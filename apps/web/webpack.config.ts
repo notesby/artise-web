@@ -712,6 +712,8 @@ export default (env: string, argv: Record<string, any>): webpack.Configuration =
                     { from: "vector-icons/**", context: path.resolve(__dirname, "res") },
                     { from: "decoder-ring/**", context: path.resolve(__dirname, "res") },
                     { from: "media/**", context: path.resolve(__dirname, "res/") },
+                    // Artise: Artise's wording (tools/artise/web_wording.py), loaded via custom_translations_url
+                    { from: "artise/**", context: path.resolve(__dirname, "res") },
                     { from: "config.json", noErrorOnMissing: true },
                     // Element Call embedded widget
                     {

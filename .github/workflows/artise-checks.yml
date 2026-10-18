@@ -25,6 +25,8 @@ jobs:
             - uses: ./.github/actions/setup-node-pnpm
             - name: Artise file headers
               run: bash tools/artise/check-headers.sh
+            - name: Artise wording (tools/artise)
+              run: python3 -m unittest discover -s tools/artise
             - name: Install
               run: pnpm install --frozen-lockfile
             - name: Type check

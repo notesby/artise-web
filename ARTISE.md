@@ -55,6 +55,17 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 `// Artise:` comment, and listed here. When a merge conflicts at a hook, move the call; the logic stays in
 `artise/`.
 
-| File       | Why |
-| ---------- | --- |
-| (none yet) |     |
+| File                         | Why                                                                   |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `apps/web/webpack.config.ts` | Copies `res/artise/` into the app, for Artise's wording file (below). |
+
+## Artise's words
+
+Element's texts use Artise's words: chat instead of room, sign out instead of "remove this device", "espacio de
+trabajo" / "espaço de trabalho" instead of the homeserver. The words are the phones'; the keys are Element Web's own.
+
+- The table is `tools/artise/web_wording.py`. Edit it, then run `python3 tools/artise/web_wording.py`, which writes
+  `apps/web/res/artise/translations.json`. Element's string files are never edited.
+- The server's `config.json` loads the file: `"custom_translations_url": "/artise/translations.json"`.
+- `python3 -m unittest discover -s tools/artise` (also in CI) fails when Element renames a key in the table, a
+  language is missing, a text loses a placeholder or tag, or the JSON is stale.
