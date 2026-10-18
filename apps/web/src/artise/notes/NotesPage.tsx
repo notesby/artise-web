@@ -13,6 +13,7 @@ import { artiseT } from "../i18n/artiseT";
 import { type NotesApi, notesApiFor } from "./NotesApi";
 import { type NotesFileHandler, NotesPageViewModel } from "./NotesPageViewModel";
 import { notesHash, readNotesLocation } from "./notesLocation";
+import { preparePhoto } from "./preparePhoto";
 
 /** Photos and files through object URLs; a download is a temporary link clicked once. */
 const browserFiles: NotesFileHandler = {
@@ -31,6 +32,7 @@ const browserFiles: NotesFileHandler = {
         window.open(url, "_blank", "noopener,noreferrer");
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
     },
+    prepare: preparePhoto,
 };
 
 function NotesForChat({

@@ -43,6 +43,15 @@ const ACTIONS: (keyof ArtiseNotesViewActions)[] = [
     "keepEditing",
     "leaveWithoutSaving",
     "dismissNotice",
+    "rename",
+    "move",
+    "remove",
+    "newFolder",
+    "changeActionName",
+    "confirmAction",
+    "cancelAction",
+    "upload",
+    "attach",
 ];
 
 const ArtiseNotesViewWrapperImpl = (props: ArtiseNotesProps): JSX.Element => {
@@ -105,6 +114,14 @@ const meta = {
             discard: "Descartar mi cambio",
             keepEditing: "Seguir editando",
             leave: "Salir sin guardar",
+            moreActions: "Más acciones",
+            rename: "Cambiar nombre",
+            move: "Mover",
+            delete: "Borrar",
+            newFolder: "Nueva carpeta",
+            folderName: "Nombre de la carpeta",
+            upload: "Agregar archivo",
+            moveHere: "Está aquí ahora",
         },
         ...(Object.fromEntries(ACTIONS.map((key) => [key, fn()])) as unknown as ArtiseNotesViewActions),
     },
@@ -225,4 +242,69 @@ export const UnsavedChanges: Story = {
 /** Saved, and other people's changes on other lines were combined in. */
 export const Merged: Story = {
     args: { notice: "Otra persona cambió otras líneas mientras editabas. Se guardaron los dos cambios." },
+};
+
+/** Moving "Mole": the folders it can go to, and where it is now. */
+export const Moving: Story = {
+    args: {
+        action: {
+            kind: "move",
+            path: "Recetas/Mole.md",
+            isFolder: false,
+            title: "Mover “Mole” a…",
+            targets: [
+                { path: "", label: "Notas (nivel principal)", here: false },
+                { path: "Recetas", label: "Recetas", here: true },
+                { path: "Recetas/Postres", label: "Recetas/Postres", here: false },
+            ],
+            saving: false,
+        },
+    },
+};
+
+/** Deleting a photo that a note shows. */
+export const DeletingPhoto: Story = {
+    args: {
+        action: {
+            kind: "delete",
+            path: "attachments/foto.jpg",
+            isFolder: false,
+            title: "¿Borrar “foto.jpg”?",
+            message:
+                "Se borra para todos en este chat. Queda en la papelera durante 30 días. Se muestra o enlaza en: Mole. Esas notas mostrarán su nombre en su lugar.",
+            confirmLabel: "Borrar",
+            saving: false,
+        },
+    },
+};
+
+/** Naming a new folder. */
+export const NewFolder: Story = {
+    args: {
+        action: {
+            kind: "newFolder",
+            name: "Cocina/Postres",
+            hint: "Usa “/” para una carpeta dentro de otra, como Recetas/Postres.",
+            saving: false,
+        },
+    },
+};
+
+/** Renaming a note to a name that's taken. */
+export const Renaming: Story = {
+    args: {
+        action: {
+            kind: "rename",
+            path: "Recetas/Mole.md",
+            isFolder: false,
+            name: "Súper",
+            error: "Ya hay una nota o un archivo con ese nombre ahí.",
+            saving: false,
+        },
+    },
+};
+
+/** An upload running. */
+export const Uploading: Story = {
+    args: { uploading: "Subiendo “foto.jpg”…" },
 };

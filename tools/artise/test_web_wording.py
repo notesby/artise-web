@@ -85,6 +85,30 @@ class ArtiseTextsTest(unittest.TestCase):
             found = web_wording.problems({})
         self.assertEqual(found, ["artise|settings|x [es]: placeholders differ from the English ['%(workspace)s']"])
 
+    def test_a_plural_needs_one_and_other_in_every_language(self) -> None:
+        texts = {
+            "artise|notes|x": (
+                {"one": "%(count)s note", "other": "%(count)s notes"},
+                {"other": "%(count)s notas"},
+                "%(count)s notas",
+            )
+        }
+        with mock.patch.dict(web_wording.WORDING, {}, clear=True), mock.patch.dict(web_wording.ARTISE_TEXTS, texts, clear=True):
+            found = web_wording.problems({})
+        self.assertEqual(
+            found,
+            [
+                "artise|notes|x [es]: a plural needs 'one' and 'other'",
+                "artise|notes|x [pt]: plural in one place and not the other",
+            ],
+        )
+
+    def test_a_plural_is_written_as_elements_plurals(self) -> None:
+        texts = {"artise|notes|x": ({"one": "%(count)s note", "other": "%(count)s notes"},) * 3}
+        with mock.patch.dict(web_wording.WORDING, {}, clear=True), mock.patch.dict(web_wording.ARTISE_TEXTS, texts, clear=True):
+            self.assertEqual(web_wording.problems({}), [])
+            self.assertEqual(web_wording.build()["artise|notes|x"]["es"], {"one": "%(count)s note", "other": "%(count)s notes"})
+
     def test_artise_texts_are_in_the_json(self) -> None:
         self.assertEqual(web_wording.build()["artise|settings|help"], {"en": "Help", "es": "Ayuda", "pt": "Ajuda", "pt-br": "Ajuda"})
 

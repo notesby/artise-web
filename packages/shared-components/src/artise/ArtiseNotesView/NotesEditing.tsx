@@ -11,6 +11,7 @@ import { Alert, Button, Text } from "@vector-im/compound-web";
 import { useViewModel } from "../../core/viewmodel";
 import { ArtiseNoteView } from "../ArtiseNoteView/ArtiseNoteView";
 import styles from "./ArtiseNotesView.module.css";
+import { FileButton } from "./NotesFileActions";
 import { type ArtiseNotesChoice, type ArtiseNotesEditor, type ArtiseNotesViewModel } from "./types";
 
 /** The note's Markdown on the left and how it will look on the right, with `[[link]]` suggestions. */
@@ -62,6 +63,7 @@ export function NoteEditor({
                 <Text as="h2" size="lg" weight="semibold" className={styles.editorTitle}>
                     {editor.title}
                 </Text>
+                <FileButton kind="tertiary" label={labels.upload} onFiles={vm.attach} />
                 <Button kind="secondary" size="md" onClick={vm.cancelEdit} disabled={editor.saving}>
                     {labels.cancel}
                 </Button>

@@ -41,6 +41,12 @@
         "pt": "Cancelar",
         "pt-br": "Cancelar"
     },
+    "artise|notes|changed_meanwhile": {
+        "en": "Someone else changed it in the meantime. Try again.",
+        "es": "Alguien más lo cambió mientras tanto. Inténtalo de nuevo.",
+        "pt": "Outra pessoa alterou isso nesse meio-tempo. Tente de novo.",
+        "pt-br": "Outra pessoa alterou isso nesse meio-tempo. Tente de novo."
+    },
     "artise|notes|choice_mine": {
         "en": "Your version",
         "es": "Tu versión",
@@ -71,11 +77,113 @@
         "pt": "Sua versão está acima da linha e a outra, abaixo. Mantenha o que quiser e salve.",
         "pt-br": "Sua versão está acima da linha e a outra, abaixo. Mantenha o que quiser e salve."
     },
+    "artise|notes|count_files": {
+        "en": {
+            "one": "%(count)s photo or file",
+            "other": "%(count)s photos or files"
+        },
+        "es": {
+            "one": "%(count)s foto o archivo",
+            "other": "%(count)s fotos o archivos"
+        },
+        "pt": {
+            "one": "%(count)s foto ou arquivo",
+            "other": "%(count)s fotos ou arquivos"
+        },
+        "pt-br": {
+            "one": "%(count)s foto ou arquivo",
+            "other": "%(count)s fotos ou arquivos"
+        }
+    },
+    "artise|notes|count_folders": {
+        "en": {
+            "one": "%(count)s folder",
+            "other": "%(count)s folders"
+        },
+        "es": {
+            "one": "%(count)s carpeta",
+            "other": "%(count)s carpetas"
+        },
+        "pt": {
+            "one": "%(count)s pasta",
+            "other": "%(count)s pastas"
+        },
+        "pt-br": {
+            "one": "%(count)s pasta",
+            "other": "%(count)s pastas"
+        }
+    },
+    "artise|notes|count_notes": {
+        "en": {
+            "one": "%(count)s note",
+            "other": "%(count)s notes"
+        },
+        "es": {
+            "one": "%(count)s nota",
+            "other": "%(count)s notas"
+        },
+        "pt": {
+            "one": "%(count)s nota",
+            "other": "%(count)s notas"
+        },
+        "pt-br": {
+            "one": "%(count)s nota",
+            "other": "%(count)s notas"
+        }
+    },
     "artise|notes|create": {
         "en": "Create",
         "es": "Crear",
         "pt": "Criar",
         "pt-br": "Criar"
+    },
+    "artise|notes|delete": {
+        "en": "Delete",
+        "es": "Borrar",
+        "pt": "Excluir",
+        "pt-br": "Excluir"
+    },
+    "artise|notes|delete_file_message": {
+        "en": "It's deleted for everyone in this chat. It stays in the trash for 30 days.",
+        "es": "Se borra para todos en este chat. Queda en la papelera durante 30 días.",
+        "pt": "Ele será excluído para todos nesta conversa. Fica na lixeira por 30 dias.",
+        "pt-br": "Ele será excluído para todos nesta conversa. Fica na lixeira por 30 dias."
+    },
+    "artise|notes|delete_folder": {
+        "en": "Delete this folder",
+        "es": "Borrar esta carpeta",
+        "pt": "Excluir esta pasta",
+        "pt-br": "Excluir esta pasta"
+    },
+    "artise|notes|delete_folder_empty": {
+        "en": "It's empty. It's deleted for everyone in this chat.",
+        "es": "Está vacía. Se borra para todos en este chat.",
+        "pt": "Ela está vazia. Será excluída para todos nesta conversa.",
+        "pt-br": "Ela está vazia. Será excluída para todos nesta conversa."
+    },
+    "artise|notes|delete_folder_message": {
+        "en": "Everything inside is deleted for everyone in this chat: %(contents)s. Notes stay in the notes' history, and photos and files stay in the trash for 30 days.",
+        "es": "Todo lo que contiene se borra para todos en este chat: %(contents)s. Las notas quedan en el historial de notas, y las fotos y archivos en la papelera durante 30 días.",
+        "pt": "Tudo o que está dentro será excluído para todos nesta conversa: %(contents)s. As notas ficam no histórico das notas, e as fotos e arquivos ficam na lixeira por 30 dias.",
+        "pt-br": "Tudo o que está dentro será excluído para todos nesta conversa: %(contents)s. As notas ficam no histórico das notas, e as fotos e arquivos ficam na lixeira por 30 dias."
+    },
+    "artise|notes|delete_note_message": {
+        "en": "It's deleted for everyone in this chat. Its earlier versions stay in the notes' history.",
+        "es": "Se borra para todos en este chat. Sus versiones anteriores quedan en el historial de las notas.",
+        "pt": "Ela será excluída para todos nesta conversa. As versões anteriores ficam no histórico das notas.",
+        "pt-br": "Ela será excluída para todos nesta conversa. As versões anteriores ficam no histórico das notas."
+    },
+    "artise|notes|delete_title": {
+        "en": "Delete “%(name)s”?",
+        "es": "¿Borrar “%(name)s”?",
+        "pt": "Excluir “%(name)s”?",
+        "pt-br": "Excluir “%(name)s”?"
+    },
+    "artise|notes|delete_used_in": {
+        "en": "It's shown or linked in: %(notes)s. Those notes will show its name instead.",
+        "es": "Se muestra o enlaza en: %(notes)s. Esas notas mostrarán su nombre en su lugar.",
+        "pt": "Ele aparece ou tem link em: %(notes)s. Essas notas vão mostrar o nome no lugar.",
+        "pt-br": "Ele aparece ou tem link em: %(notes)s. Essas notas vão mostrar o nome no lugar."
     },
     "artise|notes|discard": {
         "en": "Discard my change",
@@ -197,6 +305,24 @@
         "pt": "Abra em uma nova aba ou baixe.",
         "pt-br": "Abra em uma nova aba ou baixe."
     },
+    "artise|notes|folder_exists": {
+        "en": "There's already a folder or file with that name here.",
+        "es": "Ya hay una carpeta o archivo con ese nombre aquí.",
+        "pt": "Já existe uma pasta ou arquivo com esse nome aqui.",
+        "pt-br": "Já existe uma pasta ou arquivo com esse nome aqui."
+    },
+    "artise|notes|folder_name": {
+        "en": "Folder name",
+        "es": "Nombre de la carpeta",
+        "pt": "Nome da pasta",
+        "pt-br": "Nome da pasta"
+    },
+    "artise|notes|folder_name_hint": {
+        "en": "Use “/” for a folder inside another, like Recipes/Desserts.",
+        "es": "Usa “/” para una carpeta dentro de otra, como Recetas/Postres.",
+        "pt": "Use “/” para uma pasta dentro de outra, como Receitas/Sobremesas.",
+        "pt-br": "Use “/” para uma pasta dentro de outra, como Receitas/Sobremesas."
+    },
     "artise|notes|keep_copy": {
         "en": "Keep my copy",
         "es": "Conservar mi copia",
@@ -239,6 +365,36 @@
         "pt": "“%(name)s” ainda não existe.",
         "pt-br": "“%(name)s” ainda não existe."
     },
+    "artise|notes|more_actions": {
+        "en": "More actions",
+        "es": "Más acciones",
+        "pt": "Mais ações",
+        "pt-br": "Mais ações"
+    },
+    "artise|notes|move": {
+        "en": "Move",
+        "es": "Mover",
+        "pt": "Mover",
+        "pt-br": "Mover"
+    },
+    "artise|notes|move_here": {
+        "en": "It's here now",
+        "es": "Está aquí ahora",
+        "pt": "Está aqui agora",
+        "pt-br": "Está aqui agora"
+    },
+    "artise|notes|move_title": {
+        "en": "Move “%(name)s” to…",
+        "es": "Mover “%(name)s” a…",
+        "pt": "Mover “%(name)s” para…",
+        "pt-br": "Mover “%(name)s” para…"
+    },
+    "artise|notes|move_top_level": {
+        "en": "Notes (top level)",
+        "es": "Notas (nivel principal)",
+        "pt": "Notas (nível principal)",
+        "pt-br": "Notas (nível principal)"
+    },
     "artise|notes|name": {
         "en": "Name",
         "es": "Nombre",
@@ -256,6 +412,12 @@
         "es": "Usa un nombre sin “/”.",
         "pt": "Use um nome sem “/”.",
         "pt-br": "Use um nome sem “/”."
+    },
+    "artise|notes|new_folder": {
+        "en": "New folder",
+        "es": "Nueva carpeta",
+        "pt": "Nova pasta",
+        "pt-br": "Nova pasta"
     },
     "artise|notes|new_note": {
         "en": "New note",
@@ -292,6 +454,12 @@
         "es": "%(assistant)s puede leer las notas de este chat, así que se guardan en el servidor de Artise, sin el cifrado de extremo a extremo de tus mensajes.",
         "pt": "O %(assistant)s pode ler as notas desta conversa, por isso elas ficam guardadas no servidor do Artise, sem a criptografia de ponta a ponta das suas mensagens.",
         "pt-br": "O %(assistant)s pode ler as notas desta conversa, por isso elas ficam guardadas no servidor do Artise, sem a criptografia de ponta a ponta das suas mensagens."
+    },
+    "artise|notes|rename": {
+        "en": "Rename",
+        "es": "Cambiar nombre",
+        "pt": "Renomear",
+        "pt-br": "Renomear"
     },
     "artise|notes|retry": {
         "en": "Try again",
@@ -334,6 +502,30 @@
         "es": "Tienes cambios sin guardar. ¿Salir sin guardarlos?",
         "pt": "Você tem alterações não salvas. Sair sem salvar?",
         "pt-br": "Você tem alterações não salvas. Sair sem salvar?"
+    },
+    "artise|notes|upload": {
+        "en": "Add a file",
+        "es": "Agregar archivo",
+        "pt": "Adicionar arquivo",
+        "pt-br": "Adicionar arquivo"
+    },
+    "artise|notes|upload_failed": {
+        "en": "Couldn't add the file. Try again.",
+        "es": "No se pudo adjuntar el archivo. Inténtalo de nuevo.",
+        "pt": "Não foi possível adicionar o arquivo. Tente de novo.",
+        "pt-br": "Não foi possível adicionar o arquivo. Tente de novo."
+    },
+    "artise|notes|upload_too_big": {
+        "en": "That file is over 50 MB.",
+        "es": "Ese archivo pesa más de 50 MB.",
+        "pt": "Esse arquivo tem mais de 50 MB.",
+        "pt-br": "Esse arquivo tem mais de 50 MB."
+    },
+    "artise|notes|uploading": {
+        "en": "Uploading “%(name)s”…",
+        "es": "Subiendo “%(name)s”…",
+        "pt": "Enviando “%(name)s”…",
+        "pt-br": "Enviando “%(name)s”…"
     },
     "artise|settings|contact_admin": {
         "en": "Write to your workspace's admin",

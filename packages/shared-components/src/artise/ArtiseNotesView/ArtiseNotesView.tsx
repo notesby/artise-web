@@ -17,6 +17,7 @@ import { useViewModel } from "../../core/viewmodel";
 import { ArtiseNoteView } from "../ArtiseNoteView/ArtiseNoteView";
 import styles from "./ArtiseNotesView.module.css";
 import { LeavePrompt, NoteChoice, NoteEditor, NoteNaming } from "./NotesEditing";
+import { ActionPanel, FileButton, RowActions } from "./NotesFileActions";
 import { type ArtiseNotesContent, type ArtiseNotesTreeItem, type ArtiseNotesViewModel } from "./types";
 
 interface ArtiseNotesViewProps {
@@ -31,7 +32,7 @@ function TreeRow({
     const Icon = item.kind === "folder" ? FolderIcon : item.kind === "note" ? DocumentIcon : AttachmentIcon;
     const onClick = (): void => (item.kind === "folder" ? vm.toggleFolder(item.path) : vm.select(item.path));
     return (
-        <li>
+        <li className={styles.rowWrap}>
             <button
                 type="button"
                 className={classNames(styles.row, { [styles.selected]: selected })}
@@ -51,6 +52,7 @@ function TreeRow({
                 <Icon className={styles.rowIcon} width="18px" height="18px" aria-hidden />
                 <span className={styles.rowName}>{item.name}</span>
             </button>
+            <RowActions item={item} vm={vm} />
         </li>
     );
 }
@@ -145,6 +147,7 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
         naming,
         notice,
         problem,
+        uploading,
     } = useViewModel(vm);
 
     let body: JSX.Element;
@@ -181,9 +184,15 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
                     {naming ? (
                         <NoteNaming vm={vm} />
                     ) : (
-                        <Button kind="secondary" size="md" className={styles.newNote} onClick={vm.newNote}>
-                            {labels.newNote}
-                        </Button>
+                        <div className={styles.sidebarButtons}>
+                            <Button kind="secondary" size="md" onClick={vm.newNote}>
+                                {labels.newNote}
+                            </Button>
+                            <Button kind="tertiary" size="md" onClick={vm.newFolder}>
+                                {labels.newFolder}
+                            </Button>
+                            <FileButton kind="tertiary" label={labels.upload} onFiles={vm.upload} />
+                        </div>
                     )}
                     <ul className={styles.list}>
                         {items.map((item) => (
@@ -196,6 +205,12 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
                 </nav>
                 <main className={styles.content}>
                     <LeavePrompt vm={vm} />
+                    <ActionPanel vm={vm} />
+                    {uploading && (
+                        <Text size="sm" className={styles.status} role="status">
+                            {uploading}
+                        </Text>
+                    )}
                     {notice && <Alert type="success" title={notice} onClose={vm.dismissNotice} />}
                     {problem && <Alert type="critical" title={problem} onClose={vm.dismissNotice} />}
                     {choice ? (

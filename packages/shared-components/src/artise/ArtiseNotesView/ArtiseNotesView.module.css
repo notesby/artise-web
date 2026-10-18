@@ -338,3 +338,57 @@ SPDX-License-Identifier: AGPL-3.0-only
     border-radius: var(--cpd-space-2x);
     background-color: var(--cpd-color-bg-critical-subtle);
 }
+
+.rowWrap {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-1x);
+}
+
+.rowWrap .row {
+    flex: 1;
+    min-inline-size: 0;
+}
+
+.rowMenu {
+    flex-shrink: 0;
+    opacity: 0;
+}
+
+.rowWrap:hover .rowMenu,
+.rowWrap:focus-within .rowMenu,
+.rowMenu[aria-expanded="true"] {
+    opacity: 1;
+}
+
+.sidebarButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cpd-space-2x);
+    margin-block-end: var(--cpd-space-3x);
+}
+
+.actionPanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+    margin-block-end: var(--cpd-space-4x);
+    padding: var(--cpd-space-3x) var(--cpd-space-4x);
+    border: 1px solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--cpd-space-2x);
+}
+
+.actionPanel .list {
+    max-block-size: 320px;
+    overflow-y: auto;
+}
+
+.row:disabled {
+    cursor: default;
+    color: var(--cpd-color-text-secondary);
+}
+
+.status {
+    margin-block-end: var(--cpd-space-3x);
+    color: var(--cpd-color-text-secondary);
+}
