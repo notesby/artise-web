@@ -95,6 +95,18 @@
         "pt": "este espaço de trabalho",
         "pt-br": "este espaço de trabalho"
     },
+    "artise|workspace|menu_title": {
+        "en": "Your workspaces",
+        "es": "Tus espacios de trabajo",
+        "pt": "Seus espaços de trabalho",
+        "pt-br": "Seus espaços de trabalho"
+    },
+    "artise|workspace|switch": {
+        "en": "Change workspace (now: %(workspace)s)",
+        "es": "Cambiar de espacio de trabajo (ahora: %(workspace)s)",
+        "pt": "Mudar de espaço de trabalho (agora: %(workspace)s)",
+        "pt-br": "Mudar de espaço de trabalho (agora: %(workspace)s)"
+    },
     "auth|failed_soft_logout_homeserver": {
         "en": "Couldn't sign you in again because your workspace isn't answering. Try again in a moment.",
         "es": "No pudimos volver a iniciar tu sesión porque tu espacio de trabajo no responde. Inténtalo de nuevo en un momento.",

@@ -1,0 +1,66 @@
+/*
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+*/
+
+.bar {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+    padding: var(--cpd-space-3x) var(--cpd-space-4x) 0;
+    min-inline-size: 0;
+}
+
+.trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+    min-inline-size: 0;
+    padding: var(--cpd-space-1x) var(--cpd-space-2x) var(--cpd-space-1x) var(--cpd-space-1x);
+    margin-inline-start: calc(-1 * var(--cpd-space-1x));
+    border: none;
+    border-radius: var(--cpd-space-2x);
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+    background-color: var(--cpd-color-bg-subtle-secondary);
+}
+
+.trigger:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+    outline-offset: 1px;
+}
+
+.mark {
+    flex-shrink: 0;
+    inline-size: 24px;
+    block-size: 24px;
+    border-radius: var(--cpd-space-1-5x);
+    object-fit: cover;
+}
+
+.letter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: var(--cpd-font-body-sm-semibold);
+    background-color: var(--cpd-color-bg-subtle-primary);
+    color: var(--cpd-color-text-primary);
+}
+
+.name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chevron {
+    flex-shrink: 0;
+    color: var(--cpd-color-icon-secondary);
+}
