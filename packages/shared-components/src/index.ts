@@ -115,3 +115,4 @@ export * from "./core/viewmodel";
 
 // Artise: Artise's own views (packages/shared-components/src/artise/)
 export * from "./artise/ArtiseSettingsView";
+export * from "./artise/ArtiseWorkspaceBarView";

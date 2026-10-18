@@ -1,0 +1,46 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseWorkspaceBarView > renders the workspace's name with a menu 1`] = `
+<div>
+  <div
+    class="ArtiseWorkspaceBarView-module_bar"
+    data-testid="artise-workspace-bar"
+  >
+    <button
+      aria-expanded="false"
+      aria-haspopup="menu"
+      aria-label="Cambiar de espacio de trabajo (ahora: Prueba MAS)"
+      class="ArtiseWorkspaceBarView-module_trigger"
+      data-state="closed"
+      id="radix-react-use-id-1"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="ArtiseWorkspaceBarView-module_mark ArtiseWorkspaceBarView-module_letter"
+        style="background-color: rgb(31, 111, 235); color: rgb(255, 255, 255);"
+      >
+        P
+      </span>
+      <span
+        class="_typography_6v6n8_153 _font-body-md-semibold_6v6n8_55 ArtiseWorkspaceBarView-module_name"
+      >
+        Prueba MAS
+      </span>
+      <svg
+        aria-hidden="true"
+        class="ArtiseWorkspaceBarView-module_chevron"
+        fill="currentColor"
+        height="20px"
+        viewBox="0 0 24 24"
+        width="20px"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 14.95q-.2 0-.375-.062a.9.9 0 0 1-.325-.213l-4.6-4.6a.95.95 0 0 1-.275-.7q0-.425.275-.7a.95.95 0 0 1 .7-.275q.425 0 .7.275l3.9 3.9 3.9-3.9a.95.95 0 0 1 .7-.275q.425 0 .7.275a.95.95 0 0 1 .275.7.95.95 0 0 1-.275.7l-4.6 4.6q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;

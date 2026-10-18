@@ -206,6 +206,13 @@ ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
         "Exclua sua conta em %(workspace)s e o que há nela. Não dá para desfazer.",
     ),
     "artise|settings|this_workspace": ("this workspace", "este espacio de trabajo", "este espaço de trabalho"),
+    # The workspace bar above the chat list (W2-4).
+    "artise|workspace|switch": (
+        "Change workspace (now: %(workspace)s)",
+        "Cambiar de espacio de trabajo (ahora: %(workspace)s)",
+        "Mudar de espaço de trabalho (agora: %(workspace)s)",
+    ),
+    "artise|workspace|menu_title": ("Your workspaces", "Tus espacios de trabajo", "Seus espaços de trabalho"),
 }
 
 PLACEHOLDER = re.compile(r"%\(\w+\)s|<\w+>|</\w+>")

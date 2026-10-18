@@ -58,7 +58,12 @@ function asString(value: unknown): string | undefined {
     return typeof value === "string" && value.trim() !== "" ? value.trim() : undefined;
 }
 
-function asHttpsUrl(value: unknown): string | undefined {
+/**
+ * A trimmed `https:` URL, or `undefined` for anything else (other schemes, text that isn't a URL, non-strings).
+ *
+ * @param value - Any value read from a server's JSON.
+ */
+export function asHttpsUrl(value: unknown): string | undefined {
     const text = asString(value);
     if (!text) return undefined;
     try {
@@ -66,6 +71,16 @@ function asHttpsUrl(value: unknown): string | undefined {
     } catch {
         return undefined;
     }
+}
+
+/**
+ * A colour as `#RRGGBB`, or `undefined` for anything else.
+ *
+ * @param value - Any value read from a server's JSON.
+ */
+export function asHexColor(value: unknown): string | undefined {
+    const text = asString(value);
+    return text && HEX_COLOR.test(text) ? text : undefined;
 }
 
 function asUserId(value: unknown): string | undefined {
@@ -103,8 +118,8 @@ export function parseWorkspaceFile(wellKnown: IClientWellKnown | undefined): Wor
     const branding: WorkspaceBranding = {};
     const logo = asHttpsUrl(raw.logo);
     if (logo) branding.logo = logo;
-    const color = asString(asObject(raw.colors).accent);
-    if (color && HEX_COLOR.test(color)) branding.color = color;
+    const color = asHexColor(asObject(raw.colors).accent);
+    if (color) branding.color = color;
 
     return {
         name: asString(raw.name),
