@@ -29,6 +29,84 @@
         "pt": "Sair",
         "pt-br": "Sair"
     },
+    "artise|notes|error|bad_path": {
+        "en": "That name can't be used here.",
+        "es": "Ese nombre no se puede usar aquí.",
+        "pt": "Esse nome não pode ser usado aqui.",
+        "pt-br": "Esse nome não pode ser usado aqui."
+    },
+    "artise|notes|error|conflict": {
+        "en": "Someone else changed the same lines while you were editing.",
+        "es": "Otra persona cambió las mismas líneas mientras editabas.",
+        "pt": "Outra pessoa alterou as mesmas linhas enquanto você editava.",
+        "pt-br": "Outra pessoa alterou as mesmas linhas enquanto você editava."
+    },
+    "artise|notes|error|deleted": {
+        "en": "Someone deleted this note while you were editing it.",
+        "es": "Otra persona borró esta nota mientras la editabas.",
+        "pt": "Outra pessoa excluiu esta nota enquanto você a editava.",
+        "pt-br": "Outra pessoa excluiu esta nota enquanto você a editava."
+    },
+    "artise|notes|error|exists": {
+        "en": "There's already a note or file with that name there.",
+        "es": "Ya hay una nota o un archivo con ese nombre ahí.",
+        "pt": "Já existe uma nota ou arquivo com esse nome ali.",
+        "pt-br": "Já existe uma nota ou arquivo com esse nome ali."
+    },
+    "artise|notes|error|failed": {
+        "en": "Couldn't do it. Try again.",
+        "es": "No se pudo hacer. Inténtalo de nuevo.",
+        "pt": "Não foi possível. Tente de novo.",
+        "pt-br": "Não foi possível. Tente de novo."
+    },
+    "artise|notes|error|no_chat": {
+        "en": "This chat has no notes, or you're no longer in it.",
+        "es": "Este chat no tiene notas, o ya no estás en él.",
+        "pt": "Esta conversa não tem notas, ou você não está mais nela.",
+        "pt-br": "Esta conversa não tem notas, ou você não está mais nela."
+    },
+    "artise|notes|error|not_a_note": {
+        "en": "That file isn't a note.",
+        "es": "Ese archivo no es una nota.",
+        "pt": "Esse arquivo não é uma nota.",
+        "pt-br": "Esse arquivo não é uma nota."
+    },
+    "artise|notes|error|not_empty": {
+        "en": "The folder isn't empty.",
+        "es": "La carpeta no está vacía.",
+        "pt": "A pasta não está vazia.",
+        "pt-br": "A pasta não está vazia."
+    },
+    "artise|notes|error|not_found": {
+        "en": "Someone else deleted or moved it in the meantime.",
+        "es": "Alguien más lo borró o lo movió mientras tanto.",
+        "pt": "Outra pessoa excluiu ou moveu isso nesse meio-tempo.",
+        "pt-br": "Outra pessoa excluiu ou moveu isso nesse meio-tempo."
+    },
+    "artise|notes|error|not_in_trash": {
+        "en": "It's no longer in the trash (things stay there for 30 days).",
+        "es": "Ya no está en la papelera (las cosas se guardan ahí 30 días).",
+        "pt": "Não está mais na lixeira (as coisas ficam lá por 30 dias).",
+        "pt-br": "Não está mais na lixeira (as coisas ficam lá por 30 dias)."
+    },
+    "artise|notes|error|offline": {
+        "en": "This needs a connection. Try again when you're online.",
+        "es": "Esto necesita conexión. Inténtalo cuando tengas internet.",
+        "pt": "Para isso, é preciso ter conexão. Tente de novo quando estiver online.",
+        "pt-br": "Para isso, é preciso ter conexão. Tente de novo quando estiver online."
+    },
+    "artise|notes|error|too_big": {
+        "en": "It's too big: up to 1 MB for a note and 50 MB for a file.",
+        "es": "Es demasiado grande: hasta 1 MB para una nota y 50 MB para un archivo.",
+        "pt": "É grande demais: até 1 MB para uma nota e 50 MB para um arquivo.",
+        "pt-br": "É grande demais: até 1 MB para uma nota e 50 MB para um arquivo."
+    },
+    "artise|notes|error|unauthorized": {
+        "en": "Couldn't confirm it's you. Reload the page and try again.",
+        "es": "No pudimos confirmar que eres tú. Recarga la página e inténtalo de nuevo.",
+        "pt": "Não conseguimos confirmar que é você. Recarregue a página e tente de novo.",
+        "pt-br": "Não conseguimos confirmar que é você. Recarregue a página e tente de novo."
+    },
     "artise|settings|contact_admin": {
         "en": "Write to your workspace's admin",
         "es": "Escribirle al administrador",

@@ -232,6 +232,68 @@ ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
         "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada.",
     ),
     "artise|whats_new|done": ("Got it", "Entendido", "Entendi"),
+    # The Notes API's errors, one plain sentence each (Android's artise/notes texts where they exist).
+    "artise|notes|error|unauthorized": (
+        "Couldn't confirm it's you. Reload the page and try again.",
+        "No pudimos confirmar que eres tú. Recarga la página e inténtalo de nuevo.",
+        "Não conseguimos confirmar que é você. Recarregue a página e tente de novo.",
+    ),
+    "artise|notes|error|no_chat": (
+        "This chat has no notes, or you're no longer in it.",
+        "Este chat no tiene notas, o ya no estás en él.",
+        "Esta conversa não tem notas, ou você não está mais nela.",
+    ),
+    "artise|notes|error|bad_path": (
+        "That name can't be used here.",
+        "Ese nombre no se puede usar aquí.",
+        "Esse nome não pode ser usado aqui.",
+    ),
+    "artise|notes|error|not_found": (
+        "Someone else deleted or moved it in the meantime.",
+        "Alguien más lo borró o lo movió mientras tanto.",
+        "Outra pessoa excluiu ou moveu isso nesse meio-tempo.",
+    ),
+    "artise|notes|error|exists": (
+        "There's already a note or file with that name there.",
+        "Ya hay una nota o un archivo con ese nombre ahí.",
+        "Já existe uma nota ou arquivo com esse nome ali.",
+    ),
+    "artise|notes|error|conflict": (
+        "Someone else changed the same lines while you were editing.",
+        "Otra persona cambió las mismas líneas mientras editabas.",
+        "Outra pessoa alterou as mesmas linhas enquanto você editava.",
+    ),
+    "artise|notes|error|deleted": (
+        "Someone deleted this note while you were editing it.",
+        "Otra persona borró esta nota mientras la editabas.",
+        "Outra pessoa excluiu esta nota enquanto você a editava.",
+    ),
+    "artise|notes|error|too_big": (
+        "It's too big: up to 1 MB for a note and 50 MB for a file.",
+        "Es demasiado grande: hasta 1 MB para una nota y 50 MB para un archivo.",
+        "É grande demais: até 1 MB para uma nota e 50 MB para um arquivo.",
+    ),
+    "artise|notes|error|not_a_note": (
+        "That file isn't a note.",
+        "Ese archivo no es una nota.",
+        "Esse arquivo não é uma nota.",
+    ),
+    "artise|notes|error|not_empty": (
+        "The folder isn't empty.",
+        "La carpeta no está vacía.",
+        "A pasta não está vazia.",
+    ),
+    "artise|notes|error|not_in_trash": (
+        "It's no longer in the trash (things stay there for 30 days).",
+        "Ya no está en la papelera (las cosas se guardan ahí 30 días).",
+        "Não está mais na lixeira (as coisas ficam lá por 30 dias).",
+    ),
+    "artise|notes|error|offline": (
+        "This needs a connection. Try again when you're online.",
+        "Esto necesita conexión. Inténtalo cuando tengas internet.",
+        "Para isso, é preciso ter conexão. Tente de novo quando estiver online.",
+    ),
+    "artise|notes|error|failed": ("Couldn't do it. Try again.", "No se pudo hacer. Inténtalo de nuevo.", "Não foi possível. Tente de novo."),
     # Signing out, naming the workspace as the phones do (Android artise_sign_out_strings.xml), "this phone"
     # becoming this browser or, in the desktop app, this computer.
     "artise|sign_out|title": (
