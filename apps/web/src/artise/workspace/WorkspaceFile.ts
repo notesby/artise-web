@@ -18,7 +18,10 @@ export interface WorkspaceLinks {
     help?: string;
 }
 
-/** The workspace's own look, shown next to its name. */
+/**
+ * The workspace's own look, shown next to its name. In the file it is a top-level `logo` and `colors.accent`,
+ * the shape the phones read and admins set with `!workspace logo` and `!workspace color`.
+ */
 export interface WorkspaceBranding {
     /** An `https:` URL to a square logo. */
     logo?: string;
@@ -97,11 +100,10 @@ export function parseWorkspaceFile(wellKnown: IClientWellKnown | undefined): Wor
         if (url) links[key] = url;
     }
 
-    const rawBranding = asObject(raw.branding);
     const branding: WorkspaceBranding = {};
-    const logo = asHttpsUrl(rawBranding.logo);
+    const logo = asHttpsUrl(raw.logo);
     if (logo) branding.logo = logo;
-    const color = asString(rawBranding.color);
+    const color = asString(asObject(raw.colors).accent);
     if (color && HEX_COLOR.test(color)) branding.color = color;
 
     return {
