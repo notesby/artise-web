@@ -27,6 +27,7 @@ import PWAPlatform from "./platform/PWAPlatform";
 import WebPlatform from "./platform/WebPlatform";
 import { initRageshake, initRageshakeStore } from "./rageshakesetup";
 import { ModuleApi } from "../modules/Api.ts";
+import { registerArtise } from "../artise/module/registerArtise.tsx";
 import { type URLParams } from "./url_utils.ts";
 
 export const rageshakePromise = initRageshake();
@@ -165,6 +166,9 @@ export async function loadPlugins(): Promise<void> {
     // every single module to ship its own copy of React. This also makes it easier to access via the console
     // and incidentally means we can forget our React imports in JSX files without penalty.
     window.React = React;
+
+    // Artise: Artise's pages and buttons (Notes), registered like a module before Element loads its own
+    registerArtise(ModuleApi.instance);
 
     const modules = SdkConfig.get("modules");
     if (!modules?.length) return;
