@@ -213,6 +213,33 @@ ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
         "Mudar de espaço de trabalho (agora: %(workspace)s)",
     ),
     "artise|workspace|menu_title": ("Your workspaces", "Tus espacios de trabajo", "Seus espaços de trabalho"),
+    # Signing out, naming the workspace as the phones do (Android artise_sign_out_strings.xml), "this phone"
+    # becoming this browser or, in the desktop app, this computer.
+    "artise|sign_out|title": (
+        "Sign out of %(workspace)s?",
+        "¿Cerrar sesión en %(workspace)s?",
+        "Sair de %(workspace)s?",
+    ),
+    "artise|sign_out|content_browser": (
+        "Your chats in %(workspace)s will no longer show in this browser. You can sign back in anytime.",
+        "Tus chats de %(workspace)s dejarán de verse en este navegador. Podrás volver a entrar cuando quieras.",
+        "Suas conversas de %(workspace)s deixarão de aparecer neste navegador. Você pode entrar de novo quando quiser.",
+    ),
+    "artise|sign_out|content_browser_unnamed": (
+        "Your chats will no longer show in this browser. You can sign back in anytime.",
+        "Tus chats dejarán de verse en este navegador. Podrás volver a entrar cuando quieras.",
+        "Suas conversas deixarão de aparecer neste navegador. Você pode entrar de novo quando quiser.",
+    ),
+    "artise|sign_out|content_computer": (
+        "Your chats in %(workspace)s will no longer show on this computer. You can sign back in anytime.",
+        "Tus chats de %(workspace)s dejarán de verse en esta computadora. Podrás volver a entrar cuando quieras.",
+        "Suas conversas de %(workspace)s deixarão de aparecer neste computador. Você pode entrar de novo quando quiser.",
+    ),
+    "artise|sign_out|content_computer_unnamed": (
+        "Your chats will no longer show on this computer. You can sign back in anytime.",
+        "Tus chats dejarán de verse en esta computadora. Podrás volver a entrar cuando quieras.",
+        "Suas conversas deixarão de aparecer neste computador. Você pode entrar de novo quando quiser.",
+    ),
 }
 
 PLACEHOLDER = re.compile(r"%\(\w+\)s|<\w+>|</\w+>")

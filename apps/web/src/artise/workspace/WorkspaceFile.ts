@@ -139,5 +139,7 @@ export function parseWorkspaceFile(wellKnown: IClientWellKnown | undefined): Wor
  * @returns The workspace file, or `null` before the well-known arrives or on a non-Artise server.
  */
 export function getWorkspaceFile(client: MatrixClient): WorkspaceFile | null {
-    return parseWorkspaceFile(client.getClientWellKnown());
+    // Optional call: Artise's hooks run inside Element's components, whose tests use partial client mocks
+    // without this method. A real client always has it; without it there is no workspace file to read.
+    return parseWorkspaceFile(client.getClientWellKnown?.());
 }
