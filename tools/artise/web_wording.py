@@ -172,6 +172,42 @@ WORDING: dict[str, tuple[object, object, object]] = {
     "room_list|list_title": ("Chat list", "Lista de chats", "Lista de conversas"),
 }
 
+# Artise's own texts, for Artise's screens: key (always "artise|…"): (English, Spanish, Portuguese).
+# The words are the phones' where the phones have the same row (iOS screen_artise_*).
+ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
+    "artise|settings|tab": ("Help and account", "Ayuda y cuenta", "Ajuda e conta"),
+    "artise|settings|help": ("Help", "Ayuda", "Ajuda"),
+    "artise|settings|help_description": (
+        "Guides and answers about Artise.",
+        "Guías y respuestas sobre Artise.",
+        "Guias e respostas sobre o Artise.",
+    ),
+    "artise|settings|contact_admin": (
+        "Write to your workspace's admin",
+        "Escribirle al administrador",
+        "Escrever para o administrador",
+    ),
+    "artise|settings|contact_admin_description": (
+        "For questions about %(workspace)s.",
+        "Para dudas sobre %(workspace)s.",
+        "Para dúvidas sobre %(workspace)s.",
+    ),
+    "artise|settings|security": ("Security", "Seguridad", "Segurança"),
+    "artise|settings|security_description": (
+        "Two-step verification and how you sign in to Artise ID.",
+        "La verificación en dos pasos y cómo entras a tu Artise ID.",
+        "A verificação em duas etapas e como você entra no seu Artise ID.",
+    ),
+    "artise|settings|security_manage": ("Manage in Artise ID", "Administrar en Artise ID", "Gerenciar no Artise ID"),
+    "artise|settings|delete_account": ("Delete account", "Eliminar cuenta", "Excluir conta"),
+    "artise|settings|delete_account_description": (
+        "Delete your account in %(workspace)s and what's in it. It can't be undone.",
+        "Elimina tu cuenta en %(workspace)s y lo que hay en ella. No se puede deshacer.",
+        "Exclua sua conta em %(workspace)s e o que há nela. Não dá para desfazer.",
+    ),
+    "artise|settings|this_workspace": ("this workspace", "este espacio de trabajo", "este espaço de trabalho"),
+}
+
 PLACEHOLDER = re.compile(r"%\(\w+\)s|<\w+>|</\w+>")
 
 
@@ -213,15 +249,24 @@ def problems(element_en: dict[str, object]) -> list[str]:
                 found.append(f"{key} [{language}]: empty")
             if sorted(PLACEHOLDER.findall(" ".join(_texts(text)))) != wanted:
                 found.append(f"{key} [{language}]: placeholders differ from Element's {wanted}")
+    for key, texts in ARTISE_TEXTS.items():
+        if not key.startswith("artise|"):
+            found.append(f"{key}: Artise's own texts start with 'artise|', so they never clash with Element's")
+        if key in element_en:
+            found.append(f"{key}: already one of Element's keys")
+        wanted = sorted(PLACEHOLDER.findall(texts[0]))
+        for language, text in zip(("en", "es", "pt"), texts):
+            if not text.strip():
+                found.append(f"{key} [{language}]: empty")
+            if sorted(PLACEHOLDER.findall(text)) != wanted:
+                found.append(f"{key} [{language}]: placeholders differ from the English {wanted}")
     return found
 
 
 def build() -> dict[str, dict[str, object]]:
     """The custom translations file: key → language → text."""
-    return {
-        key: {"en": en, "es": es, "pt": pt, "pt-br": pt}
-        for key, (en, es, pt) in sorted(WORDING.items())
-    }
+    table: dict[str, tuple[object, object, object]] = {**WORDING, **ARTISE_TEXTS}
+    return {key: {"en": en, "es": es, "pt": pt, "pt-br": pt} for key, (en, es, pt) in sorted(table.items())}
 
 
 def render() -> str:
@@ -238,11 +283,11 @@ def main(argv: list[str]) -> int:
         if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != render():
             print(f"{OUTPUT.relative_to(ROOT)} is stale: run python3 tools/artise/web_wording.py", file=sys.stderr)
             return 1
-        print(f"Artise wording: {len(WORDING)} texts OK")
+        print(f"Artise wording: {len(WORDING)} of Element's texts and {len(ARTISE_TEXTS)} of Artise's OK")
         return 0
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(render(), encoding="utf-8")
-    print(f"Wrote {OUTPUT.relative_to(ROOT)} ({len(WORDING)} texts)")
+    print(f"Wrote {OUTPUT.relative_to(ROOT)} ({len(WORDING) + len(ARTISE_TEXTS)} texts)")
     return 0
 
 

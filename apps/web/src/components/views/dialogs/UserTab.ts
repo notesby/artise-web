@@ -20,4 +20,6 @@ export enum UserTab {
     Mjolnir = "USER_MJOLNIR_TAB",
     Help = "USER_HELP_TAB",
     SessionManager = "USER_SESSION_MANAGER_TAB",
+    // Artise: Artise's tab (apps/web/src/artise/settings/ArtiseSettingsTab.tsx)
+    Artise = "USER_ARTISE_TAB",
 }

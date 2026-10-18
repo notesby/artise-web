@@ -68,5 +68,26 @@ class OutputTest(unittest.TestCase):
         self.assertEqual(web_wording.OUTPUT.read_text(encoding="utf-8"), web_wording.render())
 
 
+class ArtiseTextsTest(unittest.TestCase):
+    """Artise's own texts, for Artise's screens."""
+
+    def test_a_key_outside_artise_namespace_is_reported(self) -> None:
+        with mock.patch.dict(web_wording.WORDING, {}, clear=True), mock.patch.dict(
+            web_wording.ARTISE_TEXTS, {"settings|help": ("Help", "Ayuda", "Ajuda")}, clear=True
+        ):
+            found = web_wording.problems({})
+        self.assertEqual(len(found), 1)
+        self.assertIn("start with 'artise|'", found[0])
+
+    def test_a_placeholder_missing_in_one_language_is_reported(self) -> None:
+        texts = {"artise|settings|x": ("About %(workspace)s.", "Sobre tu espacio.", "Sobre %(workspace)s.")}
+        with mock.patch.dict(web_wording.WORDING, {}, clear=True), mock.patch.dict(web_wording.ARTISE_TEXTS, texts, clear=True):
+            found = web_wording.problems({})
+        self.assertEqual(found, ["artise|settings|x [es]: placeholders differ from the English ['%(workspace)s']"])
+
+    def test_artise_texts_are_in_the_json(self) -> None:
+        self.assertEqual(web_wording.build()["artise|settings|help"], {"en": "Help", "es": "Ayuda", "pt": "Ajuda", "pt-br": "Ajuda"})
+
+
 if __name__ == "__main__":
     unittest.main()

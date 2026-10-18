@@ -1,0 +1,31 @@
+/*
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+*/
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-6x);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cpd-space-4x);
+    padding-block: var(--cpd-space-4x);
+    border-block-end: 1px solid var(--cpd-color-border-interactive-secondary);
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-1x);
+    min-inline-size: 0;
+}
+
+.description {
+    color: var(--cpd-color-text-secondary);
+}

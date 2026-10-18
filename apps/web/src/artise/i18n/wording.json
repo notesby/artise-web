@@ -29,6 +29,72 @@
         "pt": "Sair",
         "pt-br": "Sair"
     },
+    "artise|settings|contact_admin": {
+        "en": "Write to your workspace's admin",
+        "es": "Escribirle al administrador",
+        "pt": "Escrever para o administrador",
+        "pt-br": "Escrever para o administrador"
+    },
+    "artise|settings|contact_admin_description": {
+        "en": "For questions about %(workspace)s.",
+        "es": "Para dudas sobre %(workspace)s.",
+        "pt": "Para dúvidas sobre %(workspace)s.",
+        "pt-br": "Para dúvidas sobre %(workspace)s."
+    },
+    "artise|settings|delete_account": {
+        "en": "Delete account",
+        "es": "Eliminar cuenta",
+        "pt": "Excluir conta",
+        "pt-br": "Excluir conta"
+    },
+    "artise|settings|delete_account_description": {
+        "en": "Delete your account in %(workspace)s and what's in it. It can't be undone.",
+        "es": "Elimina tu cuenta en %(workspace)s y lo que hay en ella. No se puede deshacer.",
+        "pt": "Exclua sua conta em %(workspace)s e o que há nela. Não dá para desfazer.",
+        "pt-br": "Exclua sua conta em %(workspace)s e o que há nela. Não dá para desfazer."
+    },
+    "artise|settings|help": {
+        "en": "Help",
+        "es": "Ayuda",
+        "pt": "Ajuda",
+        "pt-br": "Ajuda"
+    },
+    "artise|settings|help_description": {
+        "en": "Guides and answers about Artise.",
+        "es": "Guías y respuestas sobre Artise.",
+        "pt": "Guias e respostas sobre o Artise.",
+        "pt-br": "Guias e respostas sobre o Artise."
+    },
+    "artise|settings|security": {
+        "en": "Security",
+        "es": "Seguridad",
+        "pt": "Segurança",
+        "pt-br": "Segurança"
+    },
+    "artise|settings|security_description": {
+        "en": "Two-step verification and how you sign in to Artise ID.",
+        "es": "La verificación en dos pasos y cómo entras a tu Artise ID.",
+        "pt": "A verificação em duas etapas e como você entra no seu Artise ID.",
+        "pt-br": "A verificação em duas etapas e como você entra no seu Artise ID."
+    },
+    "artise|settings|security_manage": {
+        "en": "Manage in Artise ID",
+        "es": "Administrar en Artise ID",
+        "pt": "Gerenciar no Artise ID",
+        "pt-br": "Gerenciar no Artise ID"
+    },
+    "artise|settings|tab": {
+        "en": "Help and account",
+        "es": "Ayuda y cuenta",
+        "pt": "Ajuda e conta",
+        "pt-br": "Ajuda e conta"
+    },
+    "artise|settings|this_workspace": {
+        "en": "this workspace",
+        "es": "este espacio de trabajo",
+        "pt": "este espaço de trabalho",
+        "pt-br": "este espaço de trabalho"
+    },
     "auth|failed_soft_logout_homeserver": {
         "en": "Couldn't sign you in again because your workspace isn't answering. Try again in a moment.",
         "es": "No pudimos volver a iniciar tu sesión porque tu espacio de trabajo no responde. Inténtalo de nuevo en un momento.",
