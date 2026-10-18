@@ -1,11 +1,10 @@
-# Artise: checks on every pull request into development. Element's own CI workflows are disabled in
+# Artise: checks on every pull request (into development, or into the PR it is stacked on). Element's own CI workflows are disabled in
 # the repository settings, so this is what runs before a merge: Artise's file headers, the type check,
 # and the unit tests of Artise's own folders (Element's full suite is run locally before merging tags).
 name: Artise checks
 
 on:
     pull_request:
-        branches: [development]
     workflow_dispatch:
 
 permissions:
