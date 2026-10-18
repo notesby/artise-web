@@ -1,0 +1,50 @@
+/*
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+*/
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+    margin: var(--cpd-space-2x) var(--cpd-space-3x) 0;
+    padding: var(--cpd-space-3x) var(--cpd-space-4x);
+    border-radius: var(--cpd-space-3x);
+    background-color: var(--cpd-color-bg-subtle-secondary);
+}
+
+.title {
+    margin: 0;
+    color: var(--cpd-color-text-primary);
+}
+
+.items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-1-5x);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--cpd-space-2x);
+}
+
+.check {
+    flex-shrink: 0;
+    margin-block-start: 2px;
+    color: var(--cpd-color-icon-accent-primary);
+}
+
+.text {
+    color: var(--cpd-color-text-secondary);
+}
+
+.done {
+    align-self: flex-start;
+    margin-block-start: var(--cpd-space-1x);
+}
