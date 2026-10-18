@@ -13,8 +13,23 @@ import { describe, it, expect } from "vitest";
 
 import * as stories from "./ArtiseNotesView.stories";
 
-const { Default, File, Error, ChooseChat, Editing, Conflict, DeletedMeanwhile, Naming, UnsavedChanges, Merged } =
-    composeStories(stories);
+const {
+    Default,
+    File,
+    Error,
+    ChooseChat,
+    Editing,
+    Conflict,
+    DeletedMeanwhile,
+    Naming,
+    UnsavedChanges,
+    Merged,
+    Moving,
+    DeletingPhoto,
+    NewFolder,
+    Renaming,
+    Uploading,
+} = composeStories(stories);
 
 describe("ArtiseNotesView", () => {
     // Familia's notes: the list, the open note, and who can read them.
@@ -164,5 +179,76 @@ describe("ArtiseNotesView", () => {
         expect(
             screen.getByText("Otra persona cambió otras líneas mientras editabas. Se guardaron los dos cambios."),
         ).toBeVisible();
+    });
+
+    // Each row has its menu: rename, move, delete.
+    it("offers rename, move and delete on a row", async () => {
+        const rename = fn();
+        const move = fn();
+        const remove = fn();
+        render(<Default rename={rename} move={move} remove={remove} />);
+        await userEvent.click(screen.getByRole("button", { name: "Más acciones: Súper" }));
+        await userEvent.click(screen.getByRole("menuitem", { name: "Cambiar nombre" }));
+        expect(rename).toHaveBeenCalledWith("Súper.md");
+        await userEvent.click(screen.getByRole("button", { name: "Más acciones: Recetas" }));
+        await userEvent.click(screen.getByRole("menuitem", { name: "Mover" }));
+        expect(move).toHaveBeenCalledWith("Recetas");
+        await userEvent.click(screen.getByRole("button", { name: "Más acciones: Mole" }));
+        await userEvent.click(screen.getByRole("menuitem", { name: "Borrar" }));
+        expect(remove).toHaveBeenCalledWith("Recetas/Mole.md");
+    });
+
+    // Moving: where it is now can't be picked; another folder can.
+    it("picks a folder to move to", async () => {
+        const confirmAction = fn();
+        render(<Moving confirmAction={confirmAction} />);
+        expect(screen.getByRole("button", { name: /Recetas Está aquí ahora/ })).toBeDisabled();
+        await userEvent.click(screen.getByRole("button", { name: "Notas (nivel principal)" }));
+        expect(confirmAction).toHaveBeenCalledWith("");
+    });
+
+    it("confirms a delete", async () => {
+        const confirmAction = fn();
+        render(<DeletingPhoto confirmAction={confirmAction} />);
+        expect(screen.getByRole("alertdialog", { name: "¿Borrar “foto.jpg”?" }).textContent).toContain(
+            "Se muestra o enlaza en: Mole.",
+        );
+        await userEvent.click(screen.getByRole("button", { name: "Borrar" }));
+        expect(confirmAction).toHaveBeenCalled();
+    });
+
+    it("names a new folder", async () => {
+        const confirmAction = fn();
+        render(<NewFolder confirmAction={confirmAction} />);
+        expect(screen.getByRole("textbox", { name: "Nombre de la carpeta" })).toHaveValue("Cocina/Postres");
+        await userEvent.click(screen.getByRole("button", { name: "Crear" }));
+        expect(confirmAction).toHaveBeenCalled();
+    });
+
+    it("ties a rename's problem to its field", () => {
+        render(<Renaming />);
+        expect(screen.getByRole("textbox", { name: "Cambiar nombre" })).toHaveAccessibleDescription(
+            "Ya hay una nota o un archivo con ese nombre ahí.",
+        );
+    });
+
+    // Files picked with "Agregar archivo" go to the view model; in the editor, they go into the note.
+    it("uploads files from the list and the editor", async () => {
+        const upload = fn();
+        const attach = fn();
+        const file = new window.File(["x"], "foto.jpg", { type: "image/jpeg" });
+        const { unmount } = render(<Default upload={upload} />);
+        await userEvent.upload(screen.getByTestId("artise-notes-file-input"), file);
+        expect(upload).toHaveBeenCalledWith([file]);
+        unmount();
+        render(<Editing attach={attach} />);
+        // The list's picker comes first, then the editor's.
+        await userEvent.upload(screen.getAllByTestId("artise-notes-file-input")[1], file);
+        expect(attach).toHaveBeenCalledWith([file]);
+    });
+
+    it("says while an upload runs", () => {
+        render(<Uploading />);
+        expect(screen.getByRole("status")).toHaveTextContent("Subiendo “foto.jpg”…");
     });
 });

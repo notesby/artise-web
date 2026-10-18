@@ -65,6 +65,25 @@ function fakeApi(tree: NotesTree = TREE): { [K in keyof NotesApi]: Mock } {
             merged: false,
             created: false,
         })),
+        move: vi.fn().mockImplementation(async (_room: string, from: string, to: string) => ({
+            from,
+            to,
+            version: v(70),
+            linksUpdated: [],
+        })),
+        moveFolder: vi.fn().mockImplementation(async (_room: string, from: string, to: string) => ({
+            from,
+            to,
+            moved: [],
+            linksUpdated: [],
+        })),
+        deleteFile: vi
+            .fn()
+            .mockImplementation(async (_room: string, path: string) => ({ path, deleted: true, trash: false })),
+        deleteFolder: vi.fn().mockImplementation(async (_room: string, path: string) => ({ path, notes: 0, files: 0 })),
+        createFolder: vi.fn().mockImplementation(async (_room: string, path: string) => ({ path })),
+        putRaw: vi.fn().mockImplementation(async (_room: string, path: string) => ({ path, version: v(80) })),
+        links: vi.fn().mockResolvedValue({ path: "x", outgoing: [], backlinks: [] }),
         raw: vi.fn().mockImplementation(async (_room: string, path: string) => ({
             blob: new Blob([`bytes of ${path}`], { type: "text/html" }),
             contentType: "text/html",
@@ -75,7 +94,13 @@ function fakeApi(tree: NotesTree = TREE): { [K in keyof NotesApi]: Mock } {
 
 function fileHandler(): { [K in keyof NotesFileHandler]: Mock } {
     let n = 0;
-    return { url: vi.fn().mockImplementation(() => `blob:test/${++n}`), revoke: vi.fn(), save: vi.fn(), open: vi.fn() };
+    return {
+        url: vi.fn().mockImplementation(() => `blob:test/${++n}`),
+        revoke: vi.fn(),
+        save: vi.fn(),
+        open: vi.fn(),
+        prepare: vi.fn().mockImplementation(async (file: File) => file),
+    };
 }
 
 function makeVm(overrides: Partial<NotesPageViewModelProps> = {}) {
@@ -613,5 +638,193 @@ describe("NotesPageViewModel", () => {
                 }),
             );
         });
+    });
+
+    describe("files and folders", () => {
+        // Rename a note: the API's move, on its version; the open note follows to its new name.
+        it("renames the open note", async () => {
+            const { vm, api, props } = makeVm({ path: "Recetas/Mole.md" });
+            await vi.waitFor(() => expect(vm.getSnapshot().content.kind).toBe("note"));
+            vm.rename("Recetas/Mole.md");
+            expect(vm.getSnapshot().action).toMatchObject({ kind: "rename", name: "Mole" });
+            vm.changeActionName("Mole poblano");
+            vm.confirmAction();
+            await vi.waitFor(() => expect(vm.getSnapshot().action).toBeUndefined());
+            expect(api.move).toHaveBeenCalledWith(ROOM, "Recetas/Mole.md", "Recetas/Mole poblano.md", v(2));
+            expect(api.tree).toHaveBeenLastCalledWith(ROOM, undefined);
+            expect(props.setLocation).toHaveBeenLastCalledWith(ROOM, "Recetas/Mole poblano.md");
+        });
+
+        it.each([
+            ["a/b", "That name can't be used here."],
+            ["Súper", "There's already a note or file with that name there."],
+        ])("refuses the new name %j", async (name, error) => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            vm.rename("datos.csv");
+            vm.changeActionName(name === "Súper" ? "Súper.md" : name);
+            vm.confirmAction();
+            expect(vm.getSnapshot().action?.error).toBe(error);
+            expect(api.move).not.toHaveBeenCalled();
+        });
+
+        // Move: the folders it can go to, with where it is now; picking the top level keeps the name.
+        it("moves a note to the top level", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            vm.move("Recetas/Mole.md");
+            const action = vm.getSnapshot().action;
+            expect(action).toMatchObject({ kind: "move", title: "Move “Mole” to…" });
+            expect(action?.kind === "move" && action.targets.find((t) => t.here)?.path).toBe("Recetas");
+            expect(action?.kind === "move" && action.targets[0].label).toBe("Notes (top level)");
+            vm.confirmAction("");
+            await vi.waitFor(() => expect(api.move).toHaveBeenCalledWith(ROOM, "Recetas/Mole.md", "Mole.md", v(2)));
+        });
+
+        // A folder moves with everything in it; the open note inside follows.
+        it("moves a folder and the note open in it", async () => {
+            const { vm, api, props } = makeVm({ path: "Recetas/Mole.md" });
+            await vi.waitFor(() => expect(vm.getSnapshot().content.kind).toBe("note"));
+            vm.move("Recetas");
+            const action = vm.getSnapshot().action;
+            expect(action?.kind === "move" && action.targets.map((t) => t.path)).toEqual(["", "attachments", "Vacía"]);
+            vm.confirmAction("Vacía");
+            await vi.waitFor(() => expect(api.moveFolder).toHaveBeenCalledWith(ROOM, "Recetas", "Vacía/Recetas"));
+            await vi.waitFor(() => expect(props.setLocation).toHaveBeenLastCalledWith(ROOM, "Vacía/Recetas/Mole.md"));
+        });
+
+        // Changed meanwhile: said plainly (not "the same lines"), and the list is read again.
+        it("says when it changed meanwhile", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            api.move.mockRejectedValueOnce(new NotesApiError("conflict", 409));
+            vm.move("Súper.md");
+            vm.confirmAction("Recetas");
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().action?.error).toBe("Someone else changed it in the meantime. Try again."),
+            );
+            expect(api.tree).toHaveBeenCalledTimes(2);
+        });
+
+        // Deleting the open note: on its version; the page goes back to the list.
+        it("deletes the open note", async () => {
+            const { vm, api, props } = makeVm({ path: "Súper.md" });
+            await vi.waitFor(() => expect(vm.getSnapshot().content.kind).toBe("note"));
+            vm.remove("Súper.md");
+            expect(vm.getSnapshot().action).toMatchObject({
+                kind: "delete",
+                title: "Delete “Súper”?",
+                message: "It's deleted for everyone in this chat. Its earlier versions stay in the notes' history.",
+            });
+            vm.confirmAction();
+            await vi.waitFor(() => expect(vm.getSnapshot().action).toBeUndefined());
+            expect(api.deleteFile).toHaveBeenCalledWith(ROOM, "Súper.md", v(1));
+            expect(vm.getSnapshot()).toMatchObject({ selectedPath: null, content: { kind: "none" } });
+            expect(props.setLocation).toHaveBeenLastCalledWith(ROOM, null);
+        });
+
+        // Before deleting a photo: which notes show it.
+        it("says which notes show a photo before deleting it", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            api.links.mockResolvedValueOnce({
+                path: "attachments/foto.jpg",
+                outgoing: [],
+                backlinks: [{ path: "Recetas/Mole.md", line: "![[foto.jpg]]" }],
+            });
+            vm.remove("attachments/foto.jpg");
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().action).toMatchObject({
+                    message:
+                        "It's deleted for everyone in this chat. It stays in the trash for 30 days. It's shown or linked in: Mole. Those notes will show its name instead.",
+                }),
+            );
+        });
+
+        // A folder with things inside: what's in it, and deleted with them; an empty one without.
+        it("deletes folders", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            vm.remove("Recetas");
+            expect(vm.getSnapshot().action).toMatchObject({
+                message:
+                    "Everything inside is deleted for everyone in this chat: 2 notes, 1 folder. Notes stay in the notes' history, and photos and files stay in the trash for 30 days.",
+                confirmLabel: "Delete this folder",
+            });
+            vm.confirmAction();
+            await vi.waitFor(() => expect(api.deleteFolder).toHaveBeenCalledWith(ROOM, "Recetas", true));
+            vm.remove("Vacía");
+            expect(vm.getSnapshot().action).toMatchObject({
+                message: "It's empty. It's deleted for everyone in this chat.",
+            });
+            vm.confirmAction();
+            await vi.waitFor(() => expect(api.deleteFolder).toHaveBeenCalledWith(ROOM, "Vacía", false));
+        });
+
+        // New folders: / makes one inside another; names the API would refuse are refused first.
+        it("creates folders", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            vm.newFolder();
+            vm.changeActionName("recetas");
+            vm.confirmAction();
+            expect(vm.getSnapshot().action?.error).toBe("There's already a folder or file with that name here.");
+            vm.changeActionName("a//b");
+            vm.confirmAction();
+            expect(vm.getSnapshot().action?.error).toBe("That name can't be used here.");
+            // The server's next tree has the new folders.
+            api.tree.mockResolvedValue({ ...TREE, folders: [...TREE.folders, "Cocina", "Cocina/Postres"] });
+            vm.changeActionName("Cocina/Postres");
+            vm.confirmAction();
+            await vi.waitFor(() => expect(vm.getSnapshot().action).toBeUndefined());
+            expect(api.createFolder).toHaveBeenCalledWith(ROOM, "Cocina/Postres");
+            expect(vm.getSnapshot().items.find((i) => i.path === "Cocina")).toMatchObject({ expanded: true });
+        });
+
+        // Uploads go to attachments/ under a free name, readied (shrunk) first.
+        it("uploads to a free name in attachments", async () => {
+            const { vm, api, files } = makeVm();
+            await ready(vm);
+            const photo = new File(["jpeg"], "foto.jpg", { type: "image/jpeg" });
+            vm.upload([photo]);
+            await vi.waitFor(() => expect(api.putRaw).toHaveBeenCalled());
+            expect(files.prepare).toHaveBeenCalledWith(photo);
+            expect(api.putRaw.mock.calls[0][1]).toBe("attachments/foto (2).jpg");
+            await vi.waitFor(() => expect(vm.getSnapshot().uploading).toBeUndefined());
+        });
+
+        // Over 50 MB: not sent, and said.
+        it("refuses files over 50 MB", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            const big = new File(["x"], "video.mp4");
+            Object.defineProperty(big, "size", { value: 51 * 1024 * 1024 });
+            vm.upload([big]);
+            await vi.waitFor(() => expect(vm.getSnapshot().problem).toBe("That file is over 50 MB."));
+            expect(api.putRaw).not.toHaveBeenCalled();
+        });
+
+        // In the editor: the uploaded photo goes into the note at the cursor, on its own line.
+        it("puts an uploaded photo in the note being edited", async () => {
+            const { vm } = makeVm({ path: "Súper.md" });
+            await vi.waitFor(() => expect(vm.getSnapshot().content.kind).toBe("note"));
+            vm.edit();
+            vm.changeDraft("- [ ] leche\n- [x] pan", 11);
+            vm.attach([new File(["jpeg"], "foto.jpg", { type: "image/jpeg" })]);
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().editor?.draft).toBe("- [ ] leche\n![[foto (2).jpg]]\n- [x] pan"),
+            );
+        });
+    });
+
+    // At the end of the text: the embed goes on a new line, and the text ends with a line break.
+    it("puts an uploaded file at the end of a note", async () => {
+        const { vm } = makeVm({ path: "Súper.md" });
+        await vi.waitFor(() => expect(vm.getSnapshot().content.kind).toBe("note"));
+        vm.edit();
+        vm.attach([new File(["%PDF"], "factura.pdf", { type: "application/pdf" })]);
+        await vi.waitFor(() =>
+            expect(vm.getSnapshot().editor?.draft).toBe("- [ ] leche\n- [x] pan\n![[factura (2).pdf]]\n"),
+        );
     });
 });

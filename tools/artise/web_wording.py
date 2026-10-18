@@ -174,7 +174,8 @@ WORDING: dict[str, tuple[object, object, object]] = {
 
 # Artise's own texts, for Artise's screens: key (always "artise|…"): (English, Spanish, Portuguese).
 # The words are the phones' where the phones have the same row (iOS screen_artise_*).
-ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
+# A plural is {"one": …, "other": …} in each language, with %(count)s, as in Element's own string files.
+ARTISE_TEXTS: dict[str, tuple[object, object, object]] = {
     "artise|settings|tab": ("Help and account", "Ayuda y cuenta", "Ajuda e conta"),
     "artise|settings|help": ("Help", "Ayuda", "Ajuda"),
     "artise|settings|help_description": (
@@ -312,6 +313,85 @@ ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
     ),
     "artise|notes|keep_editing": ("Keep editing", "Seguir editando", "Continuar editando"),
     "artise|notes|leave": ("Leave without saving", "Salir sin guardar", "Sair sem salvar"),
+    # Renaming, moving, deleting, folders and uploads (W3-3), worded like Android's artise/notes texts.
+    "artise|notes|more_actions": ("More actions", "Más acciones", "Mais ações"),
+    "artise|notes|rename": ("Rename", "Cambiar nombre", "Renomear"),
+    "artise|notes|move": ("Move", "Mover", "Mover"),
+    "artise|notes|delete": ("Delete", "Borrar", "Excluir"),
+    "artise|notes|delete_title": ("Delete “%(name)s”?", "¿Borrar “%(name)s”?", "Excluir “%(name)s”?"),
+    "artise|notes|delete_note_message": (
+        "It's deleted for everyone in this chat. Its earlier versions stay in the notes' history.",
+        "Se borra para todos en este chat. Sus versiones anteriores quedan en el historial de las notas.",
+        "Ela será excluída para todos nesta conversa. As versões anteriores ficam no histórico das notas.",
+    ),
+    "artise|notes|delete_file_message": (
+        "It's deleted for everyone in this chat. It stays in the trash for 30 days.",
+        "Se borra para todos en este chat. Queda en la papelera durante 30 días.",
+        "Ele será excluído para todos nesta conversa. Fica na lixeira por 30 dias.",
+    ),
+    "artise|notes|delete_used_in": (
+        "It's shown or linked in: %(notes)s. Those notes will show its name instead.",
+        "Se muestra o enlaza en: %(notes)s. Esas notas mostrarán su nombre en su lugar.",
+        "Ele aparece ou tem link em: %(notes)s. Essas notas vão mostrar o nome no lugar.",
+    ),
+    "artise|notes|delete_folder_empty": (
+        "It's empty. It's deleted for everyone in this chat.",
+        "Está vacía. Se borra para todos en este chat.",
+        "Ela está vazia. Será excluída para todos nesta conversa.",
+    ),
+    "artise|notes|delete_folder_message": (
+        "Everything inside is deleted for everyone in this chat: %(contents)s. Notes stay in the notes' history, and photos and files stay in the trash for 30 days.",
+        "Todo lo que contiene se borra para todos en este chat: %(contents)s. Las notas quedan en el historial de notas, y las fotos y archivos en la papelera durante 30 días.",
+        "Tudo o que está dentro será excluído para todos nesta conversa: %(contents)s. As notas ficam no histórico das notas, e as fotos e arquivos ficam na lixeira por 30 dias.",
+    ),
+    "artise|notes|count_notes": (
+        {"one": "%(count)s note", "other": "%(count)s notes"},
+        {"one": "%(count)s nota", "other": "%(count)s notas"},
+        {"one": "%(count)s nota", "other": "%(count)s notas"},
+    ),
+    "artise|notes|count_files": (
+        {"one": "%(count)s photo or file", "other": "%(count)s photos or files"},
+        {"one": "%(count)s foto o archivo", "other": "%(count)s fotos o archivos"},
+        {"one": "%(count)s foto ou arquivo", "other": "%(count)s fotos ou arquivos"},
+    ),
+    "artise|notes|count_folders": (
+        {"one": "%(count)s folder", "other": "%(count)s folders"},
+        {"one": "%(count)s carpeta", "other": "%(count)s carpetas"},
+        {"one": "%(count)s pasta", "other": "%(count)s pastas"},
+    ),
+    "artise|notes|delete_folder": ("Delete this folder", "Borrar esta carpeta", "Excluir esta pasta"),
+    "artise|notes|move_title": ("Move “%(name)s” to…", "Mover “%(name)s” a…", "Mover “%(name)s” para…"),
+    "artise|notes|move_top_level": ("Notes (top level)", "Notas (nivel principal)", "Notas (nível principal)"),
+    "artise|notes|move_here": ("It's here now", "Está aquí ahora", "Está aqui agora"),
+    "artise|notes|new_folder": ("New folder", "Nueva carpeta", "Nova pasta"),
+    "artise|notes|folder_name": ("Folder name", "Nombre de la carpeta", "Nome da pasta"),
+    "artise|notes|folder_name_hint": (
+        "Use “/” for a folder inside another, like Recipes/Desserts.",
+        "Usa “/” para una carpeta dentro de otra, como Recetas/Postres.",
+        "Use “/” para uma pasta dentro de outra, como Receitas/Sobremesas.",
+    ),
+    "artise|notes|folder_exists": (
+        "There's already a folder or file with that name here.",
+        "Ya hay una carpeta o archivo con ese nombre aquí.",
+        "Já existe uma pasta ou arquivo com esse nome aqui.",
+    ),
+    "artise|notes|changed_meanwhile": (
+        "Someone else changed it in the meantime. Try again.",
+        "Alguien más lo cambió mientras tanto. Inténtalo de nuevo.",
+        "Outra pessoa alterou isso nesse meio-tempo. Tente de novo.",
+    ),
+    "artise|notes|upload": ("Add a file", "Agregar archivo", "Adicionar arquivo"),
+    "artise|notes|uploading": ("Uploading “%(name)s”…", "Subiendo “%(name)s”…", "Enviando “%(name)s”…"),
+    "artise|notes|upload_too_big": (
+        "That file is over 50 MB.",
+        "Ese archivo pesa más de 50 MB.",
+        "Esse arquivo tem mais de 50 MB.",
+    ),
+    "artise|notes|upload_failed": (
+        "Couldn't add the file. Try again.",
+        "No se pudo adjuntar el archivo. Inténtalo de nuevo.",
+        "Não foi possível adicionar o arquivo. Tente de novo.",
+    ),
     # The Notes API's errors, one plain sentence each (Android's artise/notes texts where they exist).
     "artise|notes|error|unauthorized": (
         "Couldn't confirm it's you. Reload the page and try again.",
@@ -449,12 +529,19 @@ def problems(element_en: dict[str, object]) -> list[str]:
             found.append(f"{key}: Artise's own texts start with 'artise|', so they never clash with Element's")
         if key in element_en:
             found.append(f"{key}: already one of Element's keys")
-        wanted = sorted(PLACEHOLDER.findall(texts[0]))
+        plural = isinstance(texts[0], dict)
+        wanted = sorted(PLACEHOLDER.findall(_texts(texts[0])[0]))
         for language, text in zip(("en", "es", "pt"), texts):
-            if not text.strip():
-                found.append(f"{key} [{language}]: empty")
-            if sorted(PLACEHOLDER.findall(text)) != wanted:
-                found.append(f"{key} [{language}]: placeholders differ from the English {wanted}")
+            if isinstance(text, dict) != plural:
+                found.append(f"{key} [{language}]: plural in one place and not the other")
+                continue
+            if plural and not {"one", "other"} <= set(text):
+                found.append(f"{key} [{language}]: a plural needs 'one' and 'other'")
+            for form in _texts(text):
+                if not form.strip():
+                    found.append(f"{key} [{language}]: empty")
+                if sorted(PLACEHOLDER.findall(form)) != wanted:
+                    found.append(f"{key} [{language}]: placeholders differ from the English {wanted}")
     return found
 
 

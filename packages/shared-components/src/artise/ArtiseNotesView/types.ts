@@ -66,6 +66,34 @@ export interface ArtiseNotesNaming {
     saving: boolean;
 }
 
+/** A file or folder action waiting for the person: a name to type, a folder to pick, or a delete to confirm. */
+export type ArtiseNotesAction =
+    | { kind: "rename"; path: string; isFolder: boolean; name: string; error?: string; saving: boolean }
+    | { kind: "newFolder"; name: string; hint: string; error?: string; saving: boolean }
+    | {
+          kind: "move";
+          path: string;
+          isFolder: boolean;
+          /** "Mover “Mole” a…". */
+          title: string;
+          /** Where it can go; `here` is where it is now. `label` names the top level "Notas (nivel principal)". */
+          targets: { path: string; label: string; here: boolean }[];
+          error?: string;
+          saving: boolean;
+      }
+    | {
+          kind: "delete";
+          path: string;
+          isFolder: boolean;
+          /** "¿Borrar “Mole”?". */
+          title: string;
+          /** What deleting does, and (for a photo or file) which notes show it. */
+          message: string;
+          confirmLabel: string;
+          error?: string;
+          saving: boolean;
+      };
+
 export interface ArtiseNotesViewSnapshot {
     /** "Notas". */
     title: string;
@@ -95,6 +123,10 @@ export interface ArtiseNotesViewSnapshot {
     notice?: string;
     /** Something that couldn't be done (e.g. ticking a task while offline), over the note. */
     problem?: string;
+    /** Set while a file or folder action waits for the person. */
+    action?: ArtiseNotesAction;
+    /** "Subiendo “foto.jpg”…" while an upload runs. */
+    uploading?: string;
     labels: {
         back: string;
         retry: string;
@@ -121,6 +153,14 @@ export interface ArtiseNotesViewSnapshot {
         discard: string;
         keepEditing: string;
         leave: string;
+        moreActions: string;
+        rename: string;
+        move: string;
+        delete: string;
+        newFolder: string;
+        folderName: string;
+        upload: string;
+        moveHere: string;
     };
 }
 
@@ -173,6 +213,23 @@ export interface ArtiseNotesViewActions {
     leaveWithoutSaving: () => void;
     /** Hide the notice or the problem. */
     dismissNotice: () => void;
+    /** Start renaming a note, file or folder. */
+    rename: (path: string) => void;
+    /** Start moving a note, file or folder. */
+    move: (path: string) => void;
+    /** Ask before deleting a note, file or folder. */
+    remove: (path: string) => void;
+    /** Start naming a new folder. */
+    newFolder: () => void;
+    /** The name typed in a rename or new folder. */
+    changeActionName: (name: string) => void;
+    /** Do the action: for a move, `target` is the folder picked (`""` for the top level). */
+    confirmAction: (target?: string) => void;
+    cancelAction: () => void;
+    /** Upload files to the chat's notes (`attachments/`). */
+    upload: (files: File[]) => void;
+    /** Upload files and put them in the note being edited, at the cursor. */
+    attach: (files: File[]) => void;
 }
 
 export type ArtiseNotesViewModel = ViewModel<ArtiseNotesViewSnapshot, ArtiseNotesViewActions>;

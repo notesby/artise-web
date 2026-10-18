@@ -143,6 +143,27 @@ describe("Notes on the web", () => {
         fetchMock.removeRoute("save");
     });
 
+    // Rename from a row's menu: the API's move, and the note opens under its new name.
+    it("renames a note from its menu", async () => {
+        fetchMock.post(
+            `${ROOM_PATH}/move`,
+            { from: "Súper.md", to: "Compras.md", version: V, links_updated: [] },
+            { name: "move" },
+        );
+        window.location.hash = notesHash(ROOM, "Súper.md");
+        renderWith(<NotesPage />);
+        await screen.findByRole("heading", { name: "Súper" });
+        await userEvent.click(screen.getByRole("button", { name: "More actions: Súper" }));
+        await userEvent.click(screen.getByRole("menuitem", { name: "Rename" }));
+        const field = screen.getByRole("textbox", { name: "Rename" });
+        await userEvent.clear(field);
+        await userEvent.type(field, "Compras{Enter}");
+        await waitFor(() => expect(fetchMock.callHistory.called("move")).toBe(true));
+        const body = JSON.parse(fetchMock.callHistory.lastCall("move")?.options.body as string);
+        expect(body).toEqual({ from: "Súper.md", to: "Compras.md", base_version: V });
+        fetchMock.removeRoute("move");
+    });
+
     // The header button shows for a chat in the Notes API's list and opens its notes.
     it("adds Notes to the header of a chat with notes", async () => {
         renderWith(<NotesHeaderButton roomId={ROOM} />);

@@ -22,6 +22,16 @@ import { getWorkspaceFile } from "../workspace/WorkspaceFile";
 import { type NotesApi, NotesApiError, type NotesCurrent, type NotesFile } from "./NotesApi";
 import { extensionOf, isImagePath, noteDocument } from "./noteDocument";
 import { combineVersions, linkSuggestions, newNotePath, toggleTask } from "./noteEditing";
+import {
+    folderContents,
+    freeAttachmentPath,
+    MAX_UPLOAD_BYTES,
+    movedPath,
+    moveTargets,
+    newFolderPath,
+    pathAfterFolderMove,
+    renamedPath,
+} from "./noteFiles";
 
 /** The room state event the bot sets when a chat's notes change (`content.tree` is the new tree hash). */
 export const NOTES_STATE_EVENT = "co.artise.notes";
@@ -37,6 +47,8 @@ export interface NotesFileHandler {
     save: (blob: Blob, name: string) => void;
     /** Opens a PDF in a new tab. */
     open: (blob: Blob) => void;
+    /** Readies a picked file for upload: photos are shrunk to 2560 px on the long side, as the phones do. */
+    prepare: (file: File) => Promise<Blob>;
 }
 
 export interface NotesPageViewModelProps {
@@ -105,6 +117,8 @@ export class NotesPageViewModel
     private leaveTo: (() => void) | null = null;
     /** The editing note to put back in the address when the person stays. */
     private restorePath: string | null = null;
+    /** Where the editor's cursor last was, for putting uploaded files in the note. */
+    private cursor = 0;
 
     public constructor(props: NotesPageViewModelProps) {
         const assistant = getWorkspaceFile(props.client)?.assistantName ?? "Ari";
@@ -142,6 +156,14 @@ export class NotesPageViewModel
                 discard: artiseT("artise|notes|discard"),
                 keepEditing: artiseT("artise|notes|keep_editing"),
                 leave: artiseT("artise|notes|leave"),
+                moreActions: artiseT("artise|notes|more_actions"),
+                rename: artiseT("artise|notes|rename"),
+                move: artiseT("artise|notes|move"),
+                delete: artiseT("artise|notes|delete"),
+                newFolder: artiseT("artise|notes|new_folder"),
+                folderName: artiseT("artise|notes|folder_name"),
+                upload: artiseT("artise|notes|upload"),
+                moveHere: artiseT("artise|notes|move_here"),
             },
         });
         if (props.roomId) {
@@ -462,6 +484,7 @@ export class NotesPageViewModel
         const note = this.note;
         if (!note) return;
         this.editBase = note.version;
+        this.cursor = note.text.length;
         this.snapshot.merge({
             notice: undefined,
             problem: undefined,
@@ -479,6 +502,7 @@ export class NotesPageViewModel
     public changeDraft = (draft: string, cursor: number): void => {
         const editor = this.snapshot.current.editor;
         if (!editor) return;
+        if (cursor >= 0) this.cursor = cursor;
         const files = [...this.files.values()].map((file) => ({ path: file.path, note: file.note }));
         const original = this.snapshot.current.editor?.hint ? null : (this.note?.text ?? null);
         this.snapshot.merge({
@@ -704,6 +728,342 @@ export class NotesPageViewModel
             }
         })();
     };
+
+    private isFolder(path: string): boolean {
+        return this.folders.has(path);
+    }
+
+    private allPaths(): string[] {
+        return [...this.files.keys(), ...this.folders];
+    }
+
+    private setAction(action: ArtiseNotesViewSnapshot["action"]): void {
+        this.snapshot.merge({ action });
+    }
+
+    /** The open action with `saving` or `error` changed. */
+    private updateAction(change: { saving?: boolean; error?: string }): void {
+        const action = this.snapshot.current.action;
+        if (action) this.setAction({ ...action, ...change });
+    }
+
+    /** A file action's failure as one sentence: "changed meanwhile" rather than the save conflict's "same lines". */
+    private actionError(e: unknown, isFolder: boolean): string {
+        if (e instanceof NotesApiError) {
+            if (e.code === "conflict") return artiseT("artise|notes|changed_meanwhile");
+            if (e.code === "exists" && isFolder) return artiseT("artise|notes|folder_exists");
+        }
+        return errorText(e);
+    }
+
+    public rename = (path: string): void =>
+        this.guard(() => {
+            const isFolder = this.isFolder(path);
+            this.setAction({
+                kind: "rename",
+                path,
+                isFolder,
+                name: isFolder ? basename(path) : displayName(path),
+                saving: false,
+            });
+        });
+
+    public move = (path: string): void =>
+        this.guard(() => {
+            const isFolder = this.isFolder(path);
+            const name = isFolder ? basename(path) : displayName(path);
+            const targets = moveTargets(path, isFolder, this.folders).map((target) => ({
+                ...target,
+                label: target.path || artiseT("artise|notes|move_top_level"),
+            }));
+            this.setAction({
+                kind: "move",
+                path,
+                isFolder,
+                title: artiseT("artise|notes|move_title", { name }),
+                targets,
+                saving: false,
+            });
+        });
+
+    public remove = (path: string): void =>
+        this.guard(() => {
+            const isFolder = this.isFolder(path);
+            const name = isFolder ? basename(path) : displayName(path);
+            const title = artiseT("artise|notes|delete_title", { name });
+            if (isFolder) {
+                const inside = folderContents(path, this.files.values(), this.folders);
+                const parts = [
+                    inside.notes ? artiseT("artise|notes|count_notes", { count: inside.notes }) : null,
+                    inside.files ? artiseT("artise|notes|count_files", { count: inside.files }) : null,
+                    inside.folders ? artiseT("artise|notes|count_folders", { count: inside.folders }) : null,
+                ].filter((part): part is string => !!part);
+                const message = parts.length
+                    ? artiseT("artise|notes|delete_folder_message", { contents: parts.join(", ") })
+                    : artiseT("artise|notes|delete_folder_empty");
+                this.setAction({
+                    kind: "delete",
+                    path,
+                    isFolder,
+                    title,
+                    message,
+                    confirmLabel: artiseT("artise|notes|delete_folder"),
+                    saving: false,
+                });
+                return;
+            }
+            const note = this.files.get(path)?.note ?? false;
+            const message = artiseT(note ? "artise|notes|delete_note_message" : "artise|notes|delete_file_message");
+            this.setAction({
+                kind: "delete",
+                path,
+                isFolder,
+                title,
+                message,
+                confirmLabel: artiseT("artise|notes|delete"),
+                saving: false,
+            });
+            if (!note) void this.addUsedIn(path, message);
+        });
+
+    /** Before a photo or file is deleted: which notes show or link it (from `/links`). */
+    private async addUsedIn(path: string, message: string): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        try {
+            const links = await api.links(roomId, path);
+            const action = this.snapshot.current.action;
+            if (this.isDisposed || action?.kind !== "delete" || action.path !== path) return;
+            const notes = [...new Set(links.backlinks.map((link) => displayName(link.path)))];
+            if (!notes.length) return;
+            const usedIn = artiseT("artise|notes|delete_used_in", { notes: notes.join(", ") });
+            this.setAction({ ...action, message: `${message} ${usedIn}` });
+        } catch (e) {
+            logger.warn("Artise: couldn't read where a file is used", e);
+        }
+    }
+
+    public newFolder = (): void =>
+        this.setAction({ kind: "newFolder", name: "", hint: artiseT("artise|notes|folder_name_hint"), saving: false });
+
+    public changeActionName = (name: string): void => {
+        const action = this.snapshot.current.action;
+        if (action?.kind === "rename" || action?.kind === "newFolder")
+            this.setAction({ ...action, name, error: undefined });
+    };
+
+    public cancelAction = (): void => this.setAction(undefined);
+
+    public confirmAction = (target?: string): void => {
+        const action = this.snapshot.current.action;
+        const { roomId } = this.props;
+        if (!action || action.saving || !roomId) return;
+        switch (action.kind) {
+            case "rename": {
+                const result = renamedPath(action.path, action.name, action.isFolder, this.allPaths());
+                if ("problem" in result) {
+                    const key =
+                        result.problem === "invalid"
+                            ? "artise|notes|error|bad_path"
+                            : action.isFolder
+                              ? "artise|notes|folder_exists"
+                              : "artise|notes|error|exists";
+                    this.updateAction({ error: artiseT(key) });
+                    return;
+                }
+                if (result.path === action.path) {
+                    this.setAction(undefined);
+                    return;
+                }
+                void this.doMove(action.path, result.path, action.isFolder);
+                return;
+            }
+            case "move": {
+                if (target === undefined) return;
+                const to = movedPath(action.path, target);
+                if (to === action.path) return;
+                if (this.allPaths().some((path) => path.toLowerCase() === to.toLowerCase())) {
+                    this.updateAction({
+                        error: artiseT(action.isFolder ? "artise|notes|folder_exists" : "artise|notes|error|exists"),
+                    });
+                    return;
+                }
+                void this.doMove(action.path, to, action.isFolder);
+                return;
+            }
+            case "delete":
+                void this.doDelete(action.path, action.isFolder);
+                return;
+            case "newFolder": {
+                const result = newFolderPath(action.name, this.allPaths());
+                if ("problem" in result) {
+                    this.updateAction({
+                        error: artiseT(
+                            result.problem === "exists" ? "artise|notes|folder_exists" : "artise|notes|error|bad_path",
+                        ),
+                    });
+                    return;
+                }
+                void this.doCreateFolder(result.path);
+            }
+        }
+    };
+
+    private async doMove(from: string, to: string, isFolder: boolean): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        this.updateAction({ saving: true, error: undefined });
+        try {
+            let linksUpdated: string[];
+            if (isFolder) {
+                linksUpdated = (await api.moveFolder(roomId, from, to)).linksUpdated;
+            } else {
+                const version = this.files.get(from)?.version ?? "";
+                linksUpdated = (await api.move(roomId, from, to, version)).linksUpdated;
+            }
+            if (this.isDisposed) return;
+            this.setAction(undefined);
+            // Open folders and the open note follow the move.
+            this.expanded = new Set([...this.expanded].map((path) => pathAfterFolderMove(path, from, to)));
+            if (isFolder) this.expanded.add(to);
+            for (let parent = parentOf(to); parent; parent = parentOf(parent)) this.expanded.add(parent);
+            const selected = this.snapshot.current.selectedPath;
+            const next = selected ? pathAfterFolderMove(selected, from, to) : null;
+            await this.reloadTree();
+            if (selected && next && (next !== selected || linksUpdated.includes(next))) {
+                this.props.setLocation(roomId, next);
+                await this.open(next);
+            }
+        } catch (e) {
+            if (this.isDisposed) return;
+            this.updateAction({ saving: false, error: this.actionError(e, isFolder) });
+            if (e instanceof NotesApiError && e.code === "conflict") void this.reloadTree();
+        }
+    }
+
+    private async doDelete(path: string, isFolder: boolean): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        this.updateAction({ saving: true, error: undefined });
+        try {
+            if (isFolder) {
+                const inside = folderContents(path, this.files.values(), this.folders);
+                await api.deleteFolder(roomId, path, inside.notes + inside.files + inside.folders > 0);
+            } else {
+                await api.deleteFile(roomId, path, this.files.get(path)?.version ?? "");
+            }
+            if (this.isDisposed) return;
+            this.setAction(undefined);
+            const selected = this.snapshot.current.selectedPath;
+            if (selected && (selected === path || selected.startsWith(`${path}/`))) {
+                this.note = null;
+                this.loadId++;
+                this.snapshot.merge({ editor: undefined, choice: undefined });
+                this.setContent({ kind: "none", text: artiseT("artise|notes|pick") }, null);
+                this.props.setLocation(roomId, null);
+            }
+            await this.reloadTree();
+        } catch (e) {
+            if (this.isDisposed) return;
+            if (e instanceof NotesApiError && e.code === "not_empty") {
+                // Something was added meanwhile: ask again with what's inside now.
+                await this.reloadTree();
+                this.remove(path);
+                return;
+            }
+            this.updateAction({ saving: false, error: this.actionError(e, isFolder) });
+            if (e instanceof NotesApiError && e.code === "conflict") void this.reloadTree();
+        }
+    }
+
+    private async doCreateFolder(path: string): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        this.updateAction({ saving: true, error: undefined });
+        try {
+            await api.createFolder(roomId, path);
+            if (this.isDisposed) return;
+            this.setAction(undefined);
+            for (let folder = path; folder; folder = parentOf(folder)) {
+                this.folders.add(folder);
+                this.expanded.add(folder);
+            }
+            this.snapshot.merge({ items: this.visibleItems() });
+            void this.reloadTree();
+        } catch (e) {
+            if (this.isDisposed) return;
+            this.updateAction({ saving: false, error: this.actionError(e, true) });
+        }
+    }
+
+    /** The tree again in full (after the person changed it), keeping open folders and the open note. */
+    private async reloadTree(): Promise<void> {
+        this.etag = undefined;
+        await this.refresh();
+    }
+
+    public upload = (files: File[]): void => void this.uploadAll(files);
+
+    public attach = (files: File[]): void =>
+        void (async () => {
+            const paths = await this.uploadAll(files);
+            const editor = this.snapshot.current.editor;
+            if (this.isDisposed || !editor || !paths.length) return;
+            // Each on its own line, as the app writes embeds; by name unless the name is used twice.
+            const names = paths.map((path) => {
+                const name = basename(path);
+                const twice = [...this.files.keys()].filter((other) => basename(other) === name).length > 1;
+                return `![[${twice ? path : name}]]`;
+            });
+            const at = Math.min(this.cursor, editor.draft.length);
+            const before = editor.draft.slice(0, at);
+            const after = editor.draft.slice(at);
+            const lead = before && !before.endsWith("\n") ? "\n" : "";
+            const trail = after.startsWith("\n") ? "" : "\n";
+            const inserted = `${lead}${names.join("\n")}${trail}`;
+            this.changeDraft(before + inserted + after, -1);
+            this.cursor = at + inserted.length;
+        })();
+
+    /** Uploads files one at a time to free names in `attachments/`; returns the paths that made it. */
+    private async uploadAll(files: File[]): Promise<string[]> {
+        const { api, roomId } = this.props;
+        if (!roomId) return [];
+        const done: string[] = [];
+        for (const file of files) {
+            if (this.isDisposed) break;
+            if (file.size > MAX_UPLOAD_BYTES) {
+                this.snapshot.merge({ problem: artiseT("artise|notes|upload_too_big") });
+                continue;
+            }
+            const path = freeAttachmentPath(file.name, this.allPaths());
+            this.snapshot.merge({ uploading: artiseT("artise|notes|uploading", { name: basename(path) }) });
+            try {
+                const blob = await this.props.files.prepare(file);
+                if (blob.size > MAX_UPLOAD_BYTES) throw new NotesApiError("too_big", 413);
+                const saved = await api.putRaw(roomId, path, blob);
+                this.files.set(saved.path, {
+                    path: saved.path,
+                    version: saved.version,
+                    size: blob.size,
+                    modified: Math.floor(Date.now() / 1000),
+                    note: false,
+                });
+                this.folders.add(parentOf(saved.path));
+                done.push(saved.path);
+            } catch (e) {
+                if (this.isDisposed) break;
+                const tooBig = e instanceof NotesApiError && e.code === "too_big";
+                this.snapshot.merge({
+                    problem: artiseT(tooBig ? "artise|notes|upload_too_big" : "artise|notes|upload_failed"),
+                });
+            }
+        }
+        if (this.isDisposed) return done;
+        this.snapshot.merge({ uploading: undefined, items: this.visibleItems() });
+        if (done.length) void this.reloadTree();
+        return done;
+    }
 
     private async withRaw(path: string, handle: (blob: Blob) => void): Promise<void> {
         const { api, roomId } = this.props;
