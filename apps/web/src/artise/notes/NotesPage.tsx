@@ -58,6 +58,14 @@ function NotesForChat({
     );
     // Back and forward in the browser move between files.
     useEffect(() => vm.showPath(path), [vm, path]);
+    // Closing or reloading the tab with unsaved changes: the browser asks first.
+    useEffect(() => {
+        const onBeforeUnload = (ev: BeforeUnloadEvent): void => {
+            if (vm.unsaved) ev.preventDefault();
+        };
+        window.addEventListener("beforeunload", onBeforeUnload);
+        return () => window.removeEventListener("beforeunload", onBeforeUnload);
+    }, [vm]);
     return <ArtiseNotesView vm={vm} />;
 }
 

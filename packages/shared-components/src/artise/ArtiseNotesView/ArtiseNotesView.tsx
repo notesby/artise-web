@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 import React, { type JSX } from "react";
 import classNames from "classnames";
-import { Button, IconButton, InlineSpinner, Text } from "@vector-im/compound-web";
+import { Alert, Button, IconButton, InlineSpinner, Text } from "@vector-im/compound-web";
 import ArrowLeftIcon from "@vector-im/compound-design-tokens/assets/web/icons/arrow-left";
 import ChevronRightIcon from "@vector-im/compound-design-tokens/assets/web/icons/chevron-right";
 import FolderIcon from "@vector-im/compound-design-tokens/assets/web/icons/folder";
@@ -16,6 +16,7 @@ import AttachmentIcon from "@vector-im/compound-design-tokens/assets/web/icons/a
 import { useViewModel } from "../../core/viewmodel";
 import { ArtiseNoteView } from "../ArtiseNoteView/ArtiseNoteView";
 import styles from "./ArtiseNotesView.module.css";
+import { LeavePrompt, NoteChoice, NoteEditor, NoteNaming } from "./NotesEditing";
 import { type ArtiseNotesContent, type ArtiseNotesTreeItem, type ArtiseNotesViewModel } from "./types";
 
 interface ArtiseNotesViewProps {
@@ -68,12 +69,20 @@ function Content({ content, vm }: Readonly<{ content: ArtiseNotesContent; vm: Ar
             return <InlineSpinner className={styles.spinner} />;
         case "note":
             return (
-                <ArtiseNoteView
-                    document={content.document}
-                    onOpenLink={vm.openLink}
-                    onOpenEmbed={vm.openEmbed}
-                    taskLabel={labels.task}
-                />
+                <>
+                    <div className={styles.noteBar}>
+                        <Button kind="secondary" size="md" onClick={vm.edit}>
+                            {labels.edit}
+                        </Button>
+                    </div>
+                    <ArtiseNoteView
+                        document={content.document}
+                        onOpenLink={vm.openLink}
+                        onOpenEmbed={vm.openEmbed}
+                        onToggleTask={vm.toggleTask}
+                        taskLabel={labels.task}
+                    />
+                </>
             );
         case "image":
             return (
@@ -120,8 +129,23 @@ function Content({ content, vm }: Readonly<{ content: ArtiseNotesContent; vm: Ar
  * ```
  */
 export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Element {
-    const { title, chatName, state, errorText, chats, items, selectedPath, content, privacyText, labels } =
-        useViewModel(vm);
+    const {
+        title,
+        chatName,
+        state,
+        errorText,
+        chats,
+        items,
+        selectedPath,
+        content,
+        privacyText,
+        labels,
+        editor,
+        choice,
+        naming,
+        notice,
+        problem,
+    } = useViewModel(vm);
 
     let body: JSX.Element;
     if (state === "loading") {
@@ -154,6 +178,13 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
         body = (
             <div className={styles.split}>
                 <nav className={styles.sidebar} aria-label={labels.tree}>
+                    {naming ? (
+                        <NoteNaming vm={vm} />
+                    ) : (
+                        <Button kind="secondary" size="md" className={styles.newNote} onClick={vm.newNote}>
+                            {labels.newNote}
+                        </Button>
+                    )}
                     <ul className={styles.list}>
                         {items.map((item) => (
                             <TreeRow key={item.path} item={item} selected={item.path === selectedPath} vm={vm} />
@@ -164,7 +195,16 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
                     </Text>
                 </nav>
                 <main className={styles.content}>
-                    <Content content={content} vm={vm} />
+                    <LeavePrompt vm={vm} />
+                    {notice && <Alert type="success" title={notice} onClose={vm.dismissNotice} />}
+                    {problem && <Alert type="critical" title={problem} onClose={vm.dismissNotice} />}
+                    {choice ? (
+                        <NoteChoice choice={choice} vm={vm} />
+                    ) : editor ? (
+                        <NoteEditor editor={editor} vm={vm} />
+                    ) : (
+                        <Content content={content} vm={vm} />
+                    )}
                 </main>
             </div>
         );

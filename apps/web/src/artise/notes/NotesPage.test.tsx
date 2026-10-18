@@ -93,6 +93,7 @@ describe("Notes on the web", () => {
         expect(await screen.findByRole("heading", { name: "Súper" })).toBeVisible();
         expect(screen.getByRole("navigation", { name: "Files" })).toBeVisible();
         expect(screen.getByRole("checkbox", { name: "Done" })).not.toBeChecked();
+        expect(screen.getByRole("checkbox", { name: "Done" })).toBeEnabled();
         const call = fetchMock.callHistory.lastCall("super");
         expect(new Headers(call?.options.headers).get("Authorization")).toBe("Bearer openid");
     });
@@ -104,6 +105,42 @@ describe("Notes on the web", () => {
         await userEvent.click(await screen.findByRole("button", { name: "Mole" }));
         expect(await screen.findByRole("heading", { name: "Mole" })).toBeVisible();
         expect(window.location.hash).toBe(notesHash(ROOM, "Recetas/Mole.md"));
+    });
+
+    // Edit and save through the page: the PUT carries the text and the version it was opened at.
+    it("edits and saves a note", async () => {
+        fetchMock.put(
+            `${ROOM_PATH}/note`,
+            { path: "Súper.md", version: "2".padStart(40, "0"), merged: false },
+            { name: "save" },
+        );
+        window.location.hash = notesHash(ROOM, "Súper.md");
+        renderWith(<NotesPage />);
+        await userEvent.click(await screen.findByRole("button", { name: "Edit" }));
+        const box = screen.getByRole("textbox", { name: "The note's text" });
+        await userEvent.clear(box);
+        await userEvent.type(box, "# Lista");
+        await userEvent.click(screen.getByRole("button", { name: "Save" }));
+        expect(await screen.findByRole("heading", { name: "Lista" })).toBeVisible();
+        const body = JSON.parse(fetchMock.callHistory.lastCall("save")?.options.body as string);
+        expect(body).toEqual({ path: "Súper.md", content: "# Lista", base_version: V });
+        fetchMock.removeRoute("save");
+    });
+
+    // Ticking a task saves it.
+    it("ticks a task", async () => {
+        fetchMock.put(
+            `${ROOM_PATH}/note`,
+            { path: "Súper.md", version: "2".padStart(40, "0"), merged: false },
+            { name: "save" },
+        );
+        window.location.hash = notesHash(ROOM, "Súper.md");
+        renderWith(<NotesPage />);
+        await userEvent.click(await screen.findByRole("checkbox", { name: "Done" }));
+        await waitFor(() => expect(fetchMock.callHistory.called("save")).toBe(true));
+        const body = JSON.parse(fetchMock.callHistory.lastCall("save")?.options.body as string);
+        expect(body.content).toBe("# Súper\n\n- [x] leche\n\nVer [[Mole]].");
+        fetchMock.removeRoute("save");
     });
 
     // The header button shows for a chat in the Notes API's list and opens its notes.

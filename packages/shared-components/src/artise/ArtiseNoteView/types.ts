@@ -22,6 +22,8 @@ export type ArtiseNoteBlock =
 /** A list item; `checked` is set for a task (`- [ ]` / `- [x]`). */
 export interface ArtiseNoteListItem {
     checked?: boolean;
+    /** For a task: its line in the note (from 1), to tick it. */
+    line?: number;
     children: ArtiseNoteBlock[];
 }
 

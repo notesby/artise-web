@@ -30,6 +30,42 @@ export type ArtiseNotesContent =
     /** Something went wrong, or the link points to a note that doesn't exist: a sentence. */
     | { kind: "error"; text: string };
 
+/** The note being edited: its text, a preview, and what's suggested while typing a `[[link]]`. */
+export interface ArtiseNotesEditor {
+    path: string;
+    title: string;
+    draft: string;
+    /** The draft drawn as the note will look. */
+    preview: ArtiseNoteDocument;
+    /** True when the draft differs from what's saved. */
+    dirty: boolean;
+    saving: boolean;
+    /** Shown above the editor while combining two versions. */
+    hint?: string;
+    /** Why the last save failed; the draft is kept. */
+    error?: string;
+    /** For the `[[link]]` at the cursor: where its typed name starts, and the notes it could be. */
+    suggestions?: { from: number; items: { name: string; path: string; insert: string }[] };
+}
+
+/** Another person changed the note while it was being edited: the person picks what to keep. */
+export interface ArtiseNotesChoice {
+    /** `conflict`: the same lines changed; `deleted`: the note was deleted meanwhile. */
+    kind: "conflict" | "deleted";
+    text: string;
+    mine: string;
+    /** The other version (for `conflict`). */
+    theirs?: string;
+}
+
+/** Naming a new note. */
+export interface ArtiseNotesNaming {
+    name: string;
+    /** Why the name can't be used. */
+    error?: string;
+    saving: boolean;
+}
+
 export interface ArtiseNotesViewSnapshot {
     /** "Notas". */
     title: string;
@@ -47,6 +83,18 @@ export interface ArtiseNotesViewSnapshot {
     content: ArtiseNotesContent;
     /** Under the list: who can read notes ("Ari puede leer las notas de este chat…"). */
     privacyText: string;
+    /** Set while a note is being edited. */
+    editor?: ArtiseNotesEditor;
+    /** Set when a save needs the person to choose. */
+    choice?: ArtiseNotesChoice;
+    /** Set while naming a new note. */
+    naming?: ArtiseNotesNaming;
+    /** Set when leaving would lose unsaved changes. */
+    confirmLeave?: { text: string };
+    /** A short message over the note, e.g. that other people's changes were combined with yours. */
+    notice?: string;
+    /** Something that couldn't be done (e.g. ticking a task while offline), over the note. */
+    problem?: string;
     labels: {
         back: string;
         retry: string;
@@ -55,6 +103,24 @@ export interface ArtiseNotesViewSnapshot {
         download: string;
         open: string;
         chooseChat: string;
+        edit: string;
+        save: string;
+        cancel: string;
+        editor: string;
+        preview: string;
+        suggestions: string;
+        newNote: string;
+        name: string;
+        create: string;
+        mine: string;
+        theirs: string;
+        keepMine: string;
+        keepTheirs: string;
+        combine: string;
+        keepCopy: string;
+        discard: string;
+        keepEditing: string;
+        leave: string;
     };
 }
 
@@ -77,6 +143,36 @@ export interface ArtiseNotesViewActions {
     download: (path: string) => void;
     /** Open the PDF shown on the right in a new tab. */
     openFile: (path: string) => void;
+    /** Edit the note shown on the right. */
+    edit: () => void;
+    /** The editor's text or cursor changed. */
+    changeDraft: (draft: string, cursor: number) => void;
+    save: () => void;
+    /** Stop editing (asks first when there are unsaved changes). */
+    cancelEdit: () => void;
+    /** Tick or untick the task on a line of the note shown, and save it. */
+    toggleTask: (line: number) => void;
+    /** Start naming a new note (in the folder of what's open). */
+    newNote: () => void;
+    changeName: (name: string) => void;
+    createNote: () => void;
+    cancelNaming: () => void;
+    /** Conflict: save mine over theirs. */
+    keepMine: () => void;
+    /** Conflict: drop mine and show theirs. */
+    keepTheirs: () => void;
+    /** Conflict: edit both together, mine above the line. */
+    combine: () => void;
+    /** Deleted meanwhile: save my copy again. */
+    keepCopy: () => void;
+    /** Deleted meanwhile: drop my change. */
+    discard: () => void;
+    /** Unsaved changes: stay in the editor. */
+    keepEditing: () => void;
+    /** Unsaved changes: drop them and go where the person was going. */
+    leaveWithoutSaving: () => void;
+    /** Hide the notice or the problem. */
+    dismissNotice: () => void;
 }
 
 export type ArtiseNotesViewModel = ViewModel<ArtiseNotesViewSnapshot, ArtiseNotesViewActions>;

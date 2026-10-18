@@ -127,7 +127,7 @@ describe("noteDocument", () => {
         ]);
     });
 
-    // Tasks keep their tick; ordered lists keep their start.
+    // Tasks keep their tick and their line (to tick them); ordered lists keep their start.
     it("reads tasks and lists", () => {
         expect(noteDocument("- [ ] leche\n- [x] pan\n- huevos\n\n3. tres\n4. cuatro", FILES, "Súper.md")).toEqual([
             {
@@ -135,8 +135,16 @@ describe("noteDocument", () => {
                 ordered: false,
                 start: undefined,
                 items: [
-                    { checked: false, children: [{ type: "paragraph", children: [{ type: "text", text: "leche" }] }] },
-                    { checked: true, children: [{ type: "paragraph", children: [{ type: "text", text: "pan" }] }] },
+                    {
+                        checked: false,
+                        line: 1,
+                        children: [{ type: "paragraph", children: [{ type: "text", text: "leche" }] }],
+                    },
+                    {
+                        checked: true,
+                        line: 2,
+                        children: [{ type: "paragraph", children: [{ type: "text", text: "pan" }] }],
+                    },
                     { children: [{ type: "paragraph", children: [{ type: "text", text: "huevos" }] }] },
                 ],
             },

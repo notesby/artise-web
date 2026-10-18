@@ -18,6 +18,8 @@ export interface ArtiseNoteViewProps {
     onOpenEmbed: (path: string) => void;
     /** The task boxes' label for screen readers, e.g. "Hecho". */
     taskLabel: string;
+    /** A task box was pressed (its line in the note). Without it, tasks can't be ticked (a preview). */
+    onToggleTask?: (line: number) => void;
 }
 
 function inline(node: ArtiseNoteInline, key: number, props: ArtiseNoteViewProps): ReactNode {
@@ -90,8 +92,13 @@ function listItem(item: ArtiseNoteListItem, key: number, props: ArtiseNoteViewPr
     return (
         <li key={key} className={item.checked === undefined ? undefined : styles.task}>
             {item.checked !== undefined && (
-                // Read-only for now: ticking a task is an edit (W3-3).
-                <input type="checkbox" checked={item.checked} readOnly disabled aria-label={props.taskLabel} />
+                <input
+                    type="checkbox"
+                    checked={item.checked}
+                    disabled={!props.onToggleTask || item.line === undefined}
+                    onChange={() => item.line !== undefined && props.onToggleTask?.(item.line)}
+                    aria-label={props.taskLabel}
+                />
             )}
             <div>{blocks(item.children, props)}</div>
         </li>

@@ -35,17 +35,71 @@
         "pt": "Voltar à conversa",
         "pt-br": "Voltar à conversa"
     },
+    "artise|notes|cancel": {
+        "en": "Cancel",
+        "es": "Cancelar",
+        "pt": "Cancelar",
+        "pt-br": "Cancelar"
+    },
+    "artise|notes|choice_mine": {
+        "en": "Your version",
+        "es": "Tu versión",
+        "pt": "Sua versão",
+        "pt-br": "Sua versão"
+    },
+    "artise|notes|choice_theirs": {
+        "en": "The other version",
+        "es": "La otra versión",
+        "pt": "A outra versão",
+        "pt-br": "A outra versão"
+    },
     "artise|notes|choose_chat": {
         "en": "Pick a chat to see its notes.",
         "es": "Elige un chat para ver sus notas.",
         "pt": "Escolha uma conversa para ver as notas.",
         "pt-br": "Escolha uma conversa para ver as notas."
     },
+    "artise|notes|combine": {
+        "en": "Combine",
+        "es": "Combinar",
+        "pt": "Combinar",
+        "pt-br": "Combinar"
+    },
+    "artise|notes|combine_hint": {
+        "en": "Your version is above the line and the other one below. Keep what you want, then save.",
+        "es": "Tu versión está arriba de la línea y la otra abajo. Deja lo que quieras y guarda.",
+        "pt": "Sua versão está acima da linha e a outra, abaixo. Mantenha o que quiser e salve.",
+        "pt-br": "Sua versão está acima da linha e a outra, abaixo. Mantenha o que quiser e salve."
+    },
+    "artise|notes|create": {
+        "en": "Create",
+        "es": "Crear",
+        "pt": "Criar",
+        "pt-br": "Criar"
+    },
+    "artise|notes|discard": {
+        "en": "Discard my change",
+        "es": "Descartar mi cambio",
+        "pt": "Descartar minha alteração",
+        "pt-br": "Descartar minha alteração"
+    },
     "artise|notes|download": {
         "en": "Download",
         "es": "Descargar",
         "pt": "Baixar",
         "pt-br": "Baixar"
+    },
+    "artise|notes|edit": {
+        "en": "Edit",
+        "es": "Editar",
+        "pt": "Editar",
+        "pt-br": "Editar"
+    },
+    "artise|notes|editor_label": {
+        "en": "The note's text",
+        "es": "Texto de la nota",
+        "pt": "Texto da nota",
+        "pt-br": "Texto da nota"
     },
     "artise|notes|empty": {
         "en": "There are no notes here yet.",
@@ -143,11 +197,71 @@
         "pt": "Abra em uma nova aba ou baixe.",
         "pt-br": "Abra em uma nova aba ou baixe."
     },
+    "artise|notes|keep_copy": {
+        "en": "Keep my copy",
+        "es": "Conservar mi copia",
+        "pt": "Manter minha cópia",
+        "pt-br": "Manter minha cópia"
+    },
+    "artise|notes|keep_editing": {
+        "en": "Keep editing",
+        "es": "Seguir editando",
+        "pt": "Continuar editando",
+        "pt-br": "Continuar editando"
+    },
+    "artise|notes|keep_mine": {
+        "en": "Keep mine",
+        "es": "Quedarme con la mía",
+        "pt": "Manter a minha",
+        "pt-br": "Manter a minha"
+    },
+    "artise|notes|keep_theirs": {
+        "en": "Keep the other",
+        "es": "Quedarme con la otra",
+        "pt": "Manter a outra",
+        "pt-br": "Manter a outra"
+    },
+    "artise|notes|leave": {
+        "en": "Leave without saving",
+        "es": "Salir sin guardar",
+        "pt": "Sair sem salvar",
+        "pt-br": "Sair sem salvar"
+    },
+    "artise|notes|merged": {
+        "en": "Someone else changed other lines while you were editing. Both changes were saved.",
+        "es": "Otra persona cambió otras líneas mientras editabas. Se guardaron los dos cambios.",
+        "pt": "Outra pessoa alterou outras linhas enquanto você editava. As duas alterações foram salvas.",
+        "pt-br": "Outra pessoa alterou outras linhas enquanto você editava. As duas alterações foram salvas."
+    },
     "artise|notes|missing": {
         "en": "“%(name)s” doesn't exist yet.",
         "es": "“%(name)s” todavía no existe.",
         "pt": "“%(name)s” ainda não existe.",
         "pt-br": "“%(name)s” ainda não existe."
+    },
+    "artise|notes|name": {
+        "en": "Name",
+        "es": "Nombre",
+        "pt": "Nome",
+        "pt-br": "Nome"
+    },
+    "artise|notes|name_exists": {
+        "en": "There's already a note with this name.",
+        "es": "Ya hay una nota con este nombre.",
+        "pt": "Já existe uma nota com este nome.",
+        "pt-br": "Já existe uma nota com este nome."
+    },
+    "artise|notes|name_invalid": {
+        "en": "Use a name without “/”.",
+        "es": "Usa un nombre sin “/”.",
+        "pt": "Use um nome sem “/”.",
+        "pt-br": "Use um nome sem “/”."
+    },
+    "artise|notes|new_note": {
+        "en": "New note",
+        "es": "Nueva nota",
+        "pt": "Nova nota",
+        "pt-br": "Nova nota"
     },
     "artise|notes|no_chats": {
         "en": "None of your chats has notes yet.",
@@ -167,6 +281,12 @@
         "pt": "Escolha uma nota para ler.",
         "pt-br": "Escolha uma nota para ler."
     },
+    "artise|notes|preview": {
+        "en": "Preview",
+        "es": "Vista previa",
+        "pt": "Pré-visualização",
+        "pt-br": "Pré-visualização"
+    },
     "artise|notes|privacy": {
         "en": "%(assistant)s can read the notes in this chat, so they're stored on the Artise server, not end-to-end encrypted like your messages.",
         "es": "%(assistant)s puede leer las notas de este chat, así que se guardan en el servidor de Artise, sin el cifrado de extremo a extremo de tus mensajes.",
@@ -178,6 +298,18 @@
         "es": "Reintentar",
         "pt": "Tentar de novo",
         "pt-br": "Tentar de novo"
+    },
+    "artise|notes|save": {
+        "en": "Save",
+        "es": "Guardar",
+        "pt": "Salvar",
+        "pt-br": "Salvar"
+    },
+    "artise|notes|suggestions": {
+        "en": "Notes and files",
+        "es": "Notas y archivos",
+        "pt": "Notas e arquivos",
+        "pt-br": "Notas e arquivos"
     },
     "artise|notes|task": {
         "en": "Done",
@@ -196,6 +328,12 @@
         "es": "Archivos",
         "pt": "Arquivos",
         "pt-br": "Arquivos"
+    },
+    "artise|notes|unsaved": {
+        "en": "You have changes that aren't saved. Leave without saving?",
+        "es": "Tienes cambios sin guardar. ¿Salir sin guardarlos?",
+        "pt": "Você tem alterações não salvas. Sair sem salvar?",
+        "pt-br": "Você tem alterações não salvas. Sair sem salvar?"
     },
     "artise|settings|contact_admin": {
         "en": "Write to your workspace's admin",

@@ -13,7 +13,8 @@ import { describe, it, expect } from "vitest";
 
 import * as stories from "./ArtiseNotesView.stories";
 
-const { Default, File, Error, ChooseChat } = composeStories(stories);
+const { Default, File, Error, ChooseChat, Editing, Conflict, DeletedMeanwhile, Naming, UnsavedChanges, Merged } =
+    composeStories(stories);
 
 describe("ArtiseNotesView", () => {
     // Familia's notes: the list, the open note, and who can read them.
@@ -72,5 +73,96 @@ describe("ArtiseNotesView", () => {
         render(<Default back={back} />);
         await userEvent.click(screen.getByRole("button", { name: "Volver al chat" }));
         expect(back).toHaveBeenCalled();
+    });
+
+    // A note can be edited, and its tasks ticked from the page.
+    it("offers to edit and ticks tasks", async () => {
+        const edit = fn();
+        const toggleTask = fn();
+        render(<Default edit={edit} toggleTask={toggleTask} />);
+        await userEvent.click(screen.getByRole("button", { name: "Editar" }));
+        expect(edit).toHaveBeenCalled();
+        await userEvent.click(screen.getAllByRole("checkbox", { name: "Hecho" })[1]);
+        expect(toggleTask).toHaveBeenCalled();
+    });
+
+    // The editor: the text, the preview, and the [[link]] suggestions picked with the keyboard.
+    it("edits with suggestions", async () => {
+        const changeDraft = fn();
+        const save = fn();
+        render(<Editing changeDraft={changeDraft} save={save} />);
+        const box = screen.getByRole("textbox", { name: "Texto de la nota" });
+        expect(box).toHaveValue("- [ ] leche\n\nPara el [[Mo");
+        expect(screen.getByRole("region", { name: "Vista previa" })).toBeVisible();
+        expect(screen.getAllByRole("option")).toHaveLength(2);
+        box.focus();
+        (box as HTMLTextAreaElement).setSelectionRange(25, 25);
+        await userEvent.keyboard("{ArrowDown}{Enter}");
+        expect(changeDraft).toHaveBeenCalledWith("- [ ] leche\n\nPara el [[Viajes/Mole]]", 36);
+        await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+        expect(save).toHaveBeenCalled();
+    });
+
+    // Ctrl+S saves from the text.
+    it("saves with Ctrl+S", async () => {
+        const save = fn();
+        render(<Editing save={save} />);
+        screen.getByRole("textbox", { name: "Texto de la nota" }).focus();
+        await userEvent.keyboard("{Control>}s{/Control}");
+        expect(save).toHaveBeenCalled();
+    });
+
+    // The same lines changed: both versions, and the three choices.
+    it("shows both versions on a conflict", async () => {
+        const keepMine = fn();
+        const keepTheirs = fn();
+        const combine = fn();
+        render(<Conflict keepMine={keepMine} keepTheirs={keepTheirs} combine={combine} />);
+        expect(screen.getByRole("region", { name: "Tu versión" }).textContent).toContain("pan dulce");
+        expect(screen.getByRole("region", { name: "La otra versión" }).textContent).toContain("[x] pan");
+        await userEvent.click(screen.getByRole("button", { name: "Quedarme con la mía" }));
+        await userEvent.click(screen.getByRole("button", { name: "Quedarme con la otra" }));
+        await userEvent.click(screen.getByRole("button", { name: "Combinar" }));
+        expect([keepMine, keepTheirs, combine].map((f) => f.mock.calls.length)).toEqual([1, 1, 1]);
+    });
+
+    it("offers to keep a copy of a note deleted meanwhile", async () => {
+        const keepCopy = fn();
+        const discard = fn();
+        render(<DeletedMeanwhile keepCopy={keepCopy} discard={discard} />);
+        await userEvent.click(screen.getByRole("button", { name: "Conservar mi copia" }));
+        await userEvent.click(screen.getByRole("button", { name: "Descartar mi cambio" }));
+        expect([keepCopy.mock.calls.length, discard.mock.calls.length]).toEqual([1, 1]);
+    });
+
+    // Naming a new note: the problem with the name is tied to the field.
+    it("names a new note", async () => {
+        const createNote = fn();
+        const changeName = fn();
+        render(<Naming createNote={createNote} changeName={changeName} />);
+        const field = screen.getByRole("textbox", { name: "Nombre" });
+        expect(field).toHaveAttribute("aria-invalid", "true");
+        expect(field).toHaveAccessibleDescription("Ya hay una nota con este nombre.");
+        await userEvent.type(field, "s");
+        expect(changeName).toHaveBeenCalledWith("Súpers");
+        await userEvent.click(screen.getByRole("button", { name: "Crear" }));
+        expect(createNote).toHaveBeenCalled();
+    });
+
+    it("asks before losing unsaved changes", async () => {
+        const keepEditing = fn();
+        const leaveWithoutSaving = fn();
+        render(<UnsavedChanges keepEditing={keepEditing} leaveWithoutSaving={leaveWithoutSaving} />);
+        expect(screen.getByRole("alertdialog")).toBeVisible();
+        await userEvent.click(screen.getByRole("button", { name: "Seguir editando" }));
+        await userEvent.click(screen.getByRole("button", { name: "Salir sin guardar" }));
+        expect([keepEditing.mock.calls.length, leaveWithoutSaving.mock.calls.length]).toEqual([1, 1]);
+    });
+
+    it("says when other people's changes were combined in", () => {
+        render(<Merged />);
+        expect(
+            screen.getByText("Otra persona cambió otras líneas mientras editabas. Se guardaron los dos cambios."),
+        ).toBeVisible();
     });
 });

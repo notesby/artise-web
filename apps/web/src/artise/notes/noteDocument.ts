@@ -235,6 +235,7 @@ class Converter {
                     : first.children.slice(1);
                 return {
                     checked: task[1] !== " ",
+                    line: node.sourcepos?.[0]?.[0],
                     children: [{ type: "paragraph", children: inlines }, ...children.slice(1)],
                 };
             }
