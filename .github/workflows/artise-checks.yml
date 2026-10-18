@@ -1,0 +1,35 @@
+# Artise: checks on every pull request (into development, or into the PR it is stacked on). Element's
+# own CI workflows are disabled in the repository settings, so this is what runs before a merge: Artise's
+# file headers, the type check, and the unit tests of Artise's own folders (Element's full suite is run
+# locally before merging tags).
+name: Artise checks
+
+on:
+    pull_request:
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: artise-checks-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    checks:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            # Element's own setup: it keeps the pnpm store out of node_modules, without which the Element Call
+            # component (a git dependency built on install) is built with almost no type declarations.
+            - uses: ./.github/actions/setup-node-pnpm
+            - name: Artise file headers
+              run: bash tools/artise/check-headers.sh
+            - name: Install
+              run: pnpm install --frozen-lockfile
+            - name: Type check
+              run: pnpm nx run-many -t lint:types
+            - name: Artise unit tests
+              run: |
+                  pnpm nx run-many -t test:unit:prepare -p
+                  pnpm vitest run apps/web/src/artise
