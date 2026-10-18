@@ -49,7 +49,7 @@ describe("<SendMessageComposer/>", () => {
     const defaultRoomContext: RoomContextType = {
         roomViewStore: SDKContextClass.instance.roomViewStore,
         roomLoading: true,
-        peekLoading: false,
+        peekAndSummaryLoading: false,
         shouldPeek: true,
         membersLoaded: false,
         numUnreadMessages: 0,
@@ -85,7 +85,6 @@ describe("<SendMessageComposer/>", () => {
         resizing: false,
         narrow: false,
         msc3946ProcessDynamicPredecessor: false,
-        canAskToJoin: false,
         promptAskToJoin: false,
         isRoomEncrypted: false,
     };
@@ -261,6 +260,24 @@ describe("<SendMessageComposer/>", () => {
             localStorage.removeItem(key);
             ({ container } = getComponent(props));
             expect(container.textContent).toBe("");
+        });
+
+        it("restores the draft when replaced by another composer for the same room in the same render", () => {
+            const { container, rerender, unmount } = render(<div key="rightPanel">{getRawComponent()}</div>, {
+                wrapper: ({ children }) => (
+                    <SDKContext.Provider value={SDKContextClass.instance}>{children}</SDKContext.Provider>
+                ),
+            });
+            addTextToComposer(container, "Notes from call");
+
+            rerender(<div key="main">{getRawComponent()}</div>);
+            expect(container.textContent).toBe("Notes from call");
+
+            // the replacement composer should persist the draft again when it unmounts
+            unmount();
+            expect(JSON.parse(localStorage.getItem("mx_cider_state_myfakeroom")!)).toStrictEqual({
+                parts: [{ type: "plain", text: "Notes from call" }],
+            });
         });
 
         it("persists state correctly without replyToEvent onbeforeunload", () => {

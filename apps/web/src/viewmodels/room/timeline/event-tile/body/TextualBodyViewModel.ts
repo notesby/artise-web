@@ -5,10 +5,11 @@
  * Please see LICENSE files in the repository root for full details.
  */
 
-import React, { type MouseEvent } from "react";
-import { MatrixEventEvent, MsgType, type MatrixEvent } from "matrix-js-sdk/src/matrix";
+import { type MouseEvent } from "react";
+import { MatrixEventEvent, MsgType, type MatrixEvent, User } from "matrix-js-sdk/src/matrix";
 import {
     BaseViewModel,
+    LINKIFIED_DATA_ATTRIBUTE,
     TextualBodyViewBodyWrapperKind,
     TextualBodyViewKind,
     type TextualBodyViewModel as TextualBodyViewModelInterface,
@@ -19,10 +20,9 @@ import { formatDate } from "../../../../../DateUtils";
 import Modal from "../../../../../Modal";
 import dis from "../../../../../dispatcher/dispatcher";
 import { _t } from "../../../../../languageHandler";
-import { IntegrationManagers } from "../../../../../integrations/IntegrationManagers";
-import { tryTransformPermalinkToLocalHref } from "../../../../../utils/permalinks/Permalinks";
+import { parsePermalink, tryTransformPermalinkToLocalHref } from "../../../../../utils/permalinks/Permalinks";
 import { Action } from "../../../../../dispatcher/actions";
-import QuestionDialog from "../../../../../components/views/dialogs/QuestionDialog";
+import { type ViewUserPayload } from "../../../../../dispatcher/payloads/ViewUserPayload";
 import MessageEditHistoryDialog from "../../../../../components/views/dialogs/MessageEditHistoryDialog";
 import { type TimelineRenderingType } from "../../../../../contexts/RoomContext";
 
@@ -34,7 +34,7 @@ export interface TextualBodyViewModelProps {
      */
     id?: string;
     /**
-     * Matrix event used to derive the body kind, sender label, starter link, edit state, and moderation state.
+     * Matrix event used to derive the body kind, sender label, edit state, and moderation state.
      */
     mxEvent: MatrixEvent;
     /**
@@ -79,35 +79,19 @@ export class TextualBodyViewModel
         return TextualBodyViewKind.TEXT;
     };
 
-    private static readonly getStarterLink = (mxEvent: MatrixEvent): string | undefined => {
-        const starterLink = mxEvent.getContent().data?.["org.matrix.neb.starter_link"];
-
-        return typeof starterLink === "string" ? starterLink : undefined;
-    };
-
     private static readonly computeBodyWrapperSnapshot = (
         props: TextualBodyViewModelProps,
-    ): Pick<TextualBodyViewSnapshot, "bodyWrapper" | "bodyLinkHref" | "bodyActionAriaLabel"> => {
+    ): Pick<TextualBodyViewSnapshot, "bodyWrapper" | "bodyLinkHref"> => {
         if (props.highlightLink) {
             return {
                 bodyWrapper: TextualBodyViewBodyWrapperKind.LINK,
                 bodyLinkHref: props.highlightLink,
-                bodyActionAriaLabel: undefined,
-            };
-        }
-
-        if (TextualBodyViewModel.getStarterLink(props.mxEvent)) {
-            return {
-                bodyWrapper: TextualBodyViewBodyWrapperKind.ACTION,
-                bodyLinkHref: undefined,
-                bodyActionAriaLabel: undefined,
             };
         }
 
         return {
             bodyWrapper: TextualBodyViewBodyWrapperKind.NONE,
             bodyLinkHref: undefined,
-            bodyActionAriaLabel: undefined,
         };
     };
 
@@ -176,7 +160,6 @@ export class TextualBodyViewModel
         | "kind"
         | "bodyWrapper"
         | "bodyLinkHref"
-        | "bodyActionAriaLabel"
         | "showEditedMarker"
         | "editedMarkerText"
         | "editedMarkerTooltip"
@@ -275,6 +258,11 @@ export class TextualBodyViewModel
     }
 
     public onRootClick = (event: MouseEvent<HTMLDivElement>): void => {
+        // The click was already handled by a child component, e.g. a pill
+        if (event.defaultPrevented) {
+            return;
+        }
+
         let target: HTMLLinkElement | null = event.target as HTMLLinkElement;
 
         if (target.nodeName !== "A") {
@@ -285,52 +273,22 @@ export class TextualBodyViewModel
             return;
         }
 
+        // Show linkified user IDs in the right panel, as we do for user pills, rather than navigating to the user view
+        const userId = target.dataset?.[LINKIFIED_DATA_ATTRIBUTE] ? parsePermalink(target.href)?.userId : undefined;
+        if (userId) {
+            event.preventDefault();
+            dis.dispatch<ViewUserPayload>({
+                action: Action.ViewUser,
+                member: new User(userId),
+            });
+            return;
+        }
+
         const localHref = tryTransformPermalinkToLocalHref(target.href);
         if (localHref !== target.href) {
             event.preventDefault();
             window.location.hash = localHref;
         }
-    };
-
-    public onBodyActionClick = (event: MouseEvent<HTMLButtonElement>): void => {
-        event.preventDefault();
-
-        const starterLink = TextualBodyViewModel.getStarterLink(this.props.mxEvent);
-        if (!starterLink) {
-            return;
-        }
-
-        const managers = IntegrationManagers.sharedInstance();
-        if (!managers.hasManager()) {
-            managers.openNoManagerDialog();
-            return;
-        }
-
-        const integrationManager = managers.getPrimaryManager();
-        const scalarClient = integrationManager?.getScalarClient();
-        void scalarClient?.connect().then(() => {
-            const completeUrl = scalarClient.getStarterLink(starterLink);
-            const integrationsUrl = integrationManager!.uiUrl;
-            const { finished } = Modal.createDialog(QuestionDialog, {
-                title: _t("timeline|scalar_starter_link|dialog_title"),
-                description: <div>{_t("timeline|scalar_starter_link|dialog_description", { integrationsUrl })}</div>,
-                button: _t("action|continue"),
-            });
-
-            return finished.then(([confirmed]) => {
-                if (!confirmed) {
-                    return;
-                }
-
-                const width = Math.min(window.screen.width, 1024);
-                const height = Math.min(window.screen.height, 800);
-                const left = (window.screen.width - width) / 2;
-                const top = (window.screen.height - height) / 2;
-                const features = `height=${height}, width=${width}, top=${top}, left=${left},`;
-                const wnd = window.open(completeUrl, "_blank", features)!;
-                wnd.opener = null;
-            });
-        });
     };
 
     public onEditedMarkerClick = (): void => {
