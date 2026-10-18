@@ -62,6 +62,7 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/web/src/components/views/dialogs/UserTab.ts`             | Adds the `Artise` tab ID.                                                                                                                                     |
 | `apps/web/src/components/views/dialogs/UserSettingsDialog.tsx` | Adds Artise's tab ("Ayuda y cuenta", `artise/settings/ArtiseSettingsTab.tsx`) after Help, on Artise workspaces only.                                          |
 | `packages/shared-components/src/index.ts`                      | Exports Artise's views (`packages/shared-components/src/artise/`).                                                                                            |
+| `apps/web/src/Notifier.ts`                                     | `evaluateEvent` applies Ari's level (`artise/notifications/automationLevel.ts`): important posts always notify, critical ones also sound.                     |
 
 ## Artise's words
 
