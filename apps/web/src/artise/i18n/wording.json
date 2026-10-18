@@ -1,0 +1,284 @@
+{
+    "action|create_a_room": {
+        "en": "New group chat",
+        "es": "Nuevo chat de grupo",
+        "pt": "Nova conversa em grupo",
+        "pt-br": "Nova conversa em grupo"
+    },
+    "action|leave_room": {
+        "en": "Leave chat",
+        "es": "Salir del chat",
+        "pt": "Sair da conversa",
+        "pt-br": "Sair da conversa"
+    },
+    "action|new_room": {
+        "en": "New group chat",
+        "es": "Nuevo chat de grupo",
+        "pt": "Nova conversa em grupo",
+        "pt-br": "Nova conversa em grupo"
+    },
+    "action|report_room": {
+        "en": "Report chat",
+        "es": "Reportar chat",
+        "pt": "Denunciar conversa",
+        "pt-br": "Denunciar conversa"
+    },
+    "action|sign_out": {
+        "en": "Sign out",
+        "es": "Cerrar sesión",
+        "pt": "Sair",
+        "pt-br": "Sair"
+    },
+    "auth|failed_soft_logout_homeserver": {
+        "en": "Couldn't sign you in again because your workspace isn't answering. Try again in a moment.",
+        "es": "No pudimos volver a iniciar tu sesión porque tu espacio de trabajo no responde. Inténtalo de nuevo en un momento.",
+        "pt": "Não foi possível entrar de novo porque seu espaço de trabalho não está respondendo. Tente de novo em instantes.",
+        "pt-br": "Não foi possível entrar de novo porque seu espaço de trabalho não está respondendo. Tente de novo em instantes."
+    },
+    "auth|logout_dialog|description": {
+        "en": "Are you sure you want to sign out?",
+        "es": "¿Seguro que quieres cerrar sesión?",
+        "pt": "Tem certeza de que quer sair?",
+        "pt-br": "Tem certeza de que quer sair?"
+    },
+    "auth|logout_dialog|skip_key_backup": {
+        "en": "Sign out anyway",
+        "es": "Cerrar sesión de todos modos",
+        "pt": "Sair mesmo assim",
+        "pt-br": "Sair mesmo assim"
+    },
+    "common|n_rooms": {
+        "en": {
+            "one": "%(count)s chat",
+            "other": "%(count)s chats"
+        },
+        "es": {
+            "one": "%(count)s chat",
+            "other": "%(count)s chats"
+        },
+        "pt": {
+            "one": "%(count)s conversa",
+            "other": "%(count)s conversas"
+        },
+        "pt-br": {
+            "one": "%(count)s conversa",
+            "other": "%(count)s conversas"
+        }
+    },
+    "common|orphan_rooms": {
+        "en": "Other chats",
+        "es": "Otros chats",
+        "pt": "Outras conversas",
+        "pt-br": "Outras conversas"
+    },
+    "common|private_room": {
+        "en": "Private chat",
+        "es": "Chat privado",
+        "pt": "Conversa privada",
+        "pt-br": "Conversa privada"
+    },
+    "common|public_room": {
+        "en": "Public chat",
+        "es": "Chat público",
+        "pt": "Conversa pública",
+        "pt-br": "Conversa pública"
+    },
+    "common|room": {
+        "en": "Chat",
+        "es": "Chat",
+        "pt": "Conversa",
+        "pt-br": "Conversa"
+    },
+    "common|room_name": {
+        "en": "Chat name",
+        "es": "Nombre del chat",
+        "pt": "Nome da conversa",
+        "pt-br": "Nome da conversa"
+    },
+    "common|rooms": {
+        "en": "Chats",
+        "es": "Chats",
+        "pt": "Conversas",
+        "pt-br": "Conversas"
+    },
+    "common|unnamed_room": {
+        "en": "Unnamed chat",
+        "es": "Chat sin nombre",
+        "pt": "Conversa sem nome",
+        "pt-br": "Conversa sem nome"
+    },
+    "create_room|action_create_room": {
+        "en": "Create chat",
+        "es": "Crear chat",
+        "pt": "Criar conversa",
+        "pt-br": "Criar conversa"
+    },
+    "create_room|error_title": {
+        "en": "Couldn't create the chat",
+        "es": "No se pudo crear el chat",
+        "pt": "Não foi possível criar a conversa",
+        "pt-br": "Não foi possível criar a conversa"
+    },
+    "create_room|join_rule_change_notice": {
+        "en": "You can change this at any time in the chat's settings.",
+        "es": "Puedes cambiarlo cuando quieras en los ajustes del chat.",
+        "pt": "Você pode mudar isso quando quiser nas configurações da conversa.",
+        "pt-br": "Você pode mudar isso quando quiser nas configurações da conversa."
+    },
+    "create_room|join_rule_invite_label": {
+        "en": "Only people invited will be able to find and join this chat.",
+        "es": "Solo las personas invitadas podrán encontrar este chat y unirse.",
+        "pt": "Só as pessoas convidadas poderão encontrar e entrar nesta conversa.",
+        "pt-br": "Só as pessoas convidadas poderão encontrar e entrar nesta conversa."
+    },
+    "create_room|name_validation_required": {
+        "en": "Please enter a name for the chat",
+        "es": "Escribe un nombre para el chat",
+        "pt": "Digite um nome para a conversa",
+        "pt-br": "Digite um nome para a conversa"
+    },
+    "create_room|title_private_room": {
+        "en": "New private group chat",
+        "es": "Nuevo chat de grupo privado",
+        "pt": "Nova conversa em grupo privada",
+        "pt-br": "Nova conversa em grupo privada"
+    },
+    "empty_room": {
+        "en": "Empty chat",
+        "es": "Chat vacío",
+        "pt": "Conversa vazia",
+        "pt-br": "Conversa vazia"
+    },
+    "error|session_restore|clear_storage_button": {
+        "en": "Sign out and clear this browser",
+        "es": "Cerrar sesión y borrar este navegador",
+        "pt": "Sair e apagar este navegador",
+        "pt-br": "Sair e apagar este navegador"
+    },
+    "error|session_restore|clear_storage_description": {
+        "en": "Sign out and delete this browser's encryption keys?",
+        "es": "¿Cerrar sesión y borrar las claves de cifrado de este navegador?",
+        "pt": "Sair e apagar as chaves de criptografia deste navegador?",
+        "pt-br": "Sair e apagar as chaves de criptografia deste navegador?"
+    },
+    "leave_room_dialog|room_leave_admin_warning": {
+        "en": "You're the only admin of this chat. If you leave, nobody will be able to change its settings.",
+        "es": "Eres la única persona administradora de este chat. Si sales, nadie podrá cambiar sus ajustes.",
+        "pt": "Você é a única pessoa administradora desta conversa. Se sair, ninguém poderá mudar as configurações dela.",
+        "pt-br": "Você é a única pessoa administradora desta conversa. Se sair, ninguém poderá mudar as configurações dela."
+    },
+    "leave_room_dialog|room_rejoin_warning": {
+        "en": "This chat is private. You can't come back without an invite.",
+        "es": "Este chat es privado. No podrás volver sin una invitación.",
+        "pt": "Esta conversa é privada. Você não poderá voltar sem um convite.",
+        "pt-br": "Esta conversa é privada. Você não poderá voltar sem um convite."
+    },
+    "right_panel|room_summary_card|title": {
+        "en": "Chat info",
+        "es": "Información del chat",
+        "pt": "Informações da conversa",
+        "pt-br": "Informações da conversa"
+    },
+    "room_list|list_title": {
+        "en": "Chat list",
+        "es": "Lista de chats",
+        "pt": "Lista de conversas",
+        "pt-br": "Lista de conversas"
+    },
+    "room_list|more_options|leave_room": {
+        "en": "Leave chat",
+        "es": "Salir del chat",
+        "pt": "Sair da conversa",
+        "pt-br": "Sair da conversa"
+    },
+    "room_settings|general|avatar_field_label": {
+        "en": "Chat photo",
+        "es": "Foto del chat",
+        "pt": "Foto da conversa",
+        "pt-br": "Foto da conversa"
+    },
+    "room_settings|general|name_field_label": {
+        "en": "Chat name",
+        "es": "Nombre del chat",
+        "pt": "Nome da conversa",
+        "pt-br": "Nome da conversa"
+    },
+    "room_settings|general|topic_field_label": {
+        "en": "Chat topic",
+        "es": "Tema del chat",
+        "pt": "Assunto da conversa",
+        "pt-br": "Assunto da conversa"
+    },
+    "room|context_menu|forget": {
+        "en": "Forget chat",
+        "es": "Olvidar chat",
+        "pt": "Esquecer conversa",
+        "pt-br": "Esquecer conversa"
+    },
+    "room|context_menu|notifications_mute": {
+        "en": "Mute chat",
+        "es": "Silenciar chat",
+        "pt": "Silenciar conversa",
+        "pt-br": "Silenciar conversa"
+    },
+    "room|context_menu|title": {
+        "en": "Chat options",
+        "es": "Opciones del chat",
+        "pt": "Opções da conversa",
+        "pt-br": "Opções da conversa"
+    },
+    "room|header_avatar_open_settings_label": {
+        "en": "Open chat settings",
+        "es": "Abrir los ajustes del chat",
+        "pt": "Abrir as configurações da conversa",
+        "pt-br": "Abrir as configurações da conversa"
+    },
+    "room|intro|no_avatar_label": {
+        "en": "Add a photo so people can spot your chat easily.",
+        "es": "Añade una foto para que se reconozca el chat fácilmente.",
+        "pt": "Adicione uma foto para que as pessoas reconheçam a conversa facilmente.",
+        "pt-br": "Adicione uma foto para que as pessoas reconheçam a conversa facilmente."
+    },
+    "room|intro|user_created": {
+        "en": "%(displayName)s created this chat.",
+        "es": "%(displayName)s creó este chat.",
+        "pt": "%(displayName)s criou esta conversa.",
+        "pt-br": "%(displayName)s criou esta conversa."
+    },
+    "room|intro|you_created": {
+        "en": "You created this chat.",
+        "es": "Creaste este chat.",
+        "pt": "Você criou esta conversa.",
+        "pt-br": "Você criou esta conversa."
+    },
+    "room|leave_error_title": {
+        "en": "Couldn't leave the chat",
+        "es": "No se pudo salir del chat",
+        "pt": "Não foi possível sair da conversa",
+        "pt-br": "Não foi possível sair da conversa"
+    },
+    "settings|sessions|sign_out": {
+        "en": "Sign out of this device",
+        "es": "Cerrar sesión en este dispositivo",
+        "pt": "Sair deste dispositivo",
+        "pt-br": "Sair deste dispositivo"
+    },
+    "setting|help_about|homeserver": {
+        "en": "Workspace: <code>%(homeserverUrl)s</code>",
+        "es": "Espacio de trabajo: <code>%(homeserverUrl)s</code>",
+        "pt": "Espaço de trabalho: <code>%(homeserverUrl)s</code>",
+        "pt-br": "Espaço de trabalho: <code>%(homeserverUrl)s</code>"
+    },
+    "terms|tac_description": {
+        "en": "To keep using %(homeserverDomain)s, please read and accept the terms and conditions.",
+        "es": "Para seguir usando %(homeserverDomain)s, lee y acepta los términos y condiciones.",
+        "pt": "Para continuar usando %(homeserverDomain)s, leia e aceite os termos e condições.",
+        "pt-br": "Para continuar usando %(homeserverDomain)s, leia e aceite os termos e condições."
+    },
+    "voip|misconfigured_server_description": {
+        "en": "Please ask your workspace's admin (<code>%(homeserverDomain)s</code>) to set up a TURN server so calls work reliably.",
+        "es": "Pide al administrador de tu espacio de trabajo (<code>%(homeserverDomain)s</code>) que configure un servidor TURN para que las llamadas funcionen bien.",
+        "pt": "Peça ao administrador do seu espaço de trabalho (<code>%(homeserverDomain)s</code>) para configurar um servidor TURN, para que as chamadas funcionem bem.",
+        "pt-br": "Peça ao administrador do seu espaço de trabalho (<code>%(homeserverDomain)s</code>) para configurar um servidor TURN, para que as chamadas funcionem bem."
+    }
+}

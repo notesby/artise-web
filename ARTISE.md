@@ -55,6 +55,20 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 `// Artise:` comment, and listed here. When a merge conflicts at a hook, move the call; the logic stays in
 `artise/`.
 
-| File       | Why |
-| ---------- | --- |
-| (none yet) |     |
+| File                            | Why                                                                                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/i18n/settings.ts` | `setLanguage` registers Artise's words (`artise/i18n/registerArtiseTranslations.ts`) after Element's texts and before the server's `custom_translations_url`. |
+
+## Artise's words
+
+Element's texts use Artise's words: chat instead of room, sign out instead of "remove this device", "espacio de
+trabajo" / "espaço de trabalho" instead of the homeserver. The words are the phones'; the keys are Element Web's own.
+
+- The table is `tools/artise/web_wording.py`. Edit it, then run `python3 tools/artise/web_wording.py`, which writes
+  `apps/web/src/artise/i18n/wording.json`. Element's string files are never edited.
+- The words ship inside the app: `setLanguage` registers them right after Element's texts, so they need no server
+  setting and the desktop app gets them too. A workspace can still change a word through `custom_translations_url`.
+- Element's own unit tests run with Element's words (their snapshots say "Rooms"); Artise's tests turn the words on
+  with `setArtiseTranslationsInTests(true)`.
+- `python3 -m unittest discover -s tools/artise` (also in CI) fails when Element renames a key in the table, a
+  language is missing, a text loses a placeholder or tag, or the JSON is stale.
