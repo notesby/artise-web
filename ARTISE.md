@@ -80,13 +80,14 @@ needs these keys on every workspace:
 
 ```json
 {
-    "custom_translations_url": "/artise/translations.json",
     "bug_report_endpoint_url": "https://reports.artise.co/api/submit",
     "sentry": { "dsn": "<the web project's DSN on crashes.artise.co>", "environment": "<workspace>" },
     "map_style_url": "<the map style the phones use>"
 }
 ```
 
+- Artise's words need no setting: they ship inside the app. `custom_translations_url` stays free for a
+  workspace that wants to change a word for itself.
 - Problem reports arrive with the app name `element-web`, which Element hard-codes (`rageshake/submit-rageshake.ts`).
   reports.artise.co must accept that name; web and desktop are told apart by the report's `platform` field.
 - Sign in with a QR code needs no setting: Settings → Sessions shows "Link new device" when the workspace's server
