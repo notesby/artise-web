@@ -103,7 +103,8 @@ describe("parseWorkspaceFile", () => {
                 },
                 assistant_user_id: "wikibot",
                 contact_user_id: "@ana:example.com",
-                branding: { logo: "http://example.com/logo.png", color: "red" },
+                logo: "http://example.com/logo.png",
+                colors: { accent: "red" },
             },
         } as IClientWellKnown);
         expect(file).toEqual({
@@ -117,11 +118,20 @@ describe("parseWorkspaceFile", () => {
         });
     });
 
-    it("reads the branding fields the server will add (logo and colour)", () => {
+    // The shape the phones read, set by `!workspace logo` and `!workspace color`: both fields are read.
+    it("reads the logo and the accent colour the admin set", () => {
+        const file = parseWorkspaceFile({
+            [WORKSPACE_WK_KEY]: { logo: "https://artise.co/brand/logo.png", colors: { accent: "#1F6FEB" } },
+        } as IClientWellKnown);
+        expect(file?.branding).toEqual({ logo: "https://artise.co/brand/logo.png", color: "#1F6FEB" });
+    });
+
+    // A `branding` block was the web's guess before the server's shape was known: it isn't read.
+    it("ignores a branding block", () => {
         const file = parseWorkspaceFile({
             [WORKSPACE_WK_KEY]: { branding: { logo: "https://artise.co/brand/logo.png", color: "#1F6FEB" } },
         } as IClientWellKnown);
-        expect(file?.branding).toEqual({ logo: "https://artise.co/brand/logo.png", color: "#1F6FEB" });
+        expect(file?.branding).toEqual({});
     });
 });
 
