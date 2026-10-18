@@ -29,6 +29,7 @@ import { useHasOtherVerifiedDevices } from "../../../hooks/useHasOtherVerifiedDe
 import { EncryptionCard } from "../settings/encryption/EncryptionCard";
 import { EncryptionCardButtons } from "../settings/encryption/EncryptionCardButtons";
 import { EncryptionCardEmphasisedContent } from "../settings/encryption/EncryptionCardEmphasisedContent";
+import { getSignOutTexts } from "../../../artise/signOut/signOutTexts";
 
 interface IProps {
     onFinished: (success: boolean) => void;
@@ -137,7 +138,8 @@ interface SubComponentProps {
 function Loading(props: SubComponentProps): JSX.Element {
     return (
         <BaseDialog
-            title={_t("action|sign_out")}
+            // Artise: "¿Cerrar sesión en {espacio}?" on an Artise workspace
+            title={getSignOutTexts(MatrixClientPeg.safeGet())?.title ?? _t("action|sign_out")}
             contentId="mx_Dialog_content"
             hasCancel={true}
             onFinished={props.onFinished}
@@ -150,11 +152,13 @@ function Loading(props: SubComponentProps): JSX.Element {
 // Dialog contents to confirm whether the user is sure if they want to log
 // out.
 function ConfirmLogout(props: SubComponentProps): JSX.Element {
+    // Artise: the workspace's name and what signing out does, on an Artise workspace
+    const artise = getSignOutTexts(MatrixClientPeg.safeGet());
     return (
         <QuestionDialog
             hasCancelButton={true}
-            title={_t("action|sign_out")}
-            description={_t("auth|logout_dialog|description")}
+            title={artise?.title ?? _t("action|sign_out")}
+            description={artise?.description ?? _t("auth|logout_dialog|description")}
             button={_t("action|sign_out")}
             onFinished={props.onFinished}
         />

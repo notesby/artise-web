@@ -95,6 +95,36 @@
         "pt": "este espaço de trabalho",
         "pt-br": "este espaço de trabalho"
     },
+    "artise|sign_out|content_browser": {
+        "en": "Your chats in %(workspace)s will no longer show in this browser. You can sign back in anytime.",
+        "es": "Tus chats de %(workspace)s dejarán de verse en este navegador. Podrás volver a entrar cuando quieras.",
+        "pt": "Suas conversas de %(workspace)s deixarão de aparecer neste navegador. Você pode entrar de novo quando quiser.",
+        "pt-br": "Suas conversas de %(workspace)s deixarão de aparecer neste navegador. Você pode entrar de novo quando quiser."
+    },
+    "artise|sign_out|content_browser_unnamed": {
+        "en": "Your chats will no longer show in this browser. You can sign back in anytime.",
+        "es": "Tus chats dejarán de verse en este navegador. Podrás volver a entrar cuando quieras.",
+        "pt": "Suas conversas deixarão de aparecer neste navegador. Você pode entrar de novo quando quiser.",
+        "pt-br": "Suas conversas deixarão de aparecer neste navegador. Você pode entrar de novo quando quiser."
+    },
+    "artise|sign_out|content_computer": {
+        "en": "Your chats in %(workspace)s will no longer show on this computer. You can sign back in anytime.",
+        "es": "Tus chats de %(workspace)s dejarán de verse en esta computadora. Podrás volver a entrar cuando quieras.",
+        "pt": "Suas conversas de %(workspace)s deixarão de aparecer neste computador. Você pode entrar de novo quando quiser.",
+        "pt-br": "Suas conversas de %(workspace)s deixarão de aparecer neste computador. Você pode entrar de novo quando quiser."
+    },
+    "artise|sign_out|content_computer_unnamed": {
+        "en": "Your chats will no longer show on this computer. You can sign back in anytime.",
+        "es": "Tus chats dejarán de verse en esta computadora. Podrás volver a entrar cuando quieras.",
+        "pt": "Suas conversas deixarão de aparecer neste computador. Você pode entrar de novo quando quiser.",
+        "pt-br": "Suas conversas deixarão de aparecer neste computador. Você pode entrar de novo quando quiser."
+    },
+    "artise|sign_out|title": {
+        "en": "Sign out of %(workspace)s?",
+        "es": "¿Cerrar sesión en %(workspace)s?",
+        "pt": "Sair de %(workspace)s?",
+        "pt-br": "Sair de %(workspace)s?"
+    },
     "artise|workspace|menu_title": {
         "en": "Your workspaces",
         "es": "Tus espacios de trabajo",
