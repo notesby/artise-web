@@ -35,3 +35,8 @@ jobs:
               run: |
                   pnpm nx run-many -t test:unit:prepare -p
                   pnpm vitest run apps/web/src/artise
+            # Artise's views run their tests in a browser, as the rest of shared-components does.
+            - name: Artise view tests
+              run: |
+                  pnpm exec playwright install --with-deps chromium-headless-shell
+                  cd packages/shared-components && pnpm test:unit -- src/artise
