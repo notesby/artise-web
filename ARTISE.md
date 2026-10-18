@@ -19,3 +19,42 @@ chat.artise.co. The Android app is the same idea: [artise-android](https://githu
   mounts its own `config.json` over `/app/config.json`.
 - Locally: `corepack enable --install-directory ~/.local/bin pnpm`, then `pnpm install` and
   `cd apps/web && pnpm start`. See AGENTS.md for tests and linting.
+- `.github/workflows/artise-checks.yml` runs on every pull request into `development`: Artise's file headers, the
+  type check and the unit tests in Artise's folders. Before merging an Element tag, run Element's whole suite
+  locally (`pnpm lint` and `pnpm test:unit`).
+
+## Where Artise code lives
+
+Artise code goes in its own folders, which Element never touches, so tag merges stay easy. The iOS app works the
+same way (artise-ios `Artise/README.md`).
+
+| Folder                                   | Holds                                                                                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/web/src/artise/`                   | Logic and view models: the workspace file, Notes, notifications, wording, the desktop bridge. Tests sit next to each file (`*.test.ts`, vitest). |
+| `packages/shared-components/src/artise/` | Artise's views (MVVM, as AGENTS.md describes), with Storybook stories.                                                                           |
+| `apps/desktop/src/artise/`               | The desktop shell: Artise ID, the workspace rail, one view per workspace.                                                                        |
+| `tools/artise/`                          | Scripts: the file header check, the wording table import.                                                                                        |
+
+Every file Artise adds starts with:
+
+```
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+```
+
+`tools/artise/check-headers.sh` checks this in CI.
+
+Artise reads its workspace's file (`co.artise.workspace` in `/.well-known/matrix/client`) through
+`apps/web/src/artise/workspace/WorkspaceFile.ts`. Every field is optional, because workspaces are updated one at
+a time.
+
+### Element files changed
+
+Element's own files change only where Artise needs a hook. Each hook is one call into `artise/`, marked with an
+`// Artise:` comment, and listed here. When a merge conflicts at a hook, move the call; the logic stays in
+`artise/`.
+
+| File       | Why |
+| ---------- | --- |
+| (none yet) |     |
