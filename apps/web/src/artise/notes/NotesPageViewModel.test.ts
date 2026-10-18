@@ -56,8 +56,15 @@ function fakeApi(tree: NotesTree = TREE): { [K in keyof NotesApi]: Mock } {
         tree: vi.fn().mockResolvedValue(tree),
         note: vi.fn().mockImplementation(async (_room: string, path: string) => {
             if (!(path in NOTES)) throw new NotesApiError("not_found", 404);
-            return { path, version: "x", content: NOTES[path] };
+            const version = tree.files.find((f) => f.path === path)?.version ?? "x";
+            return { path, version, content: NOTES[path] };
         }),
+        saveNote: vi.fn().mockImplementation(async (_room: string, path: string) => ({
+            path,
+            version: v(50),
+            merged: false,
+            created: false,
+        })),
         raw: vi.fn().mockImplementation(async (_room: string, path: string) => ({
             blob: new Blob([`bytes of ${path}`], { type: "text/html" }),
             contentType: "text/html",
@@ -311,5 +318,300 @@ describe("NotesPageViewModel", () => {
         const event = new MatrixEvent({ type: "co.artise.notes", state_key: "", room_id: ROOM, content: {} });
         client.emit(RoomStateEvent.Events, event, {} as never, null);
         expect(api.tree).toHaveBeenCalledTimes(1);
+    });
+
+    describe("editing", () => {
+        /** A page with "Súper" open (version v(1) on the server). */
+        async function editing() {
+            const made = makeVm({ path: "Súper.md" });
+            await vi.waitFor(() => expect(made.vm.getSnapshot().content.kind).toBe("note"));
+            return made;
+        }
+
+        // Edit: the editor starts from the saved text; typing marks it changed and updates the preview.
+        it("edits a note with a live preview", async () => {
+            const { vm } = await editing();
+            vm.edit();
+            expect(vm.getSnapshot().editor).toMatchObject({ path: "Súper.md", draft: NOTES["Súper.md"], dirty: false });
+            vm.changeDraft("# Nueva", 7);
+            expect(vm.getSnapshot().editor).toMatchObject({ dirty: true, preview: [{ type: "heading", level: 1 }] });
+        });
+
+        // Typing [[ suggests notes; Escape (cursor -1) hides them.
+        it("suggests notes for [[", async () => {
+            const { vm } = await editing();
+            vm.edit();
+            vm.changeDraft("Ver [[Mo", 8);
+            expect(vm.getSnapshot().editor?.suggestions).toEqual({
+                from: 6,
+                items: [{ name: "Mole", path: "Recetas/Mole.md", insert: "Mole]]" }],
+            });
+            vm.changeDraft("Ver [[Mo", -1);
+            expect(vm.getSnapshot().editor?.suggestions).toBeUndefined();
+        });
+
+        // Save: sent on the version it was opened at; the note shows the saved text.
+        it("saves on the opened version", async () => {
+            const { vm, api } = await editing();
+            vm.edit();
+            vm.changeDraft("- [ ] leche\n- [ ] huevos", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().editor).toBeUndefined());
+            expect(api.saveNote).toHaveBeenCalledWith(ROOM, "Súper.md", "- [ ] leche\n- [ ] huevos", v(1));
+            expect(JSON.stringify(vm.getSnapshot().content)).toContain("huevos");
+            // The next save is based on the new version.
+            vm.edit();
+            vm.changeDraft("otra", 0);
+            vm.save();
+            await vi.waitFor(() => expect(api.saveNote).toHaveBeenCalledTimes(2));
+            expect(api.saveNote.mock.calls[1][3]).toBe(v(50));
+        });
+
+        // merged: true — the server combined other people's edits: show its text and say so.
+        it("shows the merged text", async () => {
+            const { vm, api } = await editing();
+            api.saveNote.mockResolvedValueOnce({
+                path: "Súper.md",
+                version: v(51),
+                merged: true,
+                content: "- [ ] leche\n- [x] pan\n- [ ] sal",
+                created: false,
+            });
+            vm.edit();
+            vm.changeDraft("- [ ] leche\n- [ ] sal", 0);
+            vm.save();
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().notice).toBe(
+                    "Someone else changed other lines while you were editing. Both changes were saved.",
+                ),
+            );
+            expect(JSON.stringify(vm.getSnapshot().content)).toContain("pan");
+        });
+
+        function conflictOnce(api: { saveNote: Mock }): void {
+            api.saveNote.mockRejectedValueOnce(
+                new NotesApiError("conflict", 409, { path: "Súper.md", version: v(60), content: "- [x] leche" }),
+            );
+        }
+
+        // The same lines changed: both versions shown; nothing is lost.
+        it("asks on a conflict", async () => {
+            const { vm, api } = await editing();
+            conflictOnce(api);
+            vm.edit();
+            vm.changeDraft("- [ ] leche entera", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice).toBeDefined());
+            expect(vm.getSnapshot().choice).toEqual({
+                kind: "conflict",
+                text: "Someone else changed the same lines while you were editing.",
+                mine: "- [ ] leche entera",
+                theirs: "- [x] leche",
+            });
+            expect(vm.getSnapshot().editor).toBeUndefined();
+        });
+
+        // Keep mine: saved over theirs, on their version.
+        it("keeps mine", async () => {
+            const { vm, api } = await editing();
+            conflictOnce(api);
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice).toBeDefined());
+            vm.keepMine();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice).toBeUndefined());
+            expect(api.saveNote).toHaveBeenLastCalledWith(ROOM, "Súper.md", "mía", v(60));
+        });
+
+        // Keep theirs: mine is dropped, theirs is shown, and the next edit starts from it.
+        it("keeps theirs", async () => {
+            const { vm, api } = await editing();
+            conflictOnce(api);
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice).toBeDefined());
+            vm.keepTheirs();
+            expect(vm.getSnapshot().choice).toBeUndefined();
+            expect(api.saveNote).toHaveBeenCalledTimes(1);
+            vm.edit();
+            expect(vm.getSnapshot().editor?.draft).toBe("- [x] leche");
+        });
+
+        // Combine: mine above the line, theirs below, saved on their version.
+        it("combines both", async () => {
+            const { vm, api } = await editing();
+            conflictOnce(api);
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice).toBeDefined());
+            vm.combine();
+            expect(vm.getSnapshot().editor).toMatchObject({
+                draft: "mía\n\n———\n\n- [x] leche",
+                dirty: true,
+                hint: "Your version is above the line and the other one below. Keep what you want, then save.",
+            });
+            vm.changeDraft("las dos", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().editor).toBeUndefined());
+            expect(api.saveNote).toHaveBeenLastCalledWith(ROOM, "Súper.md", "las dos", v(60));
+        });
+
+        // Deleted meanwhile: keep my copy (saved as new) or discard it.
+        it("keeps a copy of a note deleted meanwhile", async () => {
+            const { vm, api } = await editing();
+            api.saveNote.mockRejectedValueOnce(new NotesApiError("deleted", 409));
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice?.kind).toBe("deleted"));
+            vm.keepCopy();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice).toBeUndefined());
+            expect(api.saveNote).toHaveBeenLastCalledWith(ROOM, "Súper.md", "mía", null);
+        });
+
+        it("discards a change to a note deleted meanwhile", async () => {
+            const { vm, api, props } = await editing();
+            api.saveNote.mockRejectedValueOnce(new NotesApiError("deleted", 409));
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.save();
+            await vi.waitFor(() => expect(vm.getSnapshot().choice?.kind).toBe("deleted"));
+            vm.discard();
+            expect(vm.getSnapshot()).toMatchObject({ choice: undefined, selectedPath: null });
+            expect(props.setLocation).toHaveBeenLastCalledWith(ROOM, null);
+        });
+
+        // Offline: the text stays in the editor, with why it wasn't saved.
+        it("keeps the draft when a save fails", async () => {
+            const { vm, api } = await editing();
+            api.saveNote.mockRejectedValueOnce(new NotesApiError("offline", 0));
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.save();
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().editor?.error).toBe("This needs a connection. Try again when you're online."),
+            );
+            expect(vm.getSnapshot().editor).toMatchObject({ draft: "mía", saving: false, dirty: true });
+        });
+
+        // Ticking a task: drawn at once, saved as a one-character edit on the open version.
+        it("ticks a task", async () => {
+            const { vm, api } = await editing();
+            vm.toggleTask(1);
+            expect(JSON.stringify(vm.getSnapshot().content)).toContain('"checked":true,"line":1');
+            await vi.waitFor(() =>
+                expect(api.saveNote).toHaveBeenCalledWith(ROOM, "Súper.md", "- [x] leche\n- [x] pan", v(1)),
+            );
+        });
+
+        // A tick that can't be saved goes back, and says why.
+        it("undoes a tick that couldn't be saved", async () => {
+            const { vm, api } = await editing();
+            api.saveNote.mockRejectedValueOnce(new NotesApiError("offline", 0));
+            vm.toggleTask(1);
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().problem).toBe("This needs a connection. Try again when you're online."),
+            );
+            expect(JSON.stringify(vm.getSnapshot().content)).toContain('"checked":false,"line":1');
+        });
+
+        // Leaving with unsaved changes asks first; staying keeps the draft.
+        it("asks before losing unsaved changes", async () => {
+            const { vm, api } = await editing();
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.select("Recetas/Mole.md");
+            expect(vm.getSnapshot().confirmLeave).toEqual({
+                text: "You have changes that aren't saved. Leave without saving?",
+            });
+            vm.keepEditing();
+            expect(vm.getSnapshot()).toMatchObject({ confirmLeave: undefined, editor: { draft: "mía" } });
+            vm.select("Recetas/Mole.md");
+            vm.leaveWithoutSaving();
+            await vi.waitFor(() => expect(vm.getSnapshot().selectedPath).toBe("Recetas/Mole.md"));
+            expect(vm.getSnapshot().editor).toBeUndefined();
+            expect(api.note).toHaveBeenLastCalledWith(ROOM, "Recetas/Mole.md");
+        });
+
+        // Browser back while editing: ask, and staying puts the note back in the address.
+        it("asks on browser back and restores the address", async () => {
+            const { vm, props } = await editing();
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            vm.showPath(null);
+            expect(vm.getSnapshot().confirmLeave).toBeDefined();
+            vm.keepEditing();
+            expect(props.setLocation).toHaveBeenLastCalledWith(ROOM, "Súper.md");
+        });
+
+        // Nothing changed: leave without asking.
+        it("doesn't ask when nothing changed", async () => {
+            const { vm } = await editing();
+            vm.edit();
+            vm.cancelEdit();
+            expect(vm.getSnapshot().editor).toBeUndefined();
+            expect(vm.getSnapshot().confirmLeave).toBeUndefined();
+        });
+
+        // Changes elsewhere while editing don't replace the person's text.
+        it("keeps the draft when the notes change meanwhile", async () => {
+            const { vm, api } = await editing();
+            vm.edit();
+            vm.changeDraft("mía", 0);
+            api.tree.mockResolvedValueOnce({
+                ...TREE,
+                etag: '"t2"',
+                files: TREE.files.map((f) => (f.path === "Súper.md" ? { ...f, version: v(9) } : f)),
+            });
+            await vm.refresh();
+            expect(vm.getSnapshot().editor?.draft).toBe("mía");
+            expect(api.note).toHaveBeenCalledTimes(1);
+        });
+
+        // New note: in the open note's folder, with .md; then it opens to write in.
+        it("creates a note in the open folder", async () => {
+            const { vm, api, props } = makeVm({ path: "Recetas/Mole.md" });
+            await vi.waitFor(() => expect(vm.getSnapshot().content.kind).toBe("note"));
+            vm.newNote();
+            vm.changeName("Tamales");
+            vm.createNote();
+            await vi.waitFor(() => expect(vm.getSnapshot().editor?.path).toBe("Recetas/Tamales.md"));
+            expect(api.saveNote).toHaveBeenCalledWith(ROOM, "Recetas/Tamales.md", "", null);
+            expect(props.setLocation).toHaveBeenLastCalledWith(ROOM, "Recetas/Tamales.md");
+            expect(vm.getSnapshot().items.some((i) => i.path === "Recetas/Tamales.md")).toBe(true);
+            expect(vm.getSnapshot().naming).toBeUndefined();
+        });
+
+        it.each([
+            ["a/b", "Use a name without “/”."],
+            ["datos.CSV", "There's already a note with this name."],
+        ])("refuses the name %j", async (name, error) => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            vm.newNote();
+            vm.changeName(name);
+            vm.createNote();
+            expect(vm.getSnapshot().naming?.error).toBe(error);
+            expect(api.saveNote).not.toHaveBeenCalled();
+        });
+
+        // Someone created it at the same moment: the server's exists becomes the same sentence.
+        it("says when the name was just taken", async () => {
+            const { vm, api } = makeVm();
+            await ready(vm);
+            api.saveNote.mockRejectedValueOnce(new NotesApiError("exists", 409));
+            vm.newNote();
+            vm.changeName("Nueva");
+            vm.createNote();
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().naming).toMatchObject({
+                    saving: false,
+                    error: "There's already a note with this name.",
+                }),
+            );
+        });
     });
 });

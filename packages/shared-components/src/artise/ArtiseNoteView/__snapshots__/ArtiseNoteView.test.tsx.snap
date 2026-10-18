@@ -37,7 +37,6 @@ exports[`ArtiseNoteView > draws a note 1`] = `
           aria-label="Hecho"
           checked=""
           disabled=""
-          readonly=""
           type="checkbox"
         />
         <div>
@@ -52,7 +51,6 @@ exports[`ArtiseNoteView > draws a note 1`] = `
         <input
           aria-label="Hecho"
           disabled=""
-          readonly=""
           type="checkbox"
         />
         <div>

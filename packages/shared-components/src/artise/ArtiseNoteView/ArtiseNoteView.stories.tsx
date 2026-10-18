@@ -29,8 +29,16 @@ export const MOLE: ArtiseNoteDocument = [
         type: "list",
         ordered: false,
         items: [
-            { checked: true, children: [{ type: "paragraph", children: [{ type: "text", text: "Chiles mulatos" }] }] },
-            { checked: false, children: [{ type: "paragraph", children: [{ type: "text", text: "Chocolate" }] }] },
+            {
+                checked: true,
+                line: 5,
+                children: [{ type: "paragraph", children: [{ type: "text", text: "Chiles mulatos" }] }],
+            },
+            {
+                checked: false,
+                line: 6,
+                children: [{ type: "paragraph", children: [{ type: "text", text: "Chocolate" }] }],
+            },
         ],
     },
     { type: "quote", children: [{ type: "paragraph", children: [{ type: "text", text: "Sin prisa: tres horas." }] }] },

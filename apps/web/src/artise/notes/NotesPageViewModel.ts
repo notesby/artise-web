@@ -19,8 +19,9 @@ import { logger } from "matrix-js-sdk/src/logger";
 
 import { artiseT } from "../i18n/artiseT";
 import { getWorkspaceFile } from "../workspace/WorkspaceFile";
-import { type NotesApi, NotesApiError, type NotesFile } from "./NotesApi";
+import { type NotesApi, NotesApiError, type NotesCurrent, type NotesFile } from "./NotesApi";
 import { extensionOf, isImagePath, noteDocument } from "./noteDocument";
+import { combineVersions, linkSuggestions, newNotePath, toggleTask } from "./noteEditing";
 
 /** The room state event the bot sets when a chat's notes change (`content.tree` is the new tree hash). */
 export const NOTES_STATE_EVENT = "co.artise.notes";
@@ -90,8 +91,20 @@ export class NotesPageViewModel
     private etag: string | undefined;
     /** Object URLs of the photos on screen, freed when the content changes. */
     private urls: string[] = [];
+    /** The open note's photos by path, kept while it stays open (ticking a task or editing redraws it). */
+    private photos = new Map<string, string>();
     /** Each new pick or refresh gets a number; answers for an older one are dropped. */
     private loadId = 0;
+    /** The open note's text and version on the server. */
+    private note: { path: string; text: string; version: string } | null = null;
+    /** The version a save is based on (the note's, or the other version's when combining). */
+    private editBase: string | null = null;
+    /** The server's copy from the last conflict. */
+    private conflictCurrent: NotesCurrent | null = null;
+    /** Where the person was going when asked about unsaved changes. */
+    private leaveTo: (() => void) | null = null;
+    /** The editing note to put back in the address when the person stays. */
+    private restorePath: string | null = null;
 
     public constructor(props: NotesPageViewModelProps) {
         const assistant = getWorkspaceFile(props.client)?.assistantName ?? "Ari";
@@ -111,6 +124,24 @@ export class NotesPageViewModel
                 download: artiseT("artise|notes|download"),
                 open: artiseT("artise|notes|open"),
                 chooseChat: artiseT("artise|notes|choose_chat"),
+                edit: artiseT("artise|notes|edit"),
+                save: artiseT("artise|notes|save"),
+                cancel: artiseT("artise|notes|cancel"),
+                editor: artiseT("artise|notes|editor_label"),
+                preview: artiseT("artise|notes|preview"),
+                suggestions: artiseT("artise|notes|suggestions"),
+                newNote: artiseT("artise|notes|new_note"),
+                name: artiseT("artise|notes|name"),
+                create: artiseT("artise|notes|create"),
+                mine: artiseT("artise|notes|choice_mine"),
+                theirs: artiseT("artise|notes|choice_theirs"),
+                keepMine: artiseT("artise|notes|keep_mine"),
+                keepTheirs: artiseT("artise|notes|keep_theirs"),
+                combine: artiseT("artise|notes|combine"),
+                keepCopy: artiseT("artise|notes|keep_copy"),
+                discard: artiseT("artise|notes|discard"),
+                keepEditing: artiseT("artise|notes|keep_editing"),
+                leave: artiseT("artise|notes|leave"),
             },
         });
         if (props.roomId) {
@@ -126,6 +157,7 @@ export class NotesPageViewModel
     private freeUrls(): void {
         for (const url of this.urls) this.props.files.revoke(url);
         this.urls = [];
+        this.photos.clear();
     }
 
     private async load(): Promise<void> {
@@ -203,7 +235,9 @@ export class NotesPageViewModel
     }
 
     private setContent(content: ArtiseNotesContent, selectedPath: string | null): void {
-        this.freeUrls();
+        // The same note drawn again (a task ticked, a save) keeps its photos; anything else frees them.
+        const sameNote = content.kind === "note" && content.path === this.snapshot.current.selectedPath;
+        if (!sameNote) this.freeUrls();
         this.snapshot.merge({ content, selectedPath });
     }
 
@@ -220,7 +254,14 @@ export class NotesPageViewModel
             return;
         }
         for (let parent = parentOf(path); parent; parent = parentOf(parent)) this.expanded.add(parent);
-        this.snapshot.merge({ items: this.visibleItems() });
+        this.snapshot.merge({
+            items: this.visibleItems(),
+            editor: undefined,
+            choice: undefined,
+            notice: undefined,
+            problem: undefined,
+        });
+        this.note = null;
         const id = ++this.loadId;
         const title = displayName(path);
 
@@ -250,13 +291,8 @@ export class NotesPageViewModel
         try {
             const note = await api.note(roomId, path);
             if (this.isDisposed || id !== this.loadId) return;
-            // Notes that aren't Markdown (.txt, .csv, .json, .yaml) are shown as they are.
-            const document: ArtiseNoteDocument =
-                extensionOf(path) === "md"
-                    ? noteDocument(note.content, [...this.files.keys()], path)
-                    : [{ type: "code", text: note.content }];
-            this.setContent({ kind: "note", path, title, document }, path);
-            await this.loadPhotos(id, path, title, document);
+            this.note = { path, text: note.content, version: note.version };
+            await this.showNote(id, path, note.content);
         } catch (e) {
             if (this.isDisposed || id !== this.loadId) return;
             this.setContent({ kind: "error", text: errorText(e) }, path);
@@ -268,35 +304,55 @@ export class NotesPageViewModel
         return url;
     }
 
-    /** Downloads the note's photos and puts each in place as it arrives. */
-    private async loadPhotos(id: number, path: string, title: string, document: ArtiseNoteDocument): Promise<void> {
+    /** A note's text as the page draws it, with the photos already downloaded in place. */
+    private documentFor(path: string, text: string): ArtiseNoteDocument {
+        // Notes that aren't Markdown (.txt, .csv, .json, .yaml) are shown as they are.
+        const document: ArtiseNoteDocument =
+            extensionOf(path) === "md" ? noteDocument(text, [...this.files.keys()], path) : [{ type: "code", text }];
+        return mapEmbeds(document, (embed) =>
+            embed.path && this.photos.has(embed.path) ? { ...embed, src: this.photos.get(embed.path) } : embed,
+        );
+    }
+
+    /** Draws a note, then downloads its photos that aren't here yet and draws it again with them. */
+    private async showNote(id: number, path: string, text: string): Promise<void> {
+        const title = displayName(path);
+        const document = this.documentFor(path, text);
+        this.setContent({ kind: "note", path, title, document }, path);
         const { api, roomId } = this.props;
         if (!roomId) return;
         const wanted = new Set<string>();
         visitEmbeds(document, (embed) => {
             const size = embed.path ? (this.files.get(embed.path)?.size ?? Infinity) : Infinity;
-            if (embed.image && embed.path && size <= MAX_EMBED_BYTES) wanted.add(embed.path);
+            if (embed.image && embed.path && !this.photos.has(embed.path) && size <= MAX_EMBED_BYTES) {
+                wanted.add(embed.path);
+            }
         });
-        const srcs = new Map<string, string>();
+        if (wanted.size === 0) return;
         await Promise.all(
             [...wanted].map(async (photo) => {
                 try {
                     const raw = await api.raw(roomId, photo);
                     if (this.isDisposed || id !== this.loadId) return;
-                    srcs.set(
-                        photo,
-                        this.track(this.props.files.url(new Blob([raw.blob], { type: `image/${extensionOf(photo)}` }))),
-                    );
+                    const type = `image/${extensionOf(photo)}`;
+                    this.photos.set(photo, this.track(this.props.files.url(new Blob([raw.blob], { type }))));
                 } catch (e) {
                     logger.warn("Artise: couldn't load a photo in a note", e);
                 }
             }),
         );
-        if (this.isDisposed || id !== this.loadId || srcs.size === 0) return;
-        const withPhotos = mapEmbeds(document, (embed) =>
-            embed.path && srcs.has(embed.path) ? { ...embed, src: srcs.get(embed.path) } : embed,
-        );
-        this.snapshot.merge({ content: { kind: "note", path, title, document: withPhotos } });
+        if (this.isDisposed || id !== this.loadId || this.note?.path !== path) return;
+        const current = this.snapshot.current;
+        if (current.content.kind === "note" && current.content.path === path) {
+            this.snapshot.merge({
+                content: { kind: "note", path, title, document: this.documentFor(path, this.note.text) },
+            });
+        }
+        if (current.editor?.path === path) {
+            this.snapshot.merge({
+                editor: { ...current.editor, preview: this.documentFor(path, current.editor.draft) },
+            });
+        }
     }
 
     /** The tree again (free when nothing changed); a changed or removed open file is opened again. */
@@ -309,7 +365,9 @@ export class NotesPageViewModel
             const tree = await api.tree(roomId, this.etag);
             if (this.isDisposed || tree === "notModified") return;
             this.setTree(tree.files, tree.folders, tree.etag);
-            if (selected && this.files.get(selected)?.version !== before) await this.open(selected);
+            // While the person edits or chooses, their text stays: saving merges with what changed.
+            const busy = !!this.snapshot.current.editor || !!this.snapshot.current.choice;
+            if (!busy && selected && this.files.get(selected)?.version !== before) await this.open(selected);
         } catch (e) {
             logger.warn("Artise: couldn't refresh the notes", e);
         }
@@ -319,9 +377,36 @@ export class NotesPageViewModel
         if (event.getType() === NOTES_STATE_EVENT && event.getRoomId() === this.props.roomId) void this.refresh();
     };
 
+    /** True while there's text the person would lose: unsaved edits, or a choice not made yet. */
+    private hasUnsaved(): boolean {
+        const { editor, choice } = this.snapshot.current;
+        return !!editor?.dirty || !!choice;
+    }
+
+    /** Goes on at once, or first asks about unsaved changes. */
+    private guard(go: () => void, restorePath: string | null = null): void {
+        if (!this.hasUnsaved()) {
+            go();
+            return;
+        }
+        this.leaveTo = go;
+        this.restorePath = restorePath;
+        this.snapshot.merge({ confirmLeave: { text: artiseT("artise|notes|unsaved") } });
+    }
+
+    /** Whether the page would lose unsaved changes if closed now (for the browser's own warning). */
+    public get unsaved(): boolean {
+        return this.hasUnsaved();
+    }
+
     /** The page's address changed (back/forward in the browser): show that file. */
     public showPath(path: string | null): void {
         if (path === this.snapshot.current.selectedPath) return;
+        const editing = this.snapshot.current.editor?.path ?? this.snapshot.current.selectedPath;
+        if (this.hasUnsaved()) {
+            this.guard(() => this.showPath(path), editing);
+            return;
+        }
         if (path) {
             void this.open(path);
         } else {
@@ -330,16 +415,17 @@ export class NotesPageViewModel
         }
     }
 
-    public back = (): void => this.props.leave(this.props.roomId);
+    public back = (): void => this.guard(() => this.props.leave(this.props.roomId));
 
     public retry = (): void => void this.load();
 
     public chooseChat = (roomId: string): void => this.props.setLocation(roomId, null);
 
-    public select = (path: string): void => {
-        this.props.setLocation(this.props.roomId, path);
-        void this.open(path);
-    };
+    public select = (path: string): void =>
+        this.guard(() => {
+            this.props.setLocation(this.props.roomId, path);
+            void this.open(path);
+        });
 
     public toggleFolder = (path: string): void => {
         if (this.expanded.has(path)) this.expanded.delete(path);
@@ -351,8 +437,11 @@ export class NotesPageViewModel
         if (path) {
             this.select(path);
         } else {
-            this.loadId++;
-            this.setContent({ kind: "error", text: artiseT("artise|notes|missing", { name: target }) }, null);
+            this.guard(() => {
+                this.loadId++;
+                this.snapshot.merge({ editor: undefined, choice: undefined });
+                this.setContent({ kind: "error", text: artiseT("artise|notes|missing", { name: target }) }, null);
+            });
         }
     };
 
@@ -367,6 +456,253 @@ export class NotesPageViewModel
     public openFile = (path: string): void => {
         if (extensionOf(path) !== "pdf") return;
         void this.withRaw(path, (blob) => this.props.files.open(new Blob([blob], { type: "application/pdf" })));
+    };
+
+    public edit = (): void => {
+        const note = this.note;
+        if (!note) return;
+        this.editBase = note.version;
+        this.snapshot.merge({
+            notice: undefined,
+            problem: undefined,
+            editor: {
+                path: note.path,
+                title: displayName(note.path),
+                draft: note.text,
+                preview: this.documentFor(note.path, note.text),
+                dirty: false,
+                saving: false,
+            },
+        });
+    };
+
+    public changeDraft = (draft: string, cursor: number): void => {
+        const editor = this.snapshot.current.editor;
+        if (!editor) return;
+        const files = [...this.files.values()].map((file) => ({ path: file.path, note: file.note }));
+        const original = this.snapshot.current.editor?.hint ? null : (this.note?.text ?? null);
+        this.snapshot.merge({
+            editor: {
+                ...editor,
+                draft,
+                // Combining is never "unchanged": saving it is the choice.
+                dirty: original === null || draft !== original,
+                preview: this.documentFor(editor.path, draft),
+                suggestions: cursor >= 0 ? (linkSuggestions(draft, cursor, files) ?? undefined) : undefined,
+                error: undefined,
+            },
+        });
+    };
+
+    public save = (): void => {
+        const editor = this.snapshot.current.editor;
+        if (!editor || editor.saving) return;
+        this.snapshot.merge({ editor: { ...editor, saving: true, suggestions: undefined } });
+        void this.saveText(editor.path, editor.draft, this.editBase);
+    };
+
+    public cancelEdit = (): void =>
+        this.guard(() => {
+            this.snapshot.merge({ editor: undefined });
+        });
+
+    public toggleTask = (line: number): void => {
+        const note = this.note;
+        if (!note || this.snapshot.current.editor || this.snapshot.current.choice) return;
+        const text = toggleTask(note.text, line);
+        if (text === null) {
+            void this.open(note.path);
+            return;
+        }
+        // Drawn ticked at once; the save follows (and is undone if it fails).
+        this.setContent(
+            {
+                kind: "note",
+                path: note.path,
+                title: displayName(note.path),
+                document: this.documentFor(note.path, text),
+            },
+            note.path,
+        );
+        void this.saveText(note.path, text, note.version);
+    };
+
+    /**
+     * Saves a note's text on `base`, then shows what the server kept. A conflict or a deletion meanwhile asks the
+     * person what to keep; other problems keep the text and say why.
+     */
+    private async saveText(path: string, text: string, base: string | null): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        try {
+            const saved = await api.saveNote(roomId, path, text, base);
+            if (this.isDisposed) return;
+            const kept = saved.merged && saved.content !== undefined ? saved.content : text;
+            const file = this.files.get(path);
+            this.files.set(path, {
+                path,
+                version: saved.version,
+                size: new Blob([kept]).size,
+                modified: Math.floor(Date.now() / 1000),
+                note: true,
+            });
+            if (!file) this.snapshot.merge({ items: this.visibleItems() });
+            this.note = { path, text: kept, version: saved.version };
+            this.conflictCurrent = null;
+            this.snapshot.merge({
+                editor: undefined,
+                choice: undefined,
+                notice: saved.merged ? artiseT("artise|notes|merged") : undefined,
+                problem: undefined,
+            });
+            await this.showNote(this.loadId, path, kept);
+        } catch (e) {
+            if (this.isDisposed) return;
+            if (e instanceof NotesApiError && e.code === "conflict" && e.current) {
+                this.conflictCurrent = e.current;
+                this.snapshot.merge({
+                    editor: undefined,
+                    choice: { kind: "conflict", text: e.text, mine: text, theirs: e.current.content ?? "" },
+                });
+            } else if (e instanceof NotesApiError && e.code === "deleted") {
+                this.snapshot.merge({ editor: undefined, choice: { kind: "deleted", text: e.text, mine: text } });
+            } else if (this.snapshot.current.editor) {
+                const editor = this.snapshot.current.editor;
+                this.snapshot.merge({ editor: { ...editor, saving: false, error: errorText(e) } });
+            } else {
+                // A task that couldn't be ticked: back as it was, and why.
+                if (this.note) await this.showNote(this.loadId, this.note.path, this.note.text);
+                this.snapshot.merge({ problem: errorText(e), choice: undefined });
+            }
+        }
+    }
+
+    public keepMine = (): void => {
+        const { choice } = this.snapshot.current;
+        const current = this.conflictCurrent;
+        const path = this.note?.path;
+        if (choice?.kind !== "conflict" || !current || !path) return;
+        void this.saveText(path, choice.mine, current.version);
+    };
+
+    public keepTheirs = (): void => {
+        const { choice } = this.snapshot.current;
+        const current = this.conflictCurrent;
+        if (choice?.kind !== "conflict" || !current) return;
+        const text = current.content ?? "";
+        const file = this.files.get(current.path);
+        if (file) this.files.set(current.path, { ...file, version: current.version });
+        this.note = { path: current.path, text, version: current.version };
+        this.conflictCurrent = null;
+        this.snapshot.merge({ choice: undefined });
+        void this.showNote(this.loadId, current.path, text);
+    };
+
+    public combine = (): void => {
+        const { choice } = this.snapshot.current;
+        const current = this.conflictCurrent;
+        if (choice?.kind !== "conflict" || !current) return;
+        const draft = combineVersions(choice.mine, current.content ?? "");
+        this.editBase = current.version;
+        this.snapshot.merge({
+            choice: undefined,
+            editor: {
+                path: current.path,
+                title: displayName(current.path),
+                draft,
+                preview: this.documentFor(current.path, draft),
+                dirty: true,
+                saving: false,
+                hint: artiseT("artise|notes|combine_hint"),
+            },
+        });
+    };
+
+    public keepCopy = (): void => {
+        const { choice } = this.snapshot.current;
+        const path = this.note?.path ?? this.snapshot.current.selectedPath;
+        if (choice?.kind !== "deleted" || !path) return;
+        void this.saveText(path, choice.mine, null);
+    };
+
+    public discard = (): void => {
+        if (this.snapshot.current.choice?.kind !== "deleted") return;
+        this.note = null;
+        this.snapshot.merge({ choice: undefined });
+        this.setContent({ kind: "none", text: artiseT("artise|notes|pick") }, null);
+        this.props.setLocation(this.props.roomId, null);
+        void this.refresh();
+    };
+
+    public keepEditing = (): void => {
+        this.leaveTo = null;
+        this.snapshot.merge({ confirmLeave: undefined });
+        // Back in the browser had already changed the address: put the note being edited back.
+        if (this.restorePath) this.props.setLocation(this.props.roomId, this.restorePath);
+        this.restorePath = null;
+    };
+
+    public leaveWithoutSaving = (): void => {
+        const go = this.leaveTo;
+        this.leaveTo = null;
+        this.restorePath = null;
+        this.conflictCurrent = null;
+        this.snapshot.merge({ confirmLeave: undefined, editor: undefined, choice: undefined });
+        go?.();
+    };
+
+    public dismissNotice = (): void => this.snapshot.merge({ notice: undefined, problem: undefined });
+
+    public newNote = (): void => this.guard(() => this.snapshot.merge({ naming: { name: "", saving: false } }));
+
+    public changeName = (name: string): void => {
+        const naming = this.snapshot.current.naming;
+        if (naming) this.snapshot.merge({ naming: { ...naming, name, error: undefined } });
+    };
+
+    public cancelNaming = (): void => this.snapshot.merge({ naming: undefined });
+
+    /** Creates the named note in the folder of what's open, then opens it to write in. */
+    public createNote = (): void => {
+        const naming = this.snapshot.current.naming;
+        const { api, roomId } = this.props;
+        if (!naming || naming.saving || !roomId) return;
+        const folder = parentOf(this.snapshot.current.selectedPath ?? "");
+        const result = newNotePath(folder, naming.name, new Set([...this.files.keys(), ...this.folders]));
+        if ("problem" in result) {
+            const key = result.problem === "exists" ? "artise|notes|name_exists" : "artise|notes|name_invalid";
+            this.snapshot.merge({ naming: { ...naming, error: artiseT(key) } });
+            return;
+        }
+        const { path } = result;
+        this.snapshot.merge({ naming: { ...naming, saving: true } });
+        void (async () => {
+            try {
+                const saved = await api.saveNote(roomId, path, "", null);
+                if (this.isDisposed) return;
+                this.files.set(path, {
+                    path,
+                    version: saved.version,
+                    size: 0,
+                    modified: Math.floor(Date.now() / 1000),
+                    note: true,
+                });
+                for (let parent = parentOf(path); parent; parent = parentOf(parent)) this.expanded.add(parent);
+                this.snapshot.merge({ naming: undefined, items: this.visibleItems() });
+                this.props.setLocation(roomId, path);
+                this.loadId++;
+                this.note = { path, text: "", version: saved.version };
+                await this.showNote(this.loadId, path, "");
+                this.edit();
+            } catch (e) {
+                if (this.isDisposed) return;
+                const text =
+                    e instanceof NotesApiError && e.code === "exists"
+                        ? artiseT("artise|notes|name_exists")
+                        : errorText(e);
+                this.snapshot.merge({ naming: { ...naming, saving: false, error: text } });
+            }
+        })();
     };
 
     private async withRaw(path: string, handle: (blob: Blob) => void): Promise<void> {
