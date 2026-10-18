@@ -4,15 +4,16 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 #
-"""Writes apps/web/res/artise/translations.json: Element Web's texts in Artise's words.
+"""Writes apps/web/src/artise/i18n/wording.json: Element Web's texts in Artise's words.
 
 The words are the phones' (artise-android tools/artise/wording_overrides.py, artise-ios
 Artise/Scripts/wording_overrides.py): chat instead of room, sign out instead of "remove this device",
 "espacio de trabajo" / "espaço de trabalho" instead of the homeserver. Matrix spaces keep "espacio".
 Element Web's string keys differ from Element X's, so this table has its own keys and the same words.
 
-Element Web loads the file through `custom_translations_url` in config.json, so Element's own string
-files are never edited and tag merges stay clean. Run it after editing the table:
+The app registers the file itself, right after Element's texts (apps/web/src/artise/i18n/
+registerArtiseTranslations.ts), so Element's own string files are never edited and tag merges stay clean.
+Run it after editing the table:
 
     python3 tools/artise/web_wording.py          # writes the JSON
     python3 tools/artise/web_wording.py --check  # fails if the JSON is stale or a key no longer exists
@@ -29,7 +30,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ELEMENT_EN = ROOT / "apps/web/src/i18n/strings/en_EN.json"
-OUTPUT = ROOT / "apps/web/res/artise/translations.json"
+OUTPUT = ROOT / "apps/web/src/artise/i18n/wording.json"
 
 # Element's language keys, as languages.json names them (lower case, "-" for "_").
 LANGUAGES = ("en", "es", "pt", "pt-br")

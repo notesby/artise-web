@@ -14,6 +14,7 @@ import { SettingLevel } from "../settings/SettingLevel";
 import { getLanguageRetry } from "./languages";
 import { getLanguageFromBrowser } from "./browser";
 import { registerCustomTranslations } from "./custom";
+import { registerArtiseTranslations } from "../artise/i18n/registerArtiseTranslations";
 
 export function getUserLanguage(): string {
     const language = SettingsStore.getValue("language", null, /*excludeDefault:*/ true);
@@ -53,5 +54,7 @@ export async function setLanguage(...preferredLangs: string[]): Promise<void> {
         registerTranslations("en", fallbackLanguageData);
     }
 
+    // Artise: Artise's words over Element's, before the server's own overrides
+    registerArtiseTranslations();
     await registerCustomTranslations();
 }
