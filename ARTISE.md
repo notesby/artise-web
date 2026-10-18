@@ -72,3 +72,23 @@ trabajo" / "espaço de trabalho" instead of the homeserver. The words are the ph
   with `setArtiseTranslationsInTests(true)`.
 - `python3 -m unittest discover -s tools/artise` (also in CI) fails when Element renames a key in the table, a
   language is missing, a text loses a placeholder or tag, or the JSON is stale.
+
+## The server's `config.json`
+
+The server mounts its own `config.json` over `/app/config.json` (family-wiki `deploy/`). Besides what it has, Artise
+needs these keys on every workspace:
+
+```json
+{
+    "bug_report_endpoint_url": "https://reports.artise.co/api/submit",
+    "sentry": { "dsn": "<the web project's DSN on crashes.artise.co>", "environment": "<workspace>" },
+    "map_style_url": "<the map style the phones use>"
+}
+```
+
+- Artise's words need no setting: they ship inside the app. `custom_translations_url` stays free for a
+  workspace that wants to change a word for itself.
+- Problem reports arrive with the app name `element-web`, which Element hard-codes (`rageshake/submit-rageshake.ts`).
+  reports.artise.co must accept that name; web and desktop are told apart by the report's `platform` field.
+- Sign in with a QR code needs no setting: Settings → Sessions shows "Link new device" when the workspace's server
+  reports `org.matrix.msc4108` (artise.co and mas-k8s did on 2026-10-18) and the person's encryption is set up.
