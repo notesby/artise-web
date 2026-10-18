@@ -117,3 +117,5 @@ export * from "./core/viewmodel";
 export * from "./artise/ArtiseSettingsView";
 export * from "./artise/ArtiseWorkspaceBarView";
 export * from "./artise/ArtiseWhatsNewView";
+export * from "./artise/ArtiseNoteView";
+export * from "./artise/ArtiseNotesView";

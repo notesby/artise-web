@@ -1,0 +1,90 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseNoteView > draws a note 1`] = `
+<div>
+  <article
+    class="ArtiseNoteView-module_note"
+  >
+    <h1>
+      Mole de la abuela
+    </h1>
+    <p>
+      Para 
+      <strong>
+        8 personas
+      </strong>
+      . Las compras están en 
+      <button
+        class="ArtiseNoteView-module_noteLink"
+        type="button"
+      >
+        la lista del súper
+      </button>
+      ; el postre, en 
+      <button
+        class="ArtiseNoteView-module_missingLink"
+        type="button"
+      >
+        Flan
+      </button>
+      .
+    </p>
+    <ul>
+      <li
+        class="ArtiseNoteView-module_task"
+      >
+        <input
+          aria-label="Hecho"
+          checked=""
+          disabled=""
+          readonly=""
+          type="checkbox"
+        />
+        <div>
+          <p>
+            Chiles mulatos
+          </p>
+        </div>
+      </li>
+      <li
+        class="ArtiseNoteView-module_task"
+      >
+        <input
+          aria-label="Hecho"
+          disabled=""
+          readonly=""
+          type="checkbox"
+        />
+        <div>
+          <p>
+            Chocolate
+          </p>
+        </div>
+      </li>
+    </ul>
+    <blockquote
+      class="ArtiseNoteView-module_quote"
+    >
+      <p>
+        Sin prisa: tres horas.
+      </p>
+    </blockquote>
+    <p>
+      <button
+        class="ArtiseNoteView-module_fileLink"
+        type="button"
+      >
+        factura.pdf
+      </button>
+    </p>
+    <pre
+      class="ArtiseNoteView-module_codeBlock"
+    >
+      <code>
+        1 kg de chile
+200 g de chocolate
+      </code>
+    </pre>
+  </article>
+</div>
+`;

@@ -1,0 +1,329 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseNotesView > shows the list and the open note 1`] = `
+<div>
+  <section
+    aria-label="Notas · Familia"
+    class="ArtiseNotesView-module_page"
+  >
+    <header
+      class="ArtiseNotesView-module_header"
+    >
+      <button
+        aria-labelledby="react-use-id-1"
+        class="_icon-button_1215g_8"
+        data-kind="primary"
+        role="button"
+        style="--cpd-icon-button-size: 32px;"
+        tabindex="0"
+      >
+        <div
+          class="_indicator-icon_147l5_17"
+          style="--cpd-icon-button-size: 100%;"
+        >
+          <svg
+            fill="currentColor"
+            height="1em"
+            viewBox="0 0 24 24"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12.207 5.293a1 1 0 0 1 0 1.414L7.914 11H18.5a1 1 0 1 1 0 2H7.914l4.293 4.293a1 1 0 0 1-1.414 1.414l-6-6a1 1 0 0 1 0-1.414l6-6a1 1 0 0 1 1.414 0"
+            />
+          </svg>
+        </div>
+      </button>
+      <h1
+        class="_typography_6v6n8_153 _font-body-lg-semibold_6v6n8_74 ArtiseNotesView-module_title"
+      >
+        Notas
+      </h1>
+      <span
+        class="_typography_6v6n8_153 _font-body-md-regular_6v6n8_50 ArtiseNotesView-module_chatName"
+      >
+        Familia
+      </span>
+    </header>
+    <div
+      class="ArtiseNotesView-module_split"
+    >
+      <nav
+        aria-label="Archivos"
+        class="ArtiseNotesView-module_sidebar"
+      >
+        <ul
+          class="ArtiseNotesView-module_list"
+        >
+          <li>
+            <button
+              aria-expanded="true"
+              class="ArtiseNotesView-module_row"
+              style="padding-inline-start: calc(var(--cpd-space-2x) + 0 * var(--cpd-space-4x));"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_chevron ArtiseNotesView-module_open"
+                fill="currentColor"
+                height="16px"
+                viewBox="0 0 24 24"
+                width="16px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8.7 17.3a.95.95 0 0 1-.275-.7q0-.425.275-.7l3.9-3.9-3.9-3.9a.95.95 0 0 1-.275-.7q0-.425.275-.7a.95.95 0 0 1 .7-.275q.425 0 .7.275l4.6 4.6q.15.15.213.325.062.175.062.375t-.062.375a.9.9 0 0 1-.213.325l-4.6 4.6a.95.95 0 0 1-.7.275.95.95 0 0 1-.7-.275"
+                />
+              </svg>
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_rowIcon"
+                fill="currentColor"
+                height="18px"
+                viewBox="0 0 24 24"
+                width="18px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 2 18V6q0-.824.587-1.412A1.93 1.93 0 0 1 4 4h6l2 2h8q.824 0 1.413.588Q22 7.175 22 8v10q0 .824-.587 1.413A1.93 1.93 0 0 1 20 20zm0-2h16V8h-8.825l-2-2H4z"
+                />
+              </svg>
+              <span
+                class="ArtiseNotesView-module_rowName"
+              >
+                Recetas
+              </span>
+            </button>
+          </li>
+          <li>
+            <button
+              aria-expanded="false"
+              class="ArtiseNotesView-module_row"
+              style="padding-inline-start: calc(var(--cpd-space-2x) + 1 * var(--cpd-space-4x));"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_chevron"
+                fill="currentColor"
+                height="16px"
+                viewBox="0 0 24 24"
+                width="16px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8.7 17.3a.95.95 0 0 1-.275-.7q0-.425.275-.7l3.9-3.9-3.9-3.9a.95.95 0 0 1-.275-.7q0-.425.275-.7a.95.95 0 0 1 .7-.275q.425 0 .7.275l4.6 4.6q.15.15.213.325.062.175.062.375t-.062.375a.9.9 0 0 1-.213.325l-4.6 4.6a.95.95 0 0 1-.7.275.95.95 0 0 1-.7-.275"
+                />
+              </svg>
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_rowIcon"
+                fill="currentColor"
+                height="18px"
+                viewBox="0 0 24 24"
+                width="18px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 2 18V6q0-.824.587-1.412A1.93 1.93 0 0 1 4 4h6l2 2h8q.824 0 1.413.588Q22 7.175 22 8v10q0 .824-.587 1.413A1.93 1.93 0 0 1 20 20zm0-2h16V8h-8.825l-2-2H4z"
+                />
+              </svg>
+              <span
+                class="ArtiseNotesView-module_rowName"
+              >
+                Postres
+              </span>
+            </button>
+          </li>
+          <li>
+            <button
+              aria-current="page"
+              class="ArtiseNotesView-module_row ArtiseNotesView-module_selected"
+              style="padding-inline-start: calc(var(--cpd-space-2x) + 1 * var(--cpd-space-4x));"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_rowIcon"
+                fill="currentColor"
+                height="18px"
+                viewBox="0 0 24 24"
+                width="18px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 18h6q.424 0 .713-.288A.97.97 0 0 0 16 17a.97.97 0 0 0-.287-.712A.97.97 0 0 0 15 16H9a.97.97 0 0 0-.713.288A.97.97 0 0 0 8 17q0 .424.287.712Q8.576 18 9 18m0-4h6q.424 0 .713-.287A.97.97 0 0 0 16 13a.97.97 0 0 0-.287-.713A.97.97 0 0 0 15 12H9a.97.97 0 0 0-.713.287A.97.97 0 0 0 8 13q0 .424.287.713Q8.576 14 9 14m-3 8q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 20V4q0-.824.588-1.412A1.93 1.93 0 0 1 6 2h7.175a1.98 1.98 0 0 1 1.4.575l4.85 4.85q.275.275.425.638.15.361.15.762V20q0 .824-.587 1.413A1.93 1.93 0 0 1 18 22zm7-14V4H6v16h12V9h-4a.97.97 0 0 1-.713-.287A.97.97 0 0 1 13 8"
+                />
+              </svg>
+              <span
+                class="ArtiseNotesView-module_rowName"
+              >
+                Mole
+              </span>
+            </button>
+          </li>
+          <li>
+            <button
+              aria-expanded="false"
+              class="ArtiseNotesView-module_row"
+              style="padding-inline-start: calc(var(--cpd-space-2x) + 0 * var(--cpd-space-4x));"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_chevron"
+                fill="currentColor"
+                height="16px"
+                viewBox="0 0 24 24"
+                width="16px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M8.7 17.3a.95.95 0 0 1-.275-.7q0-.425.275-.7l3.9-3.9-3.9-3.9a.95.95 0 0 1-.275-.7q0-.425.275-.7a.95.95 0 0 1 .7-.275q.425 0 .7.275l4.6 4.6q.15.15.213.325.062.175.062.375t-.062.375a.9.9 0 0 1-.213.325l-4.6 4.6a.95.95 0 0 1-.7.275.95.95 0 0 1-.7-.275"
+                />
+              </svg>
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_rowIcon"
+                fill="currentColor"
+                height="18px"
+                viewBox="0 0 24 24"
+                width="18px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M4 20q-.824 0-1.412-.587A1.93 1.93 0 0 1 2 18V6q0-.824.587-1.412A1.93 1.93 0 0 1 4 4h6l2 2h8q.824 0 1.413.588Q22 7.175 22 8v10q0 .824-.587 1.413A1.93 1.93 0 0 1 20 20zm0-2h16V8h-8.825l-2-2H4z"
+                />
+              </svg>
+              <span
+                class="ArtiseNotesView-module_rowName"
+              >
+                attachments
+              </span>
+            </button>
+          </li>
+          <li>
+            <button
+              class="ArtiseNotesView-module_row"
+              style="padding-inline-start: calc(var(--cpd-space-2x) + 0 * var(--cpd-space-4x));"
+              type="button"
+            >
+              <svg
+                aria-hidden="true"
+                class="ArtiseNotesView-module_rowIcon"
+                fill="currentColor"
+                height="18px"
+                viewBox="0 0 24 24"
+                width="18px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 18h6q.424 0 .713-.288A.97.97 0 0 0 16 17a.97.97 0 0 0-.287-.712A.97.97 0 0 0 15 16H9a.97.97 0 0 0-.713.288A.97.97 0 0 0 8 17q0 .424.287.712Q8.576 18 9 18m0-4h6q.424 0 .713-.287A.97.97 0 0 0 16 13a.97.97 0 0 0-.287-.713A.97.97 0 0 0 15 12H9a.97.97 0 0 0-.713.287A.97.97 0 0 0 8 13q0 .424.287.713Q8.576 14 9 14m-3 8q-.824 0-1.412-.587A1.93 1.93 0 0 1 4 20V4q0-.824.588-1.412A1.93 1.93 0 0 1 6 2h7.175a1.98 1.98 0 0 1 1.4.575l4.85 4.85q.275.275.425.638.15.361.15.762V20q0 .824-.587 1.413A1.93 1.93 0 0 1 18 22zm7-14V4H6v16h12V9h-4a.97.97 0 0 1-.713-.287A.97.97 0 0 1 13 8"
+                />
+              </svg>
+              <span
+                class="ArtiseNotesView-module_rowName"
+              >
+                Súper
+              </span>
+            </button>
+          </li>
+        </ul>
+        <p
+          class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseNotesView-module_privacy"
+        >
+          Ari puede leer las notas de este chat, así que se guardan en el servidor de Artise, sin el cifrado de extremo a extremo de tus mensajes.
+        </p>
+      </nav>
+      <main
+        class="ArtiseNotesView-module_content"
+      >
+        <article
+          class="ArtiseNoteView-module_note"
+        >
+          <h1>
+            Mole de la abuela
+          </h1>
+          <p>
+            Para 
+            <strong>
+              8 personas
+            </strong>
+            . Las compras están en 
+            <button
+              class="ArtiseNoteView-module_noteLink"
+              type="button"
+            >
+              la lista del súper
+            </button>
+            ; el postre, en 
+            <button
+              class="ArtiseNoteView-module_missingLink"
+              type="button"
+            >
+              Flan
+            </button>
+            .
+          </p>
+          <ul>
+            <li
+              class="ArtiseNoteView-module_task"
+            >
+              <input
+                aria-label="Hecho"
+                checked=""
+                disabled=""
+                readonly=""
+                type="checkbox"
+              />
+              <div>
+                <p>
+                  Chiles mulatos
+                </p>
+              </div>
+            </li>
+            <li
+              class="ArtiseNoteView-module_task"
+            >
+              <input
+                aria-label="Hecho"
+                disabled=""
+                readonly=""
+                type="checkbox"
+              />
+              <div>
+                <p>
+                  Chocolate
+                </p>
+              </div>
+            </li>
+          </ul>
+          <blockquote
+            class="ArtiseNoteView-module_quote"
+          >
+            <p>
+              Sin prisa: tres horas.
+            </p>
+          </blockquote>
+          <p>
+            <button
+              class="ArtiseNoteView-module_fileLink"
+              type="button"
+            >
+              factura.pdf
+            </button>
+          </p>
+          <pre
+            class="ArtiseNoteView-module_codeBlock"
+          >
+            <code>
+              1 kg de chile
+200 g de chocolate
+            </code>
+          </pre>
+        </article>
+      </main>
+    </div>
+  </section>
+</div>
+`;

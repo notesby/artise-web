@@ -232,6 +232,46 @@ ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
         "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada.",
     ),
     "artise|whats_new|done": ("Got it", "Entendido", "Entendi"),
+    # The Notes page (W3-2), worded like Android's artise/notes texts.
+    "artise|notes|title": ("Notes", "Notas", "Notas"),
+    "artise|notes|back": ("Back to the chat", "Volver al chat", "Voltar à conversa"),
+    "artise|notes|retry": ("Try again", "Reintentar", "Tentar de novo"),
+    "artise|notes|tree": ("Files", "Archivos", "Arquivos"),
+    "artise|notes|task": ("Done", "Hecho", "Feito"),
+    "artise|notes|download": ("Download", "Descargar", "Baixar"),
+    "artise|notes|open": ("Open", "Abrir", "Abrir"),
+    "artise|notes|choose_chat": (
+        "Pick a chat to see its notes.",
+        "Elige un chat para ver sus notas.",
+        "Escolha uma conversa para ver as notas.",
+    ),
+    "artise|notes|no_chats": (
+        "None of your chats has notes yet.",
+        "Ninguno de tus chats tiene notas todavía.",
+        "Nenhuma das suas conversas tem notas ainda.",
+    ),
+    "artise|notes|empty": ("There are no notes here yet.", "Todavía no hay notas aquí.", "Ainda não há notas aqui."),
+    "artise|notes|pick": ("Pick a note to read it.", "Elige una nota para leerla.", "Escolha uma nota para ler."),
+    "artise|notes|missing": (
+        "“%(name)s” doesn't exist yet.",
+        "“%(name)s” todavía no existe.",
+        "“%(name)s” ainda não existe.",
+    ),
+    "artise|notes|file_open": (
+        "Open it in a new tab or download it.",
+        "Ábrelo en una pestaña nueva o descárgalo.",
+        "Abra em uma nova aba ou baixe.",
+    ),
+    "artise|notes|file_download": (
+        "Download it to open it on your computer.",
+        "Descárgalo para abrirlo en tu computadora.",
+        "Baixe para abrir no seu computador.",
+    ),
+    "artise|notes|privacy": (
+        "%(assistant)s can read the notes in this chat, so they're stored on the Artise server, not end-to-end encrypted like your messages.",
+        "%(assistant)s puede leer las notas de este chat, así que se guardan en el servidor de Artise, sin el cifrado de extremo a extremo de tus mensajes.",
+        "O %(assistant)s pode ler as notas desta conversa, por isso elas ficam guardadas no servidor do Artise, sem a criptografia de ponta a ponta das suas mensagens.",
+    ),
     # The Notes API's errors, one plain sentence each (Android's artise/notes texts where they exist).
     "artise|notes|error|unauthorized": (
         "Couldn't confirm it's you. Reload the page and try again.",

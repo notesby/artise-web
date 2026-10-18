@@ -29,6 +29,30 @@
         "pt": "Sair",
         "pt-br": "Sair"
     },
+    "artise|notes|back": {
+        "en": "Back to the chat",
+        "es": "Volver al chat",
+        "pt": "Voltar à conversa",
+        "pt-br": "Voltar à conversa"
+    },
+    "artise|notes|choose_chat": {
+        "en": "Pick a chat to see its notes.",
+        "es": "Elige un chat para ver sus notas.",
+        "pt": "Escolha uma conversa para ver as notas.",
+        "pt-br": "Escolha uma conversa para ver as notas."
+    },
+    "artise|notes|download": {
+        "en": "Download",
+        "es": "Descargar",
+        "pt": "Baixar",
+        "pt-br": "Baixar"
+    },
+    "artise|notes|empty": {
+        "en": "There are no notes here yet.",
+        "es": "Todavía no hay notas aquí.",
+        "pt": "Ainda não há notas aqui.",
+        "pt-br": "Ainda não há notas aqui."
+    },
     "artise|notes|error|bad_path": {
         "en": "That name can't be used here.",
         "es": "Ese nombre no se puede usar aquí.",
@@ -106,6 +130,72 @@
         "es": "No pudimos confirmar que eres tú. Recarga la página e inténtalo de nuevo.",
         "pt": "Não conseguimos confirmar que é você. Recarregue a página e tente de novo.",
         "pt-br": "Não conseguimos confirmar que é você. Recarregue a página e tente de novo."
+    },
+    "artise|notes|file_download": {
+        "en": "Download it to open it on your computer.",
+        "es": "Descárgalo para abrirlo en tu computadora.",
+        "pt": "Baixe para abrir no seu computador.",
+        "pt-br": "Baixe para abrir no seu computador."
+    },
+    "artise|notes|file_open": {
+        "en": "Open it in a new tab or download it.",
+        "es": "Ábrelo en una pestaña nueva o descárgalo.",
+        "pt": "Abra em uma nova aba ou baixe.",
+        "pt-br": "Abra em uma nova aba ou baixe."
+    },
+    "artise|notes|missing": {
+        "en": "“%(name)s” doesn't exist yet.",
+        "es": "“%(name)s” todavía no existe.",
+        "pt": "“%(name)s” ainda não existe.",
+        "pt-br": "“%(name)s” ainda não existe."
+    },
+    "artise|notes|no_chats": {
+        "en": "None of your chats has notes yet.",
+        "es": "Ninguno de tus chats tiene notas todavía.",
+        "pt": "Nenhuma das suas conversas tem notas ainda.",
+        "pt-br": "Nenhuma das suas conversas tem notas ainda."
+    },
+    "artise|notes|open": {
+        "en": "Open",
+        "es": "Abrir",
+        "pt": "Abrir",
+        "pt-br": "Abrir"
+    },
+    "artise|notes|pick": {
+        "en": "Pick a note to read it.",
+        "es": "Elige una nota para leerla.",
+        "pt": "Escolha uma nota para ler.",
+        "pt-br": "Escolha uma nota para ler."
+    },
+    "artise|notes|privacy": {
+        "en": "%(assistant)s can read the notes in this chat, so they're stored on the Artise server, not end-to-end encrypted like your messages.",
+        "es": "%(assistant)s puede leer las notas de este chat, así que se guardan en el servidor de Artise, sin el cifrado de extremo a extremo de tus mensajes.",
+        "pt": "O %(assistant)s pode ler as notas desta conversa, por isso elas ficam guardadas no servidor do Artise, sem a criptografia de ponta a ponta das suas mensagens.",
+        "pt-br": "O %(assistant)s pode ler as notas desta conversa, por isso elas ficam guardadas no servidor do Artise, sem a criptografia de ponta a ponta das suas mensagens."
+    },
+    "artise|notes|retry": {
+        "en": "Try again",
+        "es": "Reintentar",
+        "pt": "Tentar de novo",
+        "pt-br": "Tentar de novo"
+    },
+    "artise|notes|task": {
+        "en": "Done",
+        "es": "Hecho",
+        "pt": "Feito",
+        "pt-br": "Feito"
+    },
+    "artise|notes|title": {
+        "en": "Notes",
+        "es": "Notas",
+        "pt": "Notas",
+        "pt-br": "Notas"
+    },
+    "artise|notes|tree": {
+        "en": "Files",
+        "es": "Archivos",
+        "pt": "Arquivos",
+        "pt-br": "Arquivos"
     },
     "artise|settings|contact_admin": {
         "en": "Write to your workspace's admin",

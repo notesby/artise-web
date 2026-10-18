@@ -1,0 +1,129 @@
+/*
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+*/
+
+.note {
+    font: var(--cpd-font-body-md-regular);
+    color: var(--cpd-color-text-primary);
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+}
+
+.note h1,
+.note h2,
+.note h3,
+.note h4,
+.note h5,
+.note h6 {
+    margin: var(--cpd-space-4x) 0 var(--cpd-space-2x);
+    line-height: 1.25;
+}
+
+.note h1 {
+    font: var(--cpd-font-heading-lg-semibold);
+}
+
+.note h2 {
+    font: var(--cpd-font-heading-md-semibold);
+}
+
+.note h3 {
+    font: var(--cpd-font-heading-sm-semibold);
+}
+
+.note h4,
+.note h5,
+.note h6 {
+    font: var(--cpd-font-body-lg-semibold);
+}
+
+.note p {
+    margin: 0 0 var(--cpd-space-3x);
+}
+
+.note ul,
+.note ol {
+    margin: 0 0 var(--cpd-space-3x);
+    padding-inline-start: var(--cpd-space-6x);
+}
+
+.note li > div > p {
+    margin-block-end: var(--cpd-space-1x);
+}
+
+.task {
+    display: flex;
+    gap: var(--cpd-space-2x);
+    align-items: flex-start;
+    list-style: none;
+    margin-inline-start: calc(-1 * var(--cpd-space-5x));
+}
+
+.task input {
+    margin-block-start: 5px;
+}
+
+.quote {
+    margin: 0 0 var(--cpd-space-3x);
+    padding-inline-start: var(--cpd-space-3x);
+    border-inline-start: 3px solid var(--cpd-color-border-interactive-secondary);
+    color: var(--cpd-color-text-secondary);
+}
+
+.inlineCode,
+.codeBlock {
+    font-family: var(--cpd-font-family-mono);
+    font-size: 0.9em;
+    background-color: var(--cpd-color-bg-subtle-secondary);
+    border-radius: var(--cpd-space-1x);
+}
+
+.inlineCode {
+    padding: 0 var(--cpd-space-1x);
+}
+
+.codeBlock {
+    margin: 0 0 var(--cpd-space-3x);
+    padding: var(--cpd-space-3x);
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.noteLink,
+.missingLink,
+.fileLink {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.noteLink,
+.fileLink {
+    color: var(--cpd-color-text-link-external);
+}
+
+.missingLink {
+    color: var(--cpd-color-text-secondary);
+    text-decoration-style: dashed;
+}
+
+.image {
+    display: block;
+    max-inline-size: 100%;
+    max-block-size: 480px;
+    margin: var(--cpd-space-2x) 0;
+    border-radius: var(--cpd-space-2x);
+}
+
+.imagePlaceholder {
+    display: inline-block;
+    padding: var(--cpd-space-6x) var(--cpd-space-4x);
+    border-radius: var(--cpd-space-2x);
+    background-color: var(--cpd-color-bg-subtle-secondary);
+    color: var(--cpd-color-text-secondary);
+}
