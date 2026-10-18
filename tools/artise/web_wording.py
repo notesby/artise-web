@@ -213,6 +213,25 @@ ARTISE_TEXTS: dict[str, tuple[str, str, str]] = {
         "Mudar de espaço de trabalho (agora: %(workspace)s)",
     ),
     "artise|workspace|menu_title": ("Your workspaces", "Tus espacios de trabajo", "Seus espaços de trabalho"),
+    # "What's new": one card above the chat list after an update (iOS ArtiseWhatsNew). Change the items with
+    # WHATS_NEW_EDITION in apps/web/src/artise/whatsNew/WhatsNewViewModel.ts.
+    "artise|whats_new|title": ("What's new", "Novedades", "Novidades"),
+    "artise|whats_new|item_1": (
+        "Ari is pinned at the top of your chats, and Settings has Help and account.",
+        "Ari aparece fijo arriba en tus chats, y en Ajustes tienes Ayuda y cuenta.",
+        "O Ari fica fixo no topo das suas conversas, e as Configurações têm Ajuda e conta.",
+    ),
+    "artise|whats_new|item_2": (
+        "Your workspace's name is above your chats: open it to go to your other workspaces.",
+        "El nombre de tu espacio de trabajo está arriba de tus chats: ábrelo para ir a tus otros espacios.",
+        "O nome do seu espaço de trabalho fica acima das suas conversas: abra-o para ir aos seus outros espaços.",
+    ),
+    "artise|whats_new|item_3": (
+        "Ari's important messages always notify you, even in a muted chat.",
+        "Los mensajes importantes de Ari siempre te avisan, aunque el chat esté silenciado.",
+        "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada.",
+    ),
+    "artise|whats_new|done": ("Got it", "Entendido", "Entendi"),
     # Signing out, naming the workspace as the phones do (Android artise_sign_out_strings.xml), "this phone"
     # becoming this browser or, in the desktop app, this computer.
     "artise|sign_out|title": (

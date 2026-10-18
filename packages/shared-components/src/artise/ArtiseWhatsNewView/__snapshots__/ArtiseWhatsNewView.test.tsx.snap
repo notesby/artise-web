@@ -1,0 +1,95 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseWhatsNewView > renders the release's changes 1`] = `
+<div>
+  <section
+    aria-label="Novedades"
+    class="ArtiseWhatsNewView-module_card"
+  >
+    <h2
+      class="_typography_6v6n8_153 _font-body-md-semibold_6v6n8_55 ArtiseWhatsNewView-module_title"
+    >
+      Novedades
+    </h2>
+    <ul
+      class="ArtiseWhatsNewView-module_items"
+    >
+      <li
+        class="ArtiseWhatsNewView-module_item"
+      >
+        <svg
+          aria-hidden="true"
+          class="ArtiseWhatsNewView-module_check"
+          fill="currentColor"
+          height="16px"
+          viewBox="0 0 24 24"
+          width="16px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9.55 17.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213L4.55 13q-.274-.274-.262-.713.012-.437.287-.712a.95.95 0 0 1 .7-.275q.425 0 .7.275L9.55 15.15l8.475-8.475q.274-.275.713-.275.437 0 .712.275.275.274.275.713 0 .437-.275.712l-9.2 9.2q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+          />
+        </svg>
+        <span
+          class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseWhatsNewView-module_text"
+        >
+          Ari aparece fijo arriba en tus chats, y en Ajustes tienes Ayuda y cuenta.
+        </span>
+      </li>
+      <li
+        class="ArtiseWhatsNewView-module_item"
+      >
+        <svg
+          aria-hidden="true"
+          class="ArtiseWhatsNewView-module_check"
+          fill="currentColor"
+          height="16px"
+          viewBox="0 0 24 24"
+          width="16px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9.55 17.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213L4.55 13q-.274-.274-.262-.713.012-.437.287-.712a.95.95 0 0 1 .7-.275q.425 0 .7.275L9.55 15.15l8.475-8.475q.274-.275.713-.275.437 0 .712.275.275.274.275.713 0 .437-.275.712l-9.2 9.2q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+          />
+        </svg>
+        <span
+          class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseWhatsNewView-module_text"
+        >
+          El nombre de tu espacio de trabajo está arriba de tus chats: ábrelo para ir a tus otros espacios.
+        </span>
+      </li>
+      <li
+        class="ArtiseWhatsNewView-module_item"
+      >
+        <svg
+          aria-hidden="true"
+          class="ArtiseWhatsNewView-module_check"
+          fill="currentColor"
+          height="16px"
+          viewBox="0 0 24 24"
+          width="16px"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M9.55 17.575q-.2 0-.375-.062a.9.9 0 0 1-.325-.213L4.55 13q-.274-.274-.262-.713.012-.437.287-.712a.95.95 0 0 1 .7-.275q.425 0 .7.275L9.55 15.15l8.475-8.475q.274-.275.713-.275.437 0 .712.275.275.274.275.713 0 .437-.275.712l-9.2 9.2q-.15.15-.325.212a1.1 1.1 0 0 1-.375.063"
+          />
+        </svg>
+        <span
+          class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseWhatsNewView-module_text"
+        >
+          Los mensajes importantes de Ari siempre te avisan, aunque el chat esté silenciado.
+        </span>
+      </li>
+    </ul>
+    <button
+      class="_button_1nw83_8 ArtiseWhatsNewView-module_done"
+      data-kind="secondary"
+      data-size="md"
+      role="button"
+      tabindex="0"
+    >
+      Entendido
+    </button>
+  </section>
+</div>
+`;

@@ -82,9 +82,20 @@ describe("Artise's workspace bar in the chat list", () => {
         expect(assign).toHaveBeenCalledWith("https://chat.artise.co");
     });
 
+    // The same hook draws "What's new" under the bar until it's dismissed.
+    it("shows What's new under the bar", async () => {
+        localStorage.removeItem("artise.whatsNew.seen");
+        renderPanel(MAS_K8S);
+        expect(await screen.findByRole("region", { name: "What's new" })).toBeVisible();
+        await userEvent.click(screen.getByRole("button", { name: "Got it" }));
+        expect(screen.queryByRole("region", { name: "What's new" })).toBeNull();
+    });
+
     // Not an Artise workspace: Element's panel as it was.
     it("isn't there on a server that isn't an Artise workspace", () => {
+        localStorage.removeItem("artise.whatsNew.seen");
         renderPanel({ "m.homeserver": { base_url: "https://matrix.org" } });
         expect(screen.queryByTestId("artise-workspace-bar")).toBeNull();
+        expect(screen.queryByRole("region", { name: "What's new" })).toBeNull();
     });
 });

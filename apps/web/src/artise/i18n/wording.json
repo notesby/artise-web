@@ -125,6 +125,36 @@
         "pt": "Sair de %(workspace)s?",
         "pt-br": "Sair de %(workspace)s?"
     },
+    "artise|whats_new|done": {
+        "en": "Got it",
+        "es": "Entendido",
+        "pt": "Entendi",
+        "pt-br": "Entendi"
+    },
+    "artise|whats_new|item_1": {
+        "en": "Ari is pinned at the top of your chats, and Settings has Help and account.",
+        "es": "Ari aparece fijo arriba en tus chats, y en Ajustes tienes Ayuda y cuenta.",
+        "pt": "O Ari fica fixo no topo das suas conversas, e as Configurações têm Ajuda e conta.",
+        "pt-br": "O Ari fica fixo no topo das suas conversas, e as Configurações têm Ajuda e conta."
+    },
+    "artise|whats_new|item_2": {
+        "en": "Your workspace's name is above your chats: open it to go to your other workspaces.",
+        "es": "El nombre de tu espacio de trabajo está arriba de tus chats: ábrelo para ir a tus otros espacios.",
+        "pt": "O nome do seu espaço de trabalho fica acima das suas conversas: abra-o para ir aos seus outros espaços.",
+        "pt-br": "O nome do seu espaço de trabalho fica acima das suas conversas: abra-o para ir aos seus outros espaços."
+    },
+    "artise|whats_new|item_3": {
+        "en": "Ari's important messages always notify you, even in a muted chat.",
+        "es": "Los mensajes importantes de Ari siempre te avisan, aunque el chat esté silenciado.",
+        "pt": "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada.",
+        "pt-br": "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada."
+    },
+    "artise|whats_new|title": {
+        "en": "What's new",
+        "es": "Novedades",
+        "pt": "Novidades",
+        "pt-br": "Novidades"
+    },
     "artise|workspace|menu_title": {
         "en": "Your workspaces",
         "es": "Tus espacios de trabajo",

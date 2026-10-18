@@ -20,7 +20,7 @@ import { type IState as IRovingTabIndexState } from "../../../../accessibility/R
 import { RoomListHeaderViewModel } from "../../../../viewmodels/room-list/RoomListHeaderViewModel";
 import { useMatrixClientContext } from "../../../../contexts/MatrixClientContext";
 import { SDKContext } from "../../../../contexts/SDKContext.ts";
-import { WorkspaceBar } from "../../../../artise/workspace/WorkspaceBar";
+import { ChatListTop } from "../../../../artise/chatList/ChatListTop";
 
 type RoomListPanelProps = {
     /**
@@ -78,8 +78,8 @@ export const RoomListPanel: React.FC<RoomListPanelProps> = ({ activeSpace }) => 
             onBlur={onBlur}
             onKeyDown={onKeyDown}
         >
-            {/* Artise: the workspace's name and the menu of the person's other workspaces */}
-            <WorkspaceBar />
+            {/* Artise: the workspace bar (name, other workspaces) and "What's new" */}
+            <ChatListTop />
             {displayRoomSearch && <RoomListSearch activeSpace={activeSpace} />}
             <RoomListHeaderView vm={vm} />
             <RoomListView />
