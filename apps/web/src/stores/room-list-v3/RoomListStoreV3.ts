@@ -28,6 +28,7 @@ import { InvitesFilter } from "./skip-list/filters/InvitesFilter";
 import { MentionsFilter } from "./skip-list/filters/MentionsFilter";
 import { LowPriorityFilter } from "./skip-list/filters/LowPriorityFilter";
 import { type Sorter, SortingAlgorithm } from "./skip-list/sorters";
+import { withAssistantFirst } from "../../artise/assistant/assistantFirst";
 import { SettingLevel } from "../../settings/SettingLevel";
 import { MARKED_UNREAD_TYPE_STABLE, MARKED_UNREAD_TYPE_UNSTABLE } from "../../utils/notifications";
 import { Action } from "../../dispatcher/actions";
@@ -196,7 +197,8 @@ export class RoomListStoreV3Class extends AsyncStoreWithClient<EmptyObject> {
         return {
             spaceId: spaceId,
             filterKeys,
-            sections,
+            // Artise: Ari's chat first (apps/web/src/artise/assistant/assistantFirst.ts)
+            sections: withAssistantFirst(this.matrixClient ?? undefined, sections, filterKeys),
         };
     }
 
