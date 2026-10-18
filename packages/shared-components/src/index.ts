@@ -112,3 +112,6 @@ export * from "./status/UserStatusIconView";
 export * from "./devtools/CustomThemesView";
 // MVVM
 export * from "./core/viewmodel";
+
+// Artise: Artise's own views (packages/shared-components/src/artise/)
+export * from "./artise/ArtiseSettingsView";

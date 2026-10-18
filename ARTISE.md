@@ -55,10 +55,13 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 `// Artise:` comment, and listed here. When a merge conflicts at a hook, move the call; the logic stays in
 `artise/`.
 
-| File                                                  | Why                                                                                                                                                           |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web/src/i18n/settings.ts`                       | `setLanguage` registers Artise's words (`artise/i18n/registerArtiseTranslations.ts`) after Element's texts and before the server's `custom_translations_url`. |
-| `apps/web/src/stores/room-list-v3/RoomListStoreV3.ts` | `getSortedRoomsInActiveSpace` puts Ari's chat first in its section (`artise/assistant/assistantFirst.ts`), except while a filter is on.                       |
+| File                                                           | Why                                                                                                                                                           |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/i18n/settings.ts`                                | `setLanguage` registers Artise's words (`artise/i18n/registerArtiseTranslations.ts`) after Element's texts and before the server's `custom_translations_url`. |
+| `apps/web/src/stores/room-list-v3/RoomListStoreV3.ts`          | `getSortedRoomsInActiveSpace` puts Ari's chat first in its section (`artise/assistant/assistantFirst.ts`), except while a filter is on.                       |
+| `apps/web/src/components/views/dialogs/UserTab.ts`             | Adds the `Artise` tab ID.                                                                                                                                     |
+| `apps/web/src/components/views/dialogs/UserSettingsDialog.tsx` | Adds Artise's tab ("Ayuda y cuenta", `artise/settings/ArtiseSettingsTab.tsx`) after Help, on Artise workspaces only.                                          |
+| `packages/shared-components/src/index.ts`                      | Exports Artise's views (`packages/shared-components/src/artise/`).                                                                                            |
 
 ## Artise's words
 
@@ -71,6 +74,10 @@ trabajo" / "espaço de trabalho" instead of the homeserver. The words are the ph
   setting and the desktop app gets them too. A workspace can still change a word through `custom_translations_url`.
 - Element's own unit tests run with Element's words (their snapshots say "Rooms"); Artise's tests turn the words on
   with `setArtiseTranslationsInTests(true)`.
+- Artise's own texts (for Artise's screens) are in the same table, `ARTISE_TEXTS`, with keys starting `artise|`. Code
+  reads them with `artiseT("artise|…")` (`apps/web/src/artise/i18n/artiseT.ts`), which only accepts keys that exist.
+  Views get their texts already translated from their view model, so shared-components' own string files stay
+  Element's.
 - `python3 -m unittest discover -s tools/artise` (also in CI) fails when Element renames a key in the table, a
   language is missing, a text loses a placeholder or tag, or the JSON is stale.
 

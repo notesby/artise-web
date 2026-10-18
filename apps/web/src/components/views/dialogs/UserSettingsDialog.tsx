@@ -23,6 +23,7 @@ import LockIcon from "@vector-im/compound-design-tokens/assets/web/icons/lock";
 import LabsIcon from "@vector-im/compound-design-tokens/assets/web/icons/labs";
 import BlockIcon from "@vector-im/compound-design-tokens/assets/web/icons/block";
 import HelpIcon from "@vector-im/compound-design-tokens/assets/web/icons/help";
+import InfoIcon from "@vector-im/compound-design-tokens/assets/web/icons/info";
 import { ToastContext, useActiveToast } from "@element-hq/web-shared-components";
 
 import TabbedView, { Tab, useActiveTabWithDefault } from "../../structures/TabbedView";
@@ -43,6 +44,9 @@ import SidebarUserSettingsTab from "../settings/tabs/user/SidebarUserSettingsTab
 import KeyboardUserSettingsTab from "../settings/tabs/user/KeyboardUserSettingsTab";
 import SessionManagerTab from "../settings/tabs/user/SessionManagerTab";
 import { UserTab } from "./UserTab";
+import { ArtiseSettingsTab } from "../../../artise/settings/ArtiseSettingsTab";
+import { artiseTd } from "../../../artise/i18n/artiseT";
+import { getWorkspaceFile } from "../../../artise/workspace/WorkspaceFile";
 import { type NonEmptyArray } from "../../../@types/common";
 import { SDKContext } from "../../../contexts/SDKContext";
 import { type SDKContextClass } from "../../../contexts/SDKContextClass";
@@ -254,6 +258,17 @@ export default function UserSettingsDialog(props: IProps): JSX.Element {
                 "UserSettingsHelpAbout",
             ),
         );
+        // Artise: Artise's tab, next to Help, on Artise workspaces only
+        if (props.sdkContext.client && getWorkspaceFile(props.sdkContext.client)) {
+            tabs.push(
+                new Tab(
+                    UserTab.Artise,
+                    artiseTd("artise|settings|tab"),
+                    <InfoIcon />,
+                    <ArtiseSettingsTab closeSettingsFn={props.onFinished} />,
+                ),
+            );
+        }
 
         return tabs as NonEmptyArray<Tab<UserTab>>;
     };

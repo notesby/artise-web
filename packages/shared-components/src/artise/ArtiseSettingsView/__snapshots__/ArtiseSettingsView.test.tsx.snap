@@ -1,0 +1,126 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseSettingsView > renders every row for a full workspace file 1`] = `
+<div>
+  <section
+    aria-label="Ayuda y cuenta"
+    class="ArtiseSettingsView-module_container"
+  >
+    <h2
+      class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+    >
+      Ayuda y cuenta
+    </h2>
+    <div>
+      <div
+        class="ArtiseSettingsView-module_row"
+      >
+        <div
+          class="ArtiseSettingsView-module_text"
+        >
+          <span
+            class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+          >
+            Ayuda
+          </span>
+          <span
+            class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseSettingsView-module_description"
+          >
+            Guías y respuestas sobre Artise.
+          </span>
+        </div>
+        <button
+          class="_button_1nw83_8"
+          data-kind="secondary"
+          data-size="md"
+          role="button"
+          tabindex="0"
+        >
+          Ayuda
+        </button>
+      </div>
+      <div
+        class="ArtiseSettingsView-module_row"
+      >
+        <div
+          class="ArtiseSettingsView-module_text"
+        >
+          <span
+            class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+          >
+            Escribirle al administrador
+          </span>
+          <span
+            class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseSettingsView-module_description"
+          >
+            Para dudas sobre Prueba MAS.
+          </span>
+        </div>
+        <button
+          class="_button_1nw83_8"
+          data-kind="secondary"
+          data-size="md"
+          role="button"
+          tabindex="0"
+        >
+          Escribirle al administrador
+        </button>
+      </div>
+      <div
+        class="ArtiseSettingsView-module_row"
+      >
+        <div
+          class="ArtiseSettingsView-module_text"
+        >
+          <span
+            class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+          >
+            Seguridad
+          </span>
+          <span
+            class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseSettingsView-module_description"
+          >
+            La verificación en dos pasos y cómo entras a tu Artise ID.
+          </span>
+        </div>
+        <button
+          class="_button_1nw83_8"
+          data-kind="secondary"
+          data-size="md"
+          role="button"
+          tabindex="0"
+        >
+          Administrar en Artise ID
+        </button>
+      </div>
+      <div
+        class="ArtiseSettingsView-module_row"
+      >
+        <div
+          class="ArtiseSettingsView-module_text"
+        >
+          <span
+            class="_typography_6v6n8_153 _font-body-md-medium_6v6n8_60"
+          >
+            Eliminar cuenta
+          </span>
+          <span
+            class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseSettingsView-module_description"
+          >
+            Elimina tu cuenta en Prueba MAS y lo que hay en ella. No se puede deshacer.
+          </span>
+        </div>
+        <button
+          class="_button_1nw83_8 _destructive_1nw83_110"
+          data-kind="primary"
+          data-size="md"
+          role="button"
+          tabindex="0"
+        >
+          Eliminar cuenta
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+`;
