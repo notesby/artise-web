@@ -32,4 +32,29 @@ export const DESKTOP_WORDING = {
         es: "Versión %(version)s",
         pt: "Versão %(version)s",
     },
+    "artise|desktop|crash_reports|allow": {
+        en: "Share crash reports",
+        es: "Compartir informes de fallos",
+        pt: "Compartilhar relatórios de falhas",
+    },
+    "artise|desktop|crash_reports|deny": {
+        en: "Not now",
+        es: "Ahora no",
+        pt: "Agora não",
+    },
+    "artise|desktop|crash_reports|description": {
+        en: "Share crash reports to help us improve Artise. They go to Artise's own servers in the EU. We never send your messages, notes, names or contacts, and nothing is used for ads or sold. You can change this in the Help menu.",
+        es: "Comparte los informes de fallos para ayudarnos a mejorar Artise. Se envían a los servidores de Artise en la UE. Nunca enviamos tus mensajes, notas, nombres ni contactos, y nada se usa para anuncios ni se vende. Puedes cambiarlo en el menú Ayuda.",
+        pt: "Compartilhe os relatórios de falhas para nos ajudar a melhorar o Artise. Eles vão para os servidores do Artise na UE. Nunca enviamos suas mensagens, notas, nomes ou contatos, e nada é usado para anúncios nem vendido. Você pode mudar isso no menu Ajuda.",
+    },
+    "artise|desktop|crash_reports|menu": {
+        en: "Share crash reports",
+        es: "Compartir informes de fallos",
+        pt: "Compartilhar relatórios de falhas",
+    },
+    "artise|desktop|crash_reports|title": {
+        en: "Help us improve Artise",
+        es: "Ayúdanos a mejorar Artise",
+        pt: "Ajude a melhorar o Artise",
+    },
 } as const;

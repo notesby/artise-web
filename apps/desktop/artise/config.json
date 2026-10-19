@@ -18,6 +18,10 @@
             }
         ]
     },
+    "bug_report_endpoint_url": "https://reports.artise.co/api/submit",
+    "sentry": {
+        "environment": "desktop"
+    },
     "default_server_config": {
         "m.homeserver": {
             "base_url": "https://matrix.mas-k8s.artise.co",

@@ -6,6 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 import { app, dialog, shell, type MenuItemConstructorOptions } from "electron";
 
+import { crashReportsMenuItem } from "./crashReports.js";
 import { artiseT } from "./i18n/artiseT.js";
 import { artiseSourceRef, isArtise, sourceCodeUrl } from "./variant.js";
 
@@ -32,7 +33,7 @@ export async function showAbout(): Promise<void> {
 }
 
 /**
- * Artise's items for the Help menu ("About Artise"), in the current language. Called each time Element
+ * Artise's items for the Help menu ("Share crash reports" and "About Artise"), in the current language. Called each time Element
  * rebuilds its menu, which it does when the language changes, so this also refreshes the macOS About panel's
  * texts. Element's own builds get no items.
  */
@@ -51,6 +52,7 @@ export function artiseHelpMenuItems(): MenuItemConstructorOptions[] {
     });
     return [
         { type: "separator" },
+        crashReportsMenuItem(),
         {
             label: artiseT("artise|desktop|about|menu"),
             click(): void {
