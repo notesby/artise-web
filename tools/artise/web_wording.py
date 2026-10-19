@@ -503,6 +503,23 @@ DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
     ),
     "artise|desktop|about|source_code": ("Source code", "Código fuente", "Código-fonte"),
     "artise|desktop|about|close": ("Close", "Cerrar", "Fechar"),
+    # Crash reports, asked once and changeable in the Help menu. The words are the phones'
+    # (iOS screen_analytics_prompt_*), without the usage part: the desktop sends no usage data.
+    "artise|desktop|crash_reports|title": ("Help us improve Artise", "Ayúdanos a mejorar Artise", "Ajude a melhorar o Artise"),
+    "artise|desktop|crash_reports|description": (
+        "Share crash reports to help us improve Artise. They go to Artise's own servers in the EU. We never send"
+        " your messages, notes, names or contacts, and nothing is used for ads or sold. You can change this in"
+        " the Help menu.",
+        "Comparte los informes de fallos para ayudarnos a mejorar Artise. Se envían a los servidores de Artise en"
+        " la UE. Nunca enviamos tus mensajes, notas, nombres ni contactos, y nada se usa para anuncios ni se vende."
+        " Puedes cambiarlo en el menú Ayuda.",
+        "Compartilhe os relatórios de falhas para nos ajudar a melhorar o Artise. Eles vão para os servidores do"
+        " Artise na UE. Nunca enviamos suas mensagens, notas, nomes ou contatos, e nada é usado para anúncios nem"
+        " vendido. Você pode mudar isso no menu Ajuda.",
+    ),
+    "artise|desktop|crash_reports|allow": ("Share crash reports", "Compartir informes de fallos", "Compartilhar relatórios de falhas"),
+    "artise|desktop|crash_reports|deny": ("Not now", "Ahora no", "Agora não"),
+    "artise|desktop|crash_reports|menu": ("Share crash reports", "Compartir informes de fallos", "Compartilhar relatórios de falhas"),
 }
 
 PLACEHOLDER = re.compile(r"%\(\w+\)s|<\w+>|</\w+>")

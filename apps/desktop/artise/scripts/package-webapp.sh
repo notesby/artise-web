@@ -10,6 +10,10 @@
 #     apps/desktop/artise/scripts/package-webapp.sh --no-build  # uses an apps/web/webapp already built
 #
 # A local build without minifying (needs less memory): CI_PACKAGE=1 apps/desktop/artise/scripts/package-webapp.sh
+#
+# ARTISE_DESKTOP_SENTRY_DSN, when set, becomes config.json's sentry.dsn: the desktop project on crashes.artise.co.
+# It isn't kept in the repository; CI passes the DESKTOP_SENTRY_DSN secret. Without it the build sends no crash
+# reports and doesn't ask about them.
 set -euo pipefail
 
 desktop="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -27,5 +31,17 @@ fi
 rm -rf "$desktop/webapp"
 cp -R "$web/webapp" "$desktop/webapp"
 cp "$desktop/artise/config.json" "$desktop/webapp/config.json"
+if [ -n "${ARTISE_DESKTOP_SENTRY_DSN:-}" ]; then
+    node -e '
+        const fs = require("node:fs");
+        const file = process.argv[1];
+        const config = JSON.parse(fs.readFileSync(file, "utf8"));
+        config.sentry = { ...config.sentry, dsn: process.env.ARTISE_DESKTOP_SENTRY_DSN };
+        fs.writeFileSync(file, JSON.stringify(config, null, 4) + "\n");
+    ' "$desktop/webapp/config.json"
+    echo "Crash reports: on, once the person agrees"
+else
+    echo "Crash reports: off (no ARTISE_DESKTOP_SENTRY_DSN)"
+fi
 (cd "$desktop" && pnpm run asar-webapp)
 echo "Wrote $desktop/webapp.asar"

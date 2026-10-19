@@ -7,6 +7,9 @@ SPDX-License-Identifier: AGPL-3.0-only
 // The start-up check CI runs on each OS against the packaged Artise app (artise-desktop.yml): it opens as
 // Artise, on its workspace, with Artise's menu, and the native parts Element Desktop needs work.
 
+import fs from "node:fs";
+import path from "node:path";
+
 import { test, expect } from "../../element-desktop-test.js";
 
 declare global {
@@ -56,6 +59,17 @@ test.describe("Artise starts", () => {
         await expect(
             page.evaluate(() => window.mxPlatformPeg.get().getEventIndexingManager()?.supportsEventIndexing()),
         ).resolves.toBeTruthy();
+    });
+
+    test("sending no crash reports before the person agrees", async ({ app, tmpDir }) => {
+        // The first start asks; until then Sentry isn't even started, so it keeps no files in the profile.
+        const help = await app.evaluate(({ Menu }) =>
+            Menu.getApplicationMenu()
+                ?.items.at(-1)
+                ?.submenu?.items.find((item) => item.type === "checkbox"),
+        );
+        expect(help).toMatchObject({ label: "Share crash reports", checked: false });
+        expect(fs.existsSync(path.join(tmpDir, "sentry"))).toBe(false);
     });
 
     test("with the OS key store for encryption keys", async ({ page }) => {

@@ -49,6 +49,7 @@ import { getAsarPath } from "./asar.js";
 import { getIconPath } from "./icon.js";
 import { getArgs } from "./args.js";
 import { type ConfigOptions, loadConfig } from "./config.js";
+import { applyArtiseLanguage, isArtise, startArtiseCrashReports } from "./artise/main.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -66,6 +67,8 @@ let rendererRecovery: RendererRecovery | undefined;
 // Configure Electron Sentry and crashReporter using sentry.dsn in config.json if one is present.
 async function configureSentry(): Promise<void> {
     const config = await loadConfig(args.localConfigPath);
+    // Artise: crash reports only with the person's consent (artise/crashReports.ts)
+    if (isArtise()) return startArtiseCrashReports(config.sentry);
     const { dsn, environment } = config.sentry || {};
     if (dsn) {
         console.log(`Enabling Sentry with dsn=${dsn} environment=${environment}`);
@@ -134,6 +137,9 @@ app.enableSandbox();
 
 // We disable media controls here. We do this because calls use audio and video elements and they sometimes capture the media keys. See https://github.com/vector-im/element-web/issues/15704
 app.commandLine.appendSwitch("disable-features", "HardwareMediaKeyHandling,MediaSessionService");
+
+// Artise: start in Spanish unless the system is in English or Portuguese (artise/language.ts)
+if (isArtise()) applyArtiseLanguage();
 
 const store = Store.initialize(args.storageMode); // must be called before any async actions
 

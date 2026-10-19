@@ -58,6 +58,8 @@ jobs:
               env:
                   # Shown in Settings → Help & About, as on chat.<workspace>.
                   VERSION: ${{ steps.version.outputs.version }}
+                  # The desktop project on crashes.artise.co; without it the build sends no crash reports.
+                  ARTISE_DESKTOP_SENTRY_DSN: ${{ secrets.DESKTOP_SENTRY_DSN }}
 
             - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
               with:
