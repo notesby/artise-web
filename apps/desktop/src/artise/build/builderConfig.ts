@@ -19,8 +19,9 @@ export const ARTISE_ICONS = "artise/icons";
  * Used by apps/desktop/artise/electron-builder.ts, so Element's own electron-builder.ts never changes.
  *
  * @param element - Element's configuration, built with the Artise variant.
+ * @param sourceRef - the git tag or commit being built, for About's source link (the AGPL offer).
  */
-export function artiseBuilderConfig(element: Configuration): Configuration {
+export function artiseBuilderConfig(element: Configuration, sourceRef = ""): Configuration {
     return {
         ...element,
         // macOS shows it in About and Finder's info; Element's default would read "Copyright © Element".
@@ -33,6 +34,7 @@ export function artiseBuilderConfig(element: Configuration): Configuration {
             homepage: "https://artise.co",
             repository: { type: "git", url: ARTISE_SOURCE_REPO },
             license: "AGPL-3.0-only",
+            artise_source_ref: sourceRef,
         },
         // Element's updater reads update_base_url (src/updater.ts); without this electron-builder also writes an
         // app-update.yml pointing at Element's GitHub releases.

@@ -1,0 +1,247 @@
+# Artise: builds Artise for macOS and Windows from this commit, then starts each build once to check it.
+#
+# - By hand (Actions → Artise desktop → Run workflow) for a test build, versioned 0.0.1-dev.<run number>.
+# - On a desktop-v<major>.<minor>.<patch> tag for a release build with that version.
+# - On a pull request that changes this workflow or its scripts, so a change to the build is tried before merging.
+#
+# Nothing is signed or published yet: macOS is an unsigned universal .dmg and .zip (Developer ID signing and
+# notarization wait, D4-1), Windows an unsigned x64 .zip to try on a PC (the Store's MSIX comes in D4-2). The
+# builds are kept as this run's artifacts for 14 days.
+#
+# It reuses the steps of Element's build_desktop_macos.yaml and build_desktop_windows.yaml, which stay disabled,
+# but packages this commit's apps/web (artise/scripts/package-webapp.sh) instead of Element's release tarball.
+name: Artise desktop
+
+on:
+    workflow_dispatch:
+    push:
+        tags: ["desktop-v*"]
+    pull_request:
+        paths:
+            - .github/workflows/artise-desktop.yml
+            - apps/desktop/artise/**
+            - apps/desktop/playwright/e2e/artise/**
+
+permissions:
+    contents: read
+
+concurrency:
+    group: artise-desktop-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    webapp:
+        name: Web app and unit tests
+        runs-on: ubuntu-latest
+        outputs:
+            version: ${{ steps.version.outputs.version }}
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  persist-credentials: false
+
+            - name: Version
+              id: version
+              run: echo "version=$(apps/desktop/artise/scripts/version.sh "$GITHUB_REF_NAME" "$GITHUB_RUN_NUMBER")" >> "$GITHUB_OUTPUT"
+
+            - uses: ./.github/actions/setup-node-pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile
+
+            - name: Desktop unit tests
+              working-directory: apps/desktop
+              run: pnpm test:unit --run
+
+            - name: Build the web app into webapp.asar
+              run: apps/desktop/artise/scripts/package-webapp.sh
+              env:
+                  # Shown in Settings → Help & About, as on chat.<workspace>.
+                  VERSION: ${{ steps.version.outputs.version }}
+
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+              with:
+                  name: webapp
+                  path: apps/desktop/webapp.asar
+                  retention-days: 1
+                  if-no-files-found: error
+
+    macos:
+        name: Build macOS universal (unsigned)
+        needs: webapp
+        runs-on: macos-26
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  persist-credentials: false
+
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+              with:
+                  name: webapp
+                  path: apps/desktop
+
+            # Quartz draws the .dmg's badge icon
+            # https://github.com/electron-userland/electron-builder/issues/9511#issuecomment-3774092888
+            - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+              with:
+                  python-version: "3.13"
+            - run: sudo pip3 install pyobjc-framework-Quartz
+
+            - uses: ./.github/actions/setup-node-pnpm
+
+            # The prebuilt Seshat binaries for both architectures, for the universal build
+            - name: Install optional dependencies for both architectures
+              run: |
+                  cat >> pnpm-workspace.yaml <<EOF
+
+                  supportedArchitectures:
+                      os: [current]
+                      cpu: [x64, arm64]
+                  EOF
+
+            - name: Install
+              working-directory: apps/desktop
+              run: pnpm install --frozen-lockfile --filter element-desktop
+
+            - name: Build
+              working-directory: apps/desktop
+              run: |
+                  pnpm exec tsc
+                  node scripts/copy-res.ts
+                  pnpm exec electron-builder --config artise/electron-builder.ts --universal --publish never --mac dmg zip
+              env:
+                  CSC_IDENTITY_AUTO_DISCOVERY: false
+                  VERSION: ${{ needs.webapp.outputs.version }}
+
+            - name: Check the dmg and zip are there
+              working-directory: apps/desktop
+              run: |
+                  ls dist
+                  test -f dist/Artise-*.dmg
+                  test -f dist/Artise-*-mac.zip
+
+            # Not the unpacked app: the dmg and zip already hold it.
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+              with:
+                  name: artise-macos
+                  path: |
+                      apps/desktop/dist/*.dmg
+                      apps/desktop/dist/*-mac.zip
+                  retention-days: 14
+                  if-no-files-found: error
+
+    windows:
+        name: Build Windows x64 (unsigned)
+        needs: webapp
+        runs-on: windows-2025
+        steps:
+            # nx needs LF line endings, https://github.com/nrwl/nx/issues/35828 (as Element's workflow)
+            - name: Configure git line endings
+              run: |
+                  git config --system core.autocrlf false
+                  git config --system core.eol lf
+
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  persist-credentials: false
+
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+              with:
+                  name: webapp
+                  path: apps/desktop
+
+            - uses: ./.github/actions/setup-node-pnpm
+
+            - name: Install
+              working-directory: apps/desktop
+              run: pnpm install --frozen-lockfile --filter element-desktop
+
+            - name: Build
+              working-directory: apps/desktop
+              shell: bash
+              run: |
+                  pnpm exec tsc
+                  node scripts/copy-res.ts
+                  pnpm exec electron-builder --config artise/electron-builder.ts --x64 --publish never --win zip
+              env:
+                  VERSION: ${{ needs.webapp.outputs.version }}
+
+            - name: Check the zip is there
+              working-directory: apps/desktop
+              shell: bash
+              run: |
+                  ls dist
+                  test -f dist/win-unpacked/Artise.exe
+                  test -f dist/Artise-*-win.zip
+
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+              with:
+                  name: artise-windows-x64
+                  path: apps/desktop/dist/*-win.zip
+                  retention-days: 14
+                  if-no-files-found: error
+
+    start-up:
+        name: Start-up check on ${{ matrix.name }}
+        needs: [macos, windows]
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - name: macOS
+                      runs-on: macos-15
+                      artifact: artise-macos
+                      # A mounted dmg is read-only, and the check turns a fuse back on, so copy the app out first.
+                      prepare: |
+                          hdiutil attach dist/*.dmg -mountpoint /Volumes/Artise
+                          rsync -a /Volumes/Artise/Artise.app ~/Applications/
+                          hdiutil detach /Volumes/Artise
+                      executable: /Users/runner/Applications/Artise.app/Contents/MacOS/Artise
+                    - name: Windows
+                      runs-on: windows-2025
+                      artifact: artise-windows-x64
+                      prepare: unzip -q dist/*-win.zip -d dist/win-unpacked
+                      executable: dist/win-unpacked/Artise.exe
+        runs-on: ${{ matrix.runs-on }}
+        defaults:
+            run:
+                shell: bash
+                working-directory: apps/desktop
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  persist-credentials: false
+
+            - uses: ./.github/actions/setup-node-pnpm
+
+            - name: Install
+              run: pnpm install --frozen-lockfile --filter element-desktop
+
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+              with:
+                  name: ${{ matrix.artifact }}
+                  path: apps/desktop/dist
+
+            - name: Unpack the app
+              run: ${{ matrix.prepare }}
+
+            # The build turns the EnableNodeCliInspectArguments fuse off; Playwright needs it to drive Electron.
+            # This copy is only for the check and is thrown away with the runner.
+            - name: Let Playwright drive the app
+              run: pnpm exec electron-fuses write --app "$EXECUTABLE" EnableNodeCliInspectArguments=on
+              env:
+                  EXECUTABLE: ${{ matrix.executable }}
+
+            - name: Start Artise
+              timeout-minutes: 15
+              run: pnpm exec playwright test playwright/e2e/artise --ignore-snapshots --reporter=line
+              env:
+                  ELEMENT_DESKTOP_EXECUTABLE: ${{ matrix.executable }}
+
+            - name: Keep the test report
+              if: failure()
+              uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+              with:
+                  name: start-up-${{ matrix.artifact }}
+                  path: apps/desktop/playwright/test-results
+                  retention-days: 7

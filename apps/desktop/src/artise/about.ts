@@ -7,7 +7,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 import { app, dialog, shell, type MenuItemConstructorOptions } from "electron";
 
 import { artiseT } from "./i18n/artiseT.js";
-import { isArtise, sourceCodeUrl } from "./variant.js";
+import { artiseSourceRef, isArtise, sourceCodeUrl } from "./variant.js";
 
 /**
  * Shows "About Artise": the version, the AGPL licence and a button to this version's source code. Element
@@ -28,7 +28,7 @@ export async function showAbout(): Promise<void> {
     const { response } = global.mainWindow
         ? await dialog.showMessageBox(global.mainWindow, options)
         : await dialog.showMessageBox(options);
-    if (response === 0) await shell.openExternal(sourceCodeUrl(version));
+    if (response === 0) await shell.openExternal(sourceCodeUrl(version, artiseSourceRef()));
 }
 
 /**
@@ -39,14 +39,15 @@ export async function showAbout(): Promise<void> {
 export function artiseHelpMenuItems(): MenuItemConstructorOptions[] {
     if (!isArtise()) return [];
     const version = app.getVersion();
+    const source = sourceCodeUrl(version, artiseSourceRef());
     app.setAboutPanelOptions({
         applicationName: "Artise",
         applicationVersion: version,
         version: "",
         copyright: artiseT("artise|desktop|about|license"),
         // Shown by macOS under the copyright, and by Linux as the dialog's link.
-        credits: sourceCodeUrl(version),
-        website: sourceCodeUrl(version),
+        credits: source,
+        website: source,
     });
     return [
         { type: "separator" },
