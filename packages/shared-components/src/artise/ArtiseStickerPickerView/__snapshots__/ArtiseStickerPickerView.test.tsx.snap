@@ -1,0 +1,93 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseStickerPickerView > shows the starter pack 1`] = `
+<div>
+  <div
+    class="ArtiseStickerPickerView-module_picker"
+  >
+    <div
+      class="ArtiseStickerPickerView-module_tabs"
+      role="tablist"
+    >
+      <button
+        aria-selected="false"
+        class="ArtiseStickerPickerView-module_tab"
+        role="tab"
+        type="button"
+      >
+        Míos
+      </button>
+      <button
+        aria-selected="true"
+        class="ArtiseStickerPickerView-module_tab ArtiseStickerPickerView-module_tabSelected"
+        role="tab"
+        type="button"
+      >
+        Paquete inicial
+      </button>
+    </div>
+    <div
+      class="ArtiseStickerPickerView-module_panel"
+      role="tabpanel"
+    >
+      <ul
+        class="ArtiseStickerPickerView-module_grid"
+      >
+        <li
+          class="ArtiseStickerPickerView-module_cell"
+        >
+          <button
+            aria-label="Gato"
+            class="ArtiseStickerPickerView-module_sticker"
+            title="Gato"
+            type="button"
+          >
+            <img
+              alt=""
+              loading="lazy"
+              src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23f59e0b%22%2F%3E%3C%2Fsvg%3E"
+            />
+          </button>
+        </li>
+        <li
+          class="ArtiseStickerPickerView-module_cell"
+        >
+          <button
+            aria-label="Perro"
+            class="ArtiseStickerPickerView-module_sticker"
+            title="Perro"
+            type="button"
+          >
+            <img
+              alt=""
+              loading="lazy"
+              src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%2310b981%22%2F%3E%3C%2Fsvg%3E"
+            />
+          </button>
+        </li>
+        <li
+          class="ArtiseStickerPickerView-module_cell"
+        >
+          <button
+            aria-label="Fuego"
+            class="ArtiseStickerPickerView-module_sticker"
+            title="Fuego"
+            type="button"
+          >
+            <img
+              alt=""
+              loading="lazy"
+              src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2264%22%20height%3D%2264%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23ef4444%22%2F%3E%3C%2Fsvg%3E"
+            />
+          </button>
+        </li>
+      </ul>
+      <p
+        class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseStickerPickerView-module_credit"
+      >
+        Stickers iniciales: Fluent Emoji de Microsoft (licencia MIT)
+      </p>
+    </div>
+  </div>
+</div>
+`;

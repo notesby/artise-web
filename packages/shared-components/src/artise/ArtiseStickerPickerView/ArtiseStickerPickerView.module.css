@@ -1,0 +1,124 @@
+/*
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+*/
+
+.picker {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-3x);
+    inline-size: min(480px, 100%);
+}
+
+.tabs {
+    display: flex;
+    gap: var(--cpd-space-1x);
+    border-block-end: 1px solid var(--cpd-color-border-interactive-secondary);
+}
+
+.tab {
+    padding: var(--cpd-space-2x) var(--cpd-space-3x);
+    border: none;
+    border-block-end: 2px solid transparent;
+    background: none;
+    color: var(--cpd-color-text-secondary);
+    font: var(--cpd-font-body-md-semibold);
+    cursor: pointer;
+}
+
+.tabSelected {
+    border-block-end-color: var(--cpd-color-border-accent);
+    color: var(--cpd-color-text-primary);
+}
+
+.tab:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+}
+
+.panel {
+    max-block-size: 360px;
+    overflow-y: auto;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: var(--cpd-space-2x);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cell {
+    position: relative;
+}
+
+.sticker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 100%;
+    aspect-ratio: 1;
+    padding: var(--cpd-space-1x);
+    border: none;
+    border-radius: var(--cpd-space-2x);
+    background: none;
+    cursor: pointer;
+}
+
+.sticker:hover,
+.sticker:focus-visible {
+    background-color: var(--cpd-color-bg-subtle-secondary);
+}
+
+.sticker:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+}
+
+.sticker:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+.sticker img {
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    object-fit: contain;
+}
+
+.remove {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    opacity: 0;
+    background-color: var(--cpd-color-bg-canvas-default);
+}
+
+.cell:hover .remove,
+.cell:focus-within .remove {
+    opacity: 1;
+}
+
+.empty,
+.credit {
+    color: var(--cpd-color-text-secondary);
+}
+
+.credit {
+    margin-block-start: var(--cpd-space-3x);
+}
+
+.confirm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+    padding: var(--cpd-space-3x);
+    border-radius: var(--cpd-space-2x);
+    background-color: var(--cpd-color-bg-critical-subtle);
+}
+
+.buttons {
+    display: flex;
+    gap: var(--cpd-space-2x);
+}
