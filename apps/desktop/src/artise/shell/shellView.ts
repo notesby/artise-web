@@ -159,10 +159,11 @@ export function startArtiseShell(window: BrowserWindow): boolean {
 /**
  * Turns "start at login, hidden" on the first time workspaces open, as the phones keep running: the desktop has no
  * push service, so messages arrive only while Artise runs. Once; the person can turn it off in Settings. Not on
- * Linux, which Artise doesn't ship for.
+ * Linux, which Artise doesn't ship for, nor in the Microsoft Store build.
  */
 function startAtLoginOnce(): void {
-    if (process.platform === "linux" || readArtiseSettings().startAtLoginSet) return;
+    // The Store build starts at login through its manifest (artise/appx/extensions.xml) instead.
+    if (process.platform === "linux" || process.windowsStore || readArtiseSettings().startAtLoginSet) return;
     updateArtiseSettings({ startAtLoginSet: true });
     AutoLaunch.instance.setState("minimised").catch((e: unknown) => console.warn("Couldn't turn on start at login", e));
 }

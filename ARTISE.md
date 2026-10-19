@@ -188,6 +188,43 @@ x64 `.zip`, starts each one on its OS (`apps/desktop/playwright/e2e/artise/`) an
 for 14 days. A tag `desktop-v1.2.3` builds version 1.2.3; any other run builds `0.0.1-dev.<run number>`
 (`artise/scripts/version.sh`). About links the source of the exact build: the tag, or the commit for test builds.
 
+### Microsoft Store (Windows)
+
+Windows ships only through the Microsoft Store for now. The Windows job builds the Store package (`.appx`, the
+`artise-windows-store` artifact):
+
+- **Unsigned**: the Store signs it. Microsoft: "Your MSIX and AppX packages don't have to be signed with a
+  certificate rooted in a trusted certificate authority when submitting to the Microsoft Store. The Microsoft Store
+  will automatically re-sign your MSIX/AppX packages with a Microsoft certificate during the publishing process
+  after your app passes certification."
+- **Languages**: Spanish (Mexico) first, then English and Portuguese.
+- **Tiles**: `artise/icons/appx/`.
+- **Start at login**: through the package's `StartupTask` (`artise/appx/extensions.xml`), on by default. A packaged
+  app can't use the registry key Element's `auto-launch` writes, so Artise doesn't call it in the Store build.
+
+Its identity must match Partner Center exactly ("Values in the manifest are case-sensitive"). The owner registers the
+app there, then copies the three values into the repository's variables:
+
+```sh
+gh variable set STORE_IDENTITY_NAME -R notesby/artise-web            # Package/Identity/Name
+gh variable set STORE_PUBLISHER -R notesby/artise-web                # Package/Identity/Publisher, "CN=…"
+gh variable set STORE_PUBLISHER_DISPLAY_NAME -R notesby/artise-web   # Package/Properties/PublisherDisplayName
+```
+
+Without them the package builds with placeholders, for checking only. Versions: the Store turns 1.2.3 into 1.2.3.0
+and refuses a first part of 0, so releases start at `desktop-v1.0.0` (`artise/scripts/version.sh` checks).
+
+The listing texts in es, en and pt, the privacy policy and support links are in `artise/store/listing.md`.
+
+Microsoft's pages (read 2026-10-18; Microsoft's dates are shown as updated 2026-08-24 and 2026-06-17):
+
+- [App package requirements for MSIX](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/app-package-requirements)
+- [Create an app submission (MSIX)](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/create-app-submission)
+- [uap5:StartupTask](https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/uapmanifestschema/element-uap5-startuptask)
+
+electron-builder's AppX options are read from its own types in the installed version 26.16.1
+(`app-builder-lib/out/options/AppXOptions.d.ts`), as its web page doesn't render without JavaScript.
+
 Running it locally, from `apps/desktop`:
 
 ```sh
