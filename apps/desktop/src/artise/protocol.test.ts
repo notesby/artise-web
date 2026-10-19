@@ -65,6 +65,21 @@ describe("ProtocolHandler in the Artise build", () => {
         expect(loadURL).toHaveBeenCalledWith("vector://vector/webapp/?code=abc&state=xyz");
     });
 
+    it("keeps Artise ID's sign-in returns away from Element Web", () => {
+        // Same scheme and path as a workspace's return, but Artise ID's state: the shell takes it.
+        const loadURL = vi.fn();
+        vi.stubGlobal("mainWindow", { loadURL });
+
+        const opened = new ProtocolHandler("co.artise.desktop").initialise({
+            ...args,
+            positional: ["/bin/artise-desktop", "co.artise.desktop:/vector/webapp/?code=abc&state=artise-id.xyz"],
+        });
+
+        // Nothing was loaded, so a cold start still opens the shell.
+        expect(opened).toBe(false);
+        expect(loadURL).not.toHaveBeenCalled();
+    });
+
     it("ignores element:// links", () => {
         const loadURL = vi.fn();
         vi.stubGlobal("mainWindow", { loadURL });

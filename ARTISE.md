@@ -55,21 +55,21 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 `// Artise:` comment, and listed here. When a merge conflicts at a hook, move the call; the logic stays in
 `artise/`.
 
-| File                                                                  | Why                                                                                                                                                                                       |
-| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web/src/i18n/settings.ts`                                       | `setLanguage` registers Artise's words (`artise/i18n/registerArtiseTranslations.ts`) after Element's texts and before the server's `custom_translations_url`.                             |
-| `apps/web/src/stores/room-list-v3/RoomListStoreV3.ts`                 | `getSortedRoomsInActiveSpace` puts Ari's chat first in its section (`artise/assistant/assistantFirst.ts`), except while a filter is on.                                                   |
-| `apps/web/src/components/views/dialogs/UserTab.ts`                    | Adds the `Artise` tab ID.                                                                                                                                                                 |
-| `apps/web/src/components/views/dialogs/UserSettingsDialog.tsx`        | Adds Artise's tab ("Ayuda y cuenta", `artise/settings/ArtiseSettingsTab.tsx`) after Help, on Artise workspaces only.                                                                      |
-| `packages/shared-components/src/index.ts`                             | Exports Artise's views (`packages/shared-components/src/artise/`).                                                                                                                        |
-| `apps/web/src/Notifier.ts`                                            | `evaluateEvent` applies Ari's level (`artise/notifications/automationLevel.ts`): important posts always notify, critical ones also sound.                                                 |
-| `apps/web/src/components/views/rooms/RoomListPanel/RoomListPanel.tsx` | Draws Artise's top of the chat list (`artise/chatList/ChatListTop.tsx`): the workspace bar (name, menu of the person's other workspaces, browser only) and "What's new".                  |
-| `apps/web/src/components/views/dialogs/LogoutDialog.tsx`              | The sign-out confirmation names the workspace (`artise/signOut/signOutTexts.ts`): "¿Cerrar sesión en {espacio}?" and what it does in this browser or on this computer.                    |
-| `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button.                |
-| `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`).                                                              |
-| `apps/desktop/src/electron-main.ts`                                   | Two calls into `artise/main.ts`: before the app is ready, the start-up language (`artise/language.ts`); in `configureSentry`, crash reports only with consent (`artise/crashReports.ts`). |
-| `apps/desktop/src/vectormenu.ts`                                      | The Help menu gets "Acerca de Artise": the version, the AGPL licence and this version's source code (`artise/about.ts`).                                                                  |
-| `knip.ts`                                                             | Lists the Artise build's `apps/desktop/artise/electron-builder.ts` as an entry, so knip doesn't call it unused.                                                                           |
+| File                                                                  | Why                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src/i18n/settings.ts`                                       | `setLanguage` registers Artise's words (`artise/i18n/registerArtiseTranslations.ts`) after Element's texts and before the server's `custom_translations_url`.                                                        |
+| `apps/web/src/stores/room-list-v3/RoomListStoreV3.ts`                 | `getSortedRoomsInActiveSpace` puts Ari's chat first in its section (`artise/assistant/assistantFirst.ts`), except while a filter is on.                                                                              |
+| `apps/web/src/components/views/dialogs/UserTab.ts`                    | Adds the `Artise` tab ID.                                                                                                                                                                                            |
+| `apps/web/src/components/views/dialogs/UserSettingsDialog.tsx`        | Adds Artise's tab ("Ayuda y cuenta", `artise/settings/ArtiseSettingsTab.tsx`) after Help, on Artise workspaces only.                                                                                                 |
+| `packages/shared-components/src/index.ts`                             | Exports Artise's views (`packages/shared-components/src/artise/`).                                                                                                                                                   |
+| `apps/web/src/Notifier.ts`                                            | `evaluateEvent` applies Ari's level (`artise/notifications/automationLevel.ts`): important posts always notify, critical ones also sound.                                                                            |
+| `apps/web/src/components/views/rooms/RoomListPanel/RoomListPanel.tsx` | Draws Artise's top of the chat list (`artise/chatList/ChatListTop.tsx`): the workspace bar (name, menu of the person's other workspaces, browser only) and "What's new".                                             |
+| `apps/web/src/components/views/dialogs/LogoutDialog.tsx`              | The sign-out confirmation names the workspace (`artise/signOut/signOutTexts.ts`): "¿Cerrar sesión en {espacio}?" and what it does in this browser or on this computer.                                               |
+| `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button.                                           |
+| `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`). Artise ID's sign-in returns go to the shell, never to Element Web (`artise/artiseId/`). |
+| `apps/desktop/src/electron-main.ts`                                   | Two calls into `artise/main.ts`: before the app is ready, the start-up language (`artise/language.ts`); in `configureSentry`, crash reports only with consent (`artise/crashReports.ts`).                            |
+| `apps/desktop/src/vectormenu.ts`                                      | The Help menu gets "Acerca de Artise": the version, the AGPL licence and this version's source code (`artise/about.ts`).                                                                                             |
+| `knip.ts`                                                             | Lists the Artise build's `apps/desktop/artise/electron-builder.ts` as an entry, so knip doesn't call it unused.                                                                                                      |
 
 ## The desktop app
 
@@ -105,6 +105,16 @@ Crash reports and language (the Artise build only):
   English or Portuguese, else the workspace's language, which is Spanish today (`es-MX`).
   `artise/language.ts` sets Chromium's language before the app is ready (`--lang`, and `LANGUAGE` on Linux, where
   Chromium ignores `--lang`); Element Web reads it as the browser's language.
+
+Artise ID (`src/artise/artiseId/`, main process only): sign-in opens Artise ID in the person's own browser
+(authorization code with PKCE S256, the desktop's own client from `/v1/sign-in`'s `desktop_client_id`, Google,
+Microsoft or Apple opened directly with Zitadel's `urn:zitadel:iam:org:idp:id:` scope as on the phones). Artise ID
+returns to `co.artise.desktop:/vector/webapp/` with a state starting `artise-id.`, which tells it apart from a
+workspace's return to Element Web. The access token lives only in memory; the refresh token is kept in the OS key
+store through Element's `Store` (Keychain / DPAPI). Refreshes go through one lock, a rotated refresh token is saved
+before the new access token is used, `invalid_grant` signs the person out, and signing out revokes the refresh token
+(and, for the last workspace, signs out in the browser too). Desktop sign-in shows as unavailable until
+`/v1/sign-in` has `desktop_client_id`.
 
 Building: `.github/workflows/artise-desktop.yml` (Actions → Artise desktop → Run workflow, or a
 `desktop-v<major>.<minor>.<patch>` tag) builds an unsigned macOS universal `.dmg` and `.zip` and an unsigned Windows
