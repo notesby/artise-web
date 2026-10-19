@@ -52,7 +52,7 @@ import SettingsStore from "../../../settings/SettingsStore";
 import { isUrlPermitted } from "../../../HtmlUtils";
 import { canEditContent, editEvent, isContentActionable } from "../../../utils/EventUtils";
 import IconizedContextMenu, { IconizedContextMenuOption, IconizedContextMenuOptionList } from "./IconizedContextMenu";
-import { SaveToNotesOption } from "../../../artise/notes/SaveToNotesOption";
+import { ArtiseMessageOptions } from "../../../artise/messages/ArtiseMessageOptions";
 import { Action } from "../../../dispatcher/actions";
 import { type RoomPermalinkCreator } from "../../../utils/permalinks/Permalinks";
 import { type ButtonEvent } from "../elements/AccessibleButton";
@@ -727,8 +727,8 @@ export default class MessageContextMenu extends React.Component<IProps, IState> 
                 {openInMapSiteButton}
                 {endPollButton}
                 {forwardButton}
-                {/* Artise: "Guardar en Notas" for text messages in chats with notes */}
-                <SaveToNotesOption mxEvent={mxEvent} onFinished={this.closeMenu} />
+                {/* Artise: "Guardar en Notas" and "Guardar en mis stickers" (artise/messages/ArtiseMessageOptions.tsx) */}
+                <ArtiseMessageOptions mxEvent={mxEvent} onFinished={this.closeMenu} />
                 {permalinkButton}
                 {reportEventButton}
                 {externalURLButton}

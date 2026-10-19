@@ -233,6 +233,45 @@ ARTISE_TEXTS: dict[str, tuple[object, object, object]] = {
         "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada.",
     ),
     "artise|whats_new|done": ("Got it", "Entendido", "Entendi"),
+    # Stickers (W4-2), worded like Android's artise/stickers texts ("figurinhas" in Portuguese, as there).
+    "artise|stickers|title": ("Stickers", "Stickers", "Figurinhas"),
+    "artise|stickers|option": ("Sticker", "Sticker", "Figurinha"),
+    "artise|stickers|mine": ("Mine", "Míos", "Minhas"),
+    "artise|stickers|starter": ("Starter pack", "Paquete inicial", "Pacote inicial"),
+    "artise|stickers|empty": (
+        "Stickers you save from chats show here. They're saved to your account, on all your devices.",
+        "Aquí aparecen los stickers que guardes de los chats. Se guardan en tu cuenta, en todos tus dispositivos.",
+        "Aqui aparecem as figurinhas que você salvar das conversas. Elas ficam salvas na sua conta, em todos os seus aparelhos.",
+    ),
+    "artise|stickers|credit": (
+        "Starter stickers: Fluent Emoji by Microsoft (MIT License)",
+        "Stickers iniciales: Fluent Emoji de Microsoft (licencia MIT)",
+        "Figurinhas iniciais: Fluent Emoji da Microsoft (Licença MIT)",
+    ),
+    "artise|stickers|save": ("Save to my stickers", "Guardar en mis stickers", "Salvar nas minhas figurinhas"),
+    "artise|stickers|saved": ("Saved to your stickers", "Guardado en tus stickers", "Salvo nas suas figurinhas"),
+    "artise|stickers|remove": ("Remove", "Quitar", "Remover"),
+    "artise|stickers|remove_title": ("Remove this sticker?", "¿Quitar este sticker?", "Remover esta figurinha?"),
+    "artise|stickers|remove_message": (
+        "It's removed from your stickers on all your devices. Messages already sent keep it.",
+        "Se quita de tus stickers en todos tus dispositivos. Los mensajes ya enviados lo conservan.",
+        "Ela será removida das suas figurinhas em todos os seus aparelhos. As mensagens já enviadas continuam com ela.",
+    ),
+    "artise|stickers|send_failed": (
+        "Couldn't send the sticker. Check your connection and try again.",
+        "No se pudo enviar el sticker. Revisa tu conexión e inténtalo de nuevo.",
+        "Não foi possível enviar a figurinha. Confira sua conexão e tente de novo.",
+    ),
+    "artise|stickers|save_failed": (
+        "Couldn't save the sticker. Check your connection and try again.",
+        "No se pudo guardar el sticker. Revisa tu conexión e inténtalo de nuevo.",
+        "Não foi possível salvar a figurinha. Confira sua conexão e tente de novo.",
+    ),
+    "artise|stickers|remove_failed": (
+        "Couldn't remove the sticker. Check your connection and try again.",
+        "No se pudo quitar el sticker. Revisa tu conexión e inténtalo de nuevo.",
+        "Não foi possível remover a figurinha. Confira sua conexão e tente de novo.",
+    ),
     # Notification hours (W4-1), worded like Android's artise_notification_hours_strings.xml; kept per browser.
     "artise|hours|title": ("Notification hours", "Horario de notificaciones", "Horário das notificações"),
     "artise|hours|description_browser": (

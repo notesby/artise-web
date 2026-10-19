@@ -803,6 +803,90 @@
         "pt": "Sair de %(workspace)s?",
         "pt-br": "Sair de %(workspace)s?"
     },
+    "artise|stickers|credit": {
+        "en": "Starter stickers: Fluent Emoji by Microsoft (MIT License)",
+        "es": "Stickers iniciales: Fluent Emoji de Microsoft (licencia MIT)",
+        "pt": "Figurinhas iniciais: Fluent Emoji da Microsoft (Licença MIT)",
+        "pt-br": "Figurinhas iniciais: Fluent Emoji da Microsoft (Licença MIT)"
+    },
+    "artise|stickers|empty": {
+        "en": "Stickers you save from chats show here. They're saved to your account, on all your devices.",
+        "es": "Aquí aparecen los stickers que guardes de los chats. Se guardan en tu cuenta, en todos tus dispositivos.",
+        "pt": "Aqui aparecem as figurinhas que você salvar das conversas. Elas ficam salvas na sua conta, em todos os seus aparelhos.",
+        "pt-br": "Aqui aparecem as figurinhas que você salvar das conversas. Elas ficam salvas na sua conta, em todos os seus aparelhos."
+    },
+    "artise|stickers|mine": {
+        "en": "Mine",
+        "es": "Míos",
+        "pt": "Minhas",
+        "pt-br": "Minhas"
+    },
+    "artise|stickers|option": {
+        "en": "Sticker",
+        "es": "Sticker",
+        "pt": "Figurinha",
+        "pt-br": "Figurinha"
+    },
+    "artise|stickers|remove": {
+        "en": "Remove",
+        "es": "Quitar",
+        "pt": "Remover",
+        "pt-br": "Remover"
+    },
+    "artise|stickers|remove_failed": {
+        "en": "Couldn't remove the sticker. Check your connection and try again.",
+        "es": "No se pudo quitar el sticker. Revisa tu conexión e inténtalo de nuevo.",
+        "pt": "Não foi possível remover a figurinha. Confira sua conexão e tente de novo.",
+        "pt-br": "Não foi possível remover a figurinha. Confira sua conexão e tente de novo."
+    },
+    "artise|stickers|remove_message": {
+        "en": "It's removed from your stickers on all your devices. Messages already sent keep it.",
+        "es": "Se quita de tus stickers en todos tus dispositivos. Los mensajes ya enviados lo conservan.",
+        "pt": "Ela será removida das suas figurinhas em todos os seus aparelhos. As mensagens já enviadas continuam com ela.",
+        "pt-br": "Ela será removida das suas figurinhas em todos os seus aparelhos. As mensagens já enviadas continuam com ela."
+    },
+    "artise|stickers|remove_title": {
+        "en": "Remove this sticker?",
+        "es": "¿Quitar este sticker?",
+        "pt": "Remover esta figurinha?",
+        "pt-br": "Remover esta figurinha?"
+    },
+    "artise|stickers|save": {
+        "en": "Save to my stickers",
+        "es": "Guardar en mis stickers",
+        "pt": "Salvar nas minhas figurinhas",
+        "pt-br": "Salvar nas minhas figurinhas"
+    },
+    "artise|stickers|save_failed": {
+        "en": "Couldn't save the sticker. Check your connection and try again.",
+        "es": "No se pudo guardar el sticker. Revisa tu conexión e inténtalo de nuevo.",
+        "pt": "Não foi possível salvar a figurinha. Confira sua conexão e tente de novo.",
+        "pt-br": "Não foi possível salvar a figurinha. Confira sua conexão e tente de novo."
+    },
+    "artise|stickers|saved": {
+        "en": "Saved to your stickers",
+        "es": "Guardado en tus stickers",
+        "pt": "Salvo nas suas figurinhas",
+        "pt-br": "Salvo nas suas figurinhas"
+    },
+    "artise|stickers|send_failed": {
+        "en": "Couldn't send the sticker. Check your connection and try again.",
+        "es": "No se pudo enviar el sticker. Revisa tu conexión e inténtalo de nuevo.",
+        "pt": "Não foi possível enviar a figurinha. Confira sua conexão e tente de novo.",
+        "pt-br": "Não foi possível enviar a figurinha. Confira sua conexão e tente de novo."
+    },
+    "artise|stickers|starter": {
+        "en": "Starter pack",
+        "es": "Paquete inicial",
+        "pt": "Pacote inicial",
+        "pt-br": "Pacote inicial"
+    },
+    "artise|stickers|title": {
+        "en": "Stickers",
+        "es": "Stickers",
+        "pt": "Figurinhas",
+        "pt-br": "Figurinhas"
+    },
     "artise|whats_new|done": {
         "en": "Got it",
         "es": "Entendido",

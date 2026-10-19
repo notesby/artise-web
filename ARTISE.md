@@ -65,8 +65,8 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/web/src/Notifier.ts`                                            | `evaluateEvent` applies Artise's rules (`artise/notifications/notifyActions.ts`): Ari's important posts always notify, critical ones also sound, and outside the notification hours notifications show without sound. |
 | `apps/web/src/components/views/rooms/RoomListPanel/RoomListPanel.tsx` | Draws Artise's top of the chat list (`artise/chatList/ChatListTop.tsx`): the workspace bar (name, menu of the person's other workspaces, browser only) and "What's new".                                              |
 | `apps/web/src/components/views/dialogs/LogoutDialog.tsx`              | The sign-out confirmation names the workspace (`artise/signOut/signOutTexts.ts`): "¿Cerrar sesión en {espacio}?" and what it does in this browser or on this computer.                                                |
-| `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button.                                            |
-| `apps/web/src/components/views/context_menus/MessageContextMenu.tsx`  | Adds "Guardar en Notas" for text messages in chats with notes (`artise/notes/SaveToNotesOption.tsx`), writing `Mensajes guardados/<date> <sender>.md` as Android does.                                                |
+| `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes`, its chat-header button, and "Sticker" in the composer's "+" menu.     |
+| `apps/web/src/components/views/context_menus/MessageContextMenu.tsx`  | Adds Artise's message options (`artise/messages/ArtiseMessageOptions.tsx`): "Guardar en Notas" for text messages in chats with notes, and "Guardar en mis stickers" for stickers.                                     |
 
 ## Artise's words
 
