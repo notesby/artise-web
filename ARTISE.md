@@ -66,6 +66,38 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/web/src/components/views/rooms/RoomListPanel/RoomListPanel.tsx` | Draws Artise's top of the chat list (`artise/chatList/ChatListTop.tsx`): the workspace bar (name, menu of the person's other workspaces, browser only) and "What's new".   |
 | `apps/web/src/components/views/dialogs/LogoutDialog.tsx`              | The sign-out confirmation names the workspace (`artise/signOut/signOutTexts.ts`): "¿Cerrar sesión en {espacio}?" and what it does in this browser or on this computer.     |
 | `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button. |
+| `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`).                                               |
+| `apps/desktop/src/vectormenu.ts`                                      | The Help menu gets "Acerca de Artise": the version, the AGPL licence and this version's source code (`artise/about.ts`).                                                   |
+| `knip.ts`                                                             | Lists the Artise build's `apps/desktop/artise/electron-builder.ts` as an entry, so knip doesn't call it unused.                                                            |
+
+## The desktop app
+
+Artise for Windows and macOS is Element Desktop (`apps/desktop`) built as an Artise variant. Element's own variants
+(`element.io/`) stay as they are; Artise's sit next to them in `apps/desktop/artise/`:
+
+| File                         | Holds                                                                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `artise/build.json`          | The variant: app ID and sign-in scheme `co.artise.desktop`, name `artise-desktop`, product name Artise.      |
+| `artise/config.json`         | The config packaged with the app: brand, help link, the workspace it opens (mas-k8s until the shell).        |
+| `artise/icons/`              | Icons, written by `python3 tools/artise/desktop_icons.py` from `apps/web/res/vector-icons/1024.png`.         |
+| `artise/electron-builder.ts` | The Artise build: Element's `electron-builder.ts` plus `src/artise/build/builderConfig.ts` (icons, licence). |
+
+Only the Artise build (app ID `co.artise.desktop`) behaves differently (`src/artise/variant.ts`), so Element's own
+desktop tests keep passing as upstream. Its own texts are `DESKTOP_TEXTS` in `tools/artise/web_wording.py`, which
+writes `apps/desktop/src/artise/i18n/wording.ts`; code reads them with `artiseT` (`src/artise/i18n/artiseT.ts`).
+
+Running it locally, from `apps/desktop`:
+
+```sh
+(cd ../web && CI_PACKAGE=1 pnpm build)   # CI_PACKAGE skips minifying, which needs more memory than most laptops have
+ln -s ../web/webapp ./webapp
+pnpm start -- --config artise/config.json --profile artise
+```
+
+`pnpm start` runs Electron unpackaged, with Element's app ID, so the Artise-only parts (About, the scheme) show
+only in a build. A Linux build to try them: `pnpm build:ts && pnpm build:res && pnpm run asar-webapp && pnpm exec
+electron-builder --config artise/electron-builder.ts --linux dir`, with `artise/config.json` copied into
+`webapp/` first.
 
 ## Artise's words
 

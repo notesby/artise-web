@@ -13,8 +13,10 @@ import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 
 import { type Args, getArgsForProtocolRegistration } from "./args.js";
+import { legacyProtocol } from "./artise/variant.js";
 
-const LEGACY_PROTOCOL = "element";
+// Artise: the Artise build doesn't register or answer Element's element:// links (artise/variant.ts)
+const LEGACY_PROTOCOL = legacyProtocol("element");
 const SEARCH_PARAM = "element-desktop-ssoid";
 const STORE_FILE_NAME = "sso-sessions.json";
 
