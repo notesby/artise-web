@@ -21,7 +21,8 @@ export type ShellState =
     | { screen: "welcome"; providers: ArtiseIdProvider[]; error?: ArtiseIdError }
     /** Sign-in is open in the person's browser. */
     | { screen: "waiting" }
-    | { screen: "workspaces"; workspaces: ListedWorkspace[] | "loading"; error?: ArtiseIdError };
+    /** The workspace list: to open at first, or ("adding") to add to the open ones from the rail's "+". */
+    | { screen: "workspaces"; workspaces: ListedWorkspace[] | "loading"; error?: ArtiseIdError; adding?: boolean };
 
 /** The order of the provider buttons, as on the phones (Apple first, App Store guideline 4.8). */
 export const PROVIDER_ORDER: readonly ArtiseIdProvider[] = ["apple", "google", "microsoft"];

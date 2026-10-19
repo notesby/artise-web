@@ -18,6 +18,9 @@ export interface RailDeps {
     /** Downloads a logo. */
     fetch(url: string): Promise<Response>;
     unreadLabel(count: number): string;
+    /** "+": opens "Agregar espacio de trabajo". */
+    add(): void;
+    addLabel(): string;
     language(): string;
 }
 
@@ -61,7 +64,12 @@ export class Rail {
         switch (url.pathname) {
             case "/rail":
                 return new Response(
-                    renderRail(this.deps.items(), (count) => this.deps.unreadLabel(count), this.deps.language()),
+                    renderRail(
+                        this.deps.items(),
+                        (count) => this.deps.unreadLabel(count),
+                        this.deps.addLabel(),
+                        this.deps.language(),
+                    ),
                     {
                         headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
                     },
@@ -72,6 +80,9 @@ export class Rail {
                 });
             case "/rail/show":
                 if (Number.isInteger(index)) this.deps.show(index);
+                return new Response(null, { status: 303, headers: { Location: `${SHELL_ORIGIN}/rail` } });
+            case "/rail/add":
+                this.deps.add();
                 return new Response(null, { status: 303, headers: { Location: `${SHELL_ORIGIN}/rail` } });
             case "/rail/logo": {
                 const logoUrl = Number.isInteger(index) ? this.deps.logoUrl(index) : undefined;

@@ -52,11 +52,13 @@ export function badgeText(count: number): string {
  *
  * @param items - the open workspaces, in order.
  * @param unreadLabel - the screen-reader text for a count, e.g. "Sin leer: 3".
+ * @param addLabel - the "+" button's text, "Agregar espacio de trabajo".
  * @param language - the page's language.
  */
 export function renderRail(
     items: readonly RailItem[],
     unreadLabel: (count: number) => string,
+    addLabel: string,
     language: string,
 ): string {
     const links = items
@@ -81,6 +83,7 @@ export function renderRail(
 <body>
 <nav>
 ${links}
+<a class="item add" href="${SHELL_ORIGIN}/rail/add" title="${escapeHtml(addLabel)}" aria-label="${escapeHtml(addLabel)}"><span class="plus">+</span></a>
 </nav>
 </body>
 </html>
@@ -105,10 +108,11 @@ export function railCss(items: readonly RailItem[]): string {
     --marker: #1b1d22;
     --critical: #d51928;
     --focus: #0467dd;
+    --secondary: #656d77;
     font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
-    :root { --bg: #1d1f24; --marker: #ebeef2; --critical: #fd3e3c; --focus: #4187eb; }
+    :root { --bg: #1d1f24; --marker: #ebeef2; --critical: #fd3e3c; --focus: #4187eb; --secondary: #808994; }
 }
 html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
 nav { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 12px 0; }
@@ -123,6 +127,9 @@ nav { display: flex; flex-direction: column; align-items: center; gap: 12px; pad
 .count { position: absolute; right: -6px; top: -6px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
     border-radius: 9px; background: var(--critical); color: #fff; font-size: 11px; font-weight: 600; line-height: 18px;
     text-align: center; border: 2px solid var(--bg); box-sizing: content-box; }
+.add .plus { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: var(--secondary); border: 1px dashed var(--secondary); box-sizing: border-box; }
+.add:hover .plus { color: var(--marker); border-color: var(--marker); }
 ${colors}
 `;
 }

@@ -151,6 +151,27 @@ them up before Element's badge code shows the total: the dock badge on macOS, an
 drawn by `tools/artise/desktop_icons.py` (`artise/icons/overlay/`), since Element Web draws one per page. The tray
 menu lists the workspaces with their counts.
 
+A workspace's life:
+
+- **Notifications** carry the workspace's name ("Casa · Ana"). An extra preload in each workspace's session
+  (`views/notifications.cts`) wraps the page's `Notification`.
+- **A click** on a notification shows that workspace: its web app asks for `focusWindow`, and routing knows which
+  view asked.
+- **Signing out of a workspace** closes it. Element Web's sign-out ends with "clear storage"; once Element's handler
+  has finished, Artise:
+    - takes the view away;
+    - clears its partition;
+    - removes its message-search folder and its secrets (pickle key, search passphrase).
+
+    The partition's folder, which Electron keeps while running, goes at the next start (`views/cleanup.ts`).
+
+- **The last workspace**: signing out of it also revokes Artise ID's refresh token, ends the browser session, and
+  shows the welcome again.
+- **"+" on the rail** lists the person's workspaces that aren't open yet.
+- **Start at login** (hidden) is turned on once, the first time workspaces open, on Windows and macOS: the desktop has
+  no push service, so messages arrive only while Artise runs. The person can turn it off in Settings.
+- **Close-to-tray** is Element's default already.
+
 Element's main process is written for one page, so `routing.ts` lets it serve several without changing its
 handlers:
 

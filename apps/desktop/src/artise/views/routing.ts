@@ -55,6 +55,23 @@ export function routeFor(
     return "element";
 }
 
+/** What the views manager does with what routing sees. */
+export interface RoutingHooks {
+    /** The shown workspace's view, if any. */
+    shown(): ViewContext | undefined;
+    /**
+     * Takes a view's `setBadgeCount` arguments and gives the ones for Element's badge code: every workspace's
+     * count added up.
+     */
+    badge(view: ViewContext, args: unknown[]): unknown[];
+    /** A view's web app asked to be brought to the front: a click on one of its notifications. */
+    focus(view: ViewContext): void;
+    /** A view's web app cleared its storage: its last step when it signs out. */
+    signedOut(view: ViewContext): void;
+    /** A view's web app named its Matrix user and device (its pickle-key calls), for the cleanup at sign-out. */
+    sawUser(view: ViewContext, userId: string, deviceId: string): void;
+}
+
 /**
  * Lets Element's single-window main process serve one view per workspace, without changing its handlers.
  *
@@ -66,21 +83,14 @@ export function routeFor(
  *
  * @param window - Element's main window.
  * @param ipcMain - Electron's ipcMain.
- * @param shown - the shown workspace's view, if any.
- * @param badge - takes a view's `setBadgeCount` arguments and gives the ones for Element's badge code: every
- *     workspace's count added up.
+ * @param hooks - what the views manager does with what routing sees.
  * @returns the window's own web contents, for the code that means that one.
  */
-export function installRouting(
-    window: BrowserWindow,
-    ipcMain: IpcMain,
-    shown: () => ViewContext | undefined,
-    badge: (view: ViewContext, args: unknown[]) => unknown[],
-): WebContents {
+export function installRouting(window: BrowserWindow, ipcMain: IpcMain, hooks: RoutingHooks): WebContents {
     const own = window.webContents;
     Object.defineProperty(window, "webContents", {
         configurable: true,
-        get: (): WebContents => currentView()?.webContents ?? shown()?.webContents ?? own,
+        get: (): WebContents => currentView()?.webContents ?? hooks.shown()?.webContents ?? own,
     });
 
     const emit = ipcMain.emit.bind(ipcMain);
@@ -98,12 +108,27 @@ export function installRouting(
                 return true;
             }
             case "badge":
-                return emit(channel, event, ...badge(view, args));
+                return emit(channel, event, ...hooks.badge(view, args));
             case "seshat":
                 runInView(view, () => view.seshat?.(event, ...args));
                 return true;
-            case "element":
+            case "element": {
+                const call = channel === "ipcCall" ? (args[0] as { name?: string; args?: unknown[] }) : undefined;
+                if (call?.name === "focusWindow") hooks.focus(view);
+                const [userId, deviceId] = call?.args ?? [];
+                if (call?.name && PER_USER_CALLS.has(call.name) && typeof deviceId === "string") {
+                    hooks.sawUser(view, userId as string, deviceId);
+                }
+                if (call?.name === "clearStorage") {
+                    // Element's handlers are async; the workspace may be closed only once they've answered.
+                    const handlers = ipcMain.listeners(channel) as ((...params: unknown[]) => unknown)[];
+                    void Promise.allSettled(
+                        handlers.map((handler) => runInView(view, () => handler(event, ...args))),
+                    ).then(() => hooks.signedOut(view));
+                    return handlers.length > 0;
+                }
                 return runInView(view, () => emit(channel, event, ...args));
+            }
         }
     };
     return own;

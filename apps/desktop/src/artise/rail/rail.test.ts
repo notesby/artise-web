@@ -18,6 +18,8 @@ function setUp(fetched: Response = new Response("png", { headers: { "Content-Typ
         show: vi.fn(),
         fetch: vi.fn(async () => fetched),
         unreadLabel: (count) => `Sin leer: ${count}`,
+        add: vi.fn(),
+        addLabel: () => "Agregar espacio de trabajo",
         language: () => "es",
     };
     return { rail: new Rail(deps), deps };
@@ -32,6 +34,12 @@ describe("Rail", () => {
         expect(deps.show).toHaveBeenCalledWith(0);
         expect(answer?.status).toBe(303);
         expect(answer?.headers.get("Location")).toBe("artise-shell://shell/rail");
+    });
+
+    it("opens 'Agregar espacio de trabajo' from +", async () => {
+        const { rail, deps } = setUp();
+        expect((await rail.handle(at("/rail/add")))?.status).toBe(303);
+        expect(deps.add).toHaveBeenCalled();
     });
 
     it("serves a workspace's logo, downloaded once", async () => {
