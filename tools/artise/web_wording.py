@@ -589,6 +589,27 @@ DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
         "Ya tienes abiertos todos tus espacios de trabajo.",
         "Todos os seus espaços de trabalho já estão abertos.",
     ),
+    # Invite links (co.artise.desktop://join?workspace=…&code=…), as the phones say them (iOS screen_workspace_*).
+    "artise|desktop|join|paused": (
+        "This workspace is paused. Contact its admin.",
+        "Este espacio de trabajo está en pausa. Habla con su administrador.",
+        "Este espaço de trabalho está pausado. Fale com o administrador.",
+    ),
+    "artise|desktop|join|expired": (
+        "This invite link doesn’t work anymore. Ask for a new one.",
+        "Este enlace de invitación ya no funciona. Pide uno nuevo.",
+        "Este link de convite não funciona mais. Peça um novo.",
+    ),
+    "artise|desktop|join|rate_limited": (
+        "Too many tries. Wait a minute and try again.",
+        "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+        "Muitas tentativas. Espere um minuto e tente de novo.",
+    ),
+    "artise|desktop|join|unreachable": (
+        "Can’t open the invite right now. Check your connection and try again.",
+        "No se puede abrir la invitación ahora. Revisa tu conexión e inténtalo de nuevo.",
+        "Não foi possível abrir o convite agora. Confira sua conexão e tente de novo.",
+    ),
     "artise|desktop|rail|unread": ("Unread: %(count)s", "Sin leer: %(count)s", "Não lidas: %(count)s"),
     "artise|desktop|workspaces|other_account": (
         "Sign in another way",
