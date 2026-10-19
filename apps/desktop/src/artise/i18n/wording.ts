@@ -57,6 +57,26 @@ export const DESKTOP_WORDING = {
         es: "Ayúdanos a mejorar Artise",
         pt: "Ajude a melhorar o Artise",
     },
+    "artise|desktop|join|expired": {
+        en: "This invite link doesn’t work anymore. Ask for a new one.",
+        es: "Este enlace de invitación ya no funciona. Pide uno nuevo.",
+        pt: "Este link de convite não funciona mais. Peça um novo.",
+    },
+    "artise|desktop|join|paused": {
+        en: "This workspace is paused. Contact its admin.",
+        es: "Este espacio de trabajo está en pausa. Habla con su administrador.",
+        pt: "Este espaço de trabalho está pausado. Fale com o administrador.",
+    },
+    "artise|desktop|join|rate_limited": {
+        en: "Too many tries. Wait a minute and try again.",
+        es: "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+        pt: "Muitas tentativas. Espere um minuto e tente de novo.",
+    },
+    "artise|desktop|join|unreachable": {
+        en: "Can’t open the invite right now. Check your connection and try again.",
+        es: "No se puede abrir la invitación ahora. Revisa tu conexión e inténtalo de nuevo.",
+        pt: "Não foi possível abrir o convite agora. Confira sua conexão e tente de novo.",
+    },
     "artise|desktop|rail|unread": {
         en: "Unread: %(count)s",
         es: "Sin leer: %(count)s",

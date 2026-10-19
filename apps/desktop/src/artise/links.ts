@@ -5,25 +5,33 @@ SPDX-License-Identifier: AGPL-3.0-only
 */
 
 import { getArtiseId } from "./artiseId/instance.js";
+import { type JoinLink, parseJoinLink } from "./join/joinLink.js";
 
 /** Element Desktop's marker in a sign-in state, before the ID of the app instance that started it. */
 const SSOID_MARKER = ":element-desktop-ssoid:";
 
-/** Where links that opened the app go, beyond Artise ID's: a workspace's view, by its sign-in ID. */
+/** Where links that opened the app go, beyond Artise ID's. */
 interface LinkTargets {
     /** Loads a workspace's sign-in return in its view; false when no open workspace has that ID. */
     signInReturn(sessionId: string, url: string): boolean;
+    /** Joins a workspace from an invite. */
+    join(link: JoinLink): void;
 }
 
 let targets: LinkTargets | undefined;
+/** Invites that opened the app before the shell was ready (a cold start from the join page). */
+let pendingJoins: JoinLink[] = [];
 
 /**
- * Sets where workspaces' sign-in returns go (the open views).
+ * Sets where workspaces' sign-in returns and invites go, and hands over invites that came before.
  *
- * @param value - the open workspaces' views.
+ * @param value - the shell and the open workspaces' views.
  */
 export function setLinkTargets(value: LinkTargets): void {
     targets = value;
+    const waiting = pendingJoins;
+    pendingJoins = [];
+    waiting.forEach((link) => value.join(link));
 }
 
 /**
@@ -50,13 +58,21 @@ function reveal(): void {
 /**
  * Takes the links Artise handles itself, before Element loads them into its window (the protocol.ts hook):
  * - Artise ID's sign-in returns go to the shell;
- * - a workspace's sign-in return goes to that workspace's own view, whichever one is shown.
+ * - a workspace's sign-in return goes to that workspace's own view, whichever one is shown;
+ * - an invite (`co.artise.desktop://join?…`) joins its workspace (artise/join).
  *
  * @param link - the link, from the OS.
  * @returns whether Artise took it; then Element does nothing more with it.
  */
 export function artiseHandlesLink(link: string): boolean {
     if (getArtiseId().handleReturn(link)) {
+        reveal();
+        return true;
+    }
+    const invite = parseJoinLink(link);
+    if (invite) {
+        if (targets) targets.join(invite);
+        else pendingJoins.push(invite);
         reveal();
         return true;
     }

@@ -172,6 +172,19 @@ A workspace's life:
   no push service, so messages arrive only while Artise runs. The person can turn it off in Settings.
 - **Close-to-tray** is Element's default already.
 
+Invite links (`src/artise/join/`): the join page's "Abrir en la computadora" opens
+`co.artise.desktop://join?workspace=<slug>&code=<code>` (family-wiki `bot/joinpage.py`), the same two parts as the
+phones' `https://join.artise.co/<slug>/<code>`. Artise joins as the phones do:
+
+1. It looks the workspace up in Artise's directory (`/v1/workspaces/<slug>`).
+2. A workspace that's already open is just shown.
+3. Otherwise its join page (`<join_url>/<code>`, where the account is made) opens in a small window of the app. It is
+   sandboxed, with no preload and an in-memory session that permits nothing; other sites open in the browser.
+4. When that window closes, the workspace opens next to the others and goes to its sign-in.
+
+Paused workspaces, expired invites, too many tries and no connection get the phones' messages. An invite that
+launches Artise waits until the shell has started.
+
 Element's main process is written for one page, so `routing.ts` lets it serve several without changing its
 handlers:
 

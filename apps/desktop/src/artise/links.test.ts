@@ -30,11 +30,14 @@ describe("signInSessionId", () => {
 
 describe("artiseHandlesLink", () => {
     const loaded: [string, string][] = [];
+    const joined: object[] = [];
 
     beforeEach(() => {
         loaded.length = 0;
+        joined.length = 0;
         vi.stubGlobal("mainWindow", { isMinimized: () => false, show: vi.fn(), focus: vi.fn() });
         setLinkTargets({
+            join: (link) => joined.push(link),
             signInReturn: (sessionId, url) => {
                 if (sessionId !== "artise-casa") return false;
                 loaded.push([sessionId, url]);
@@ -64,5 +67,23 @@ describe("artiseHandlesLink", () => {
     it("gives Artise ID's returns to the shell", () => {
         expect(artiseHandlesLink("co.artise.desktop:/vector/webapp/?code=c&state=artise-id.x")).toBe(true);
         expect(loaded).toEqual([]);
+    });
+
+    it("joins a workspace from the join page's desktop link", () => {
+        expect(artiseHandlesLink("co.artise.desktop://join?workspace=mas-k8s&code=Ab3_x-9Q")).toBe(true);
+        expect(joined).toEqual([{ slug: "mas-k8s", code: "Ab3_x-9Q" }]);
+    });
+});
+
+describe("an invite that opens Artise", () => {
+    it("waits for the shell, then joins", async () => {
+        // A cold start from the join page: the link arrives before the shell is ready.
+        vi.resetModules();
+        vi.stubGlobal("mainWindow", null);
+        const links = await import("./links.js");
+        expect(links.artiseHandlesLink("co.artise.desktop://join?workspace=acme&code=Ab3_x-9Q")).toBe(true);
+        const join = vi.fn();
+        links.setLinkTargets({ join, signInReturn: () => false });
+        expect(join).toHaveBeenCalledWith({ slug: "acme", code: "Ab3_x-9Q" });
     });
 });

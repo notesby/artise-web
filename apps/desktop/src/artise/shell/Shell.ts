@@ -139,6 +139,26 @@ export class Shell {
         await this.welcome();
     }
 
+    /**
+     * Opens one workspace next to the open ones (from an invite), remembers it, and takes the shell away.
+     *
+     * @param serverName - the workspace.
+     */
+    public async openWorkspace(serverName: string): Promise<Result<unknown>> {
+        const opened = await this.deps.openWorkspaces([serverName]);
+        if (opened.ok) {
+            const others = this.deps.openServerNames().filter((name) => name !== serverName);
+            this.deps.updateSettings({ openWorkspaces: [...others, serverName] });
+            this.deps.hide();
+        }
+        return opened;
+    }
+
+    /** Takes the shell away when it's showing "Agregar espacio de trabajo" (an invite showed an open workspace). */
+    public hideIfAdding(): void {
+        if (this.state.screen === "workspaces" && this.state.adding) this.deps.hide();
+    }
+
     private async open(chosen: string[]): Promise<void> {
         const state = this.state;
         if (state.screen !== "workspaces" || state.workspaces === "loading") return;
