@@ -1,0 +1,178 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`ArtiseNotificationHoursView > shows the hours 1`] = `
+<div>
+  <section
+    aria-label="Horario de notificaciones"
+    class="ArtiseNotificationHoursView-module_section"
+  >
+    <h3
+      class="_typography_6v6n8_153 _font-heading-sm-semibold_6v6n8_93"
+    >
+      Horario de notificaciones
+    </h3>
+    <form
+      class="_root_1o4d9_17 ArtiseNotificationHoursView-module_form"
+    >
+      <div
+        class="_inline-field_1o4d9_33"
+      >
+        <div
+          class="_inline-field-control_1o4d9_45"
+        >
+          <div
+            class="_container_udcm8_10"
+          >
+            <input
+              checked=""
+              class="_input_udcm8_24"
+              id="react-use-id-1"
+              role="switch"
+              type="checkbox"
+            />
+            <div
+              class="_ui_udcm8_34"
+            />
+          </div>
+        </div>
+        <div
+          class="_inline-field-body_1o4d9_39"
+        >
+          <label
+            class="_label_1o4d9_60"
+            for="react-use-id-1"
+          >
+            Horario de notificaciones
+          </label>
+          <span
+            class="_message_1o4d9_86 _help-message_1o4d9_92"
+            id="radix-react-use-id-2"
+          >
+            Fuera de este horario, las notificaciones de este espacio de trabajo llegan sin sonido en este navegador. Los recordatorios de Ari siempre suenan.
+          </span>
+        </div>
+      </div>
+      <fieldset
+        class="ArtiseNotificationHoursView-module_fieldset"
+      >
+        <legend
+          class="ArtiseNotificationHoursView-module_legend"
+        >
+          Días
+        </legend>
+        <label
+          class="ArtiseNotificationHoursView-module_radio"
+        >
+          <input
+            name="artise_hours_schedule"
+            type="radio"
+            value="EVERY_DAY"
+          />
+          <span>
+            Todos los días
+          </span>
+        </label>
+        <label
+          class="ArtiseNotificationHoursView-module_radio"
+        >
+          <input
+            checked=""
+            name="artise_hours_schedule"
+            type="radio"
+            value="WEEKDAYS"
+          />
+          <span>
+            De lunes a viernes
+          </span>
+        </label>
+        <label
+          class="ArtiseNotificationHoursView-module_radio"
+        >
+          <input
+            name="artise_hours_schedule"
+            type="radio"
+            value="CUSTOM"
+          />
+          <span>
+            Personalizado
+          </span>
+        </label>
+        <p
+          class="_typography_6v6n8_153 _font-body-sm-regular_6v6n8_31 ArtiseNotificationHoursView-module_footer"
+        >
+          El sábado y el domingo, las notificaciones llegan sin sonido.
+        </p>
+      </fieldset>
+      <fieldset
+        class="ArtiseNotificationHoursView-module_fieldset"
+      >
+        <legend
+          class="ArtiseNotificationHoursView-module_legend"
+        >
+          Horario
+        </legend>
+        <span
+          class="ArtiseNotificationHoursView-module_times"
+        >
+          <label
+            class="ArtiseNotificationHoursView-module_time"
+          >
+            <span>
+              Desde
+            </span>
+            <input
+              aria-label="Desde"
+              type="time"
+              value="09:00"
+            />
+          </label>
+          <label
+            class="ArtiseNotificationHoursView-module_time"
+          >
+            <span>
+              Hasta
+            </span>
+            <input
+              aria-label="Hasta"
+              type="time"
+              value="18:00"
+            />
+          </label>
+        </span>
+      </fieldset>
+      <div
+        class="_inline-field_1o4d9_33"
+      >
+        <div
+          class="_inline-field-control_1o4d9_45"
+        >
+          <div
+            class="_container_udcm8_10"
+          >
+            <input
+              checked=""
+              class="_input_udcm8_24"
+              id="react-use-id-3"
+              role="switch"
+              type="checkbox"
+            />
+            <div
+              class="_ui_udcm8_34"
+            />
+          </div>
+        </div>
+        <div
+          class="_inline-field-body_1o4d9_39"
+        >
+          <label
+            class="_label_1o4d9_60"
+            for="react-use-id-3"
+          >
+            Las menciones y respuestas siempre suenan
+          </label>
+        </div>
+      </div>
+    </form>
+  </section>
+</div>
+`;

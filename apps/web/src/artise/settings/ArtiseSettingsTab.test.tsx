@@ -144,4 +144,14 @@ describe("Artise's tab in Settings", () => {
         await userEvent.click(screen.getByRole("button", { name: "Write to your workspace's admin" }));
         expect(onFinished).toHaveBeenCalled();
     });
+
+    // Notification hours are in the same tab, off until turned on.
+    it("has the notification hours", async () => {
+        render(getComponent(MAS_K8S_WELL_KNOWN));
+        expect(screen.getByRole("region", { name: "Notification hours" })).toBeVisible();
+        const toggle = screen.getByRole("switch", { name: "Notification hours" });
+        expect(toggle).not.toBeChecked();
+        await userEvent.click(toggle);
+        expect(screen.getByRole("radio", { name: "Every day" })).toBeChecked();
+    });
 });

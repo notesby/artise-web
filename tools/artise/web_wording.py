@@ -233,6 +233,45 @@ ARTISE_TEXTS: dict[str, tuple[object, object, object]] = {
         "As mensagens importantes do Ari sempre avisam você, mesmo com a conversa silenciada.",
     ),
     "artise|whats_new|done": ("Got it", "Entendido", "Entendi"),
+    # Notification hours (W4-1), worded like Android's artise_notification_hours_strings.xml; kept per browser.
+    "artise|hours|title": ("Notification hours", "Horario de notificaciones", "Horário das notificações"),
+    "artise|hours|description_browser": (
+        "Outside these hours, this workspace's notifications arrive without sound in this browser. Ari's reminders always sound.",
+        "Fuera de este horario, las notificaciones de este espacio de trabajo llegan sin sonido en este navegador. Los recordatorios de Ari siempre suenan.",
+        "Fora deste horário, as notificações deste espaço de trabalho chegam sem som neste navegador. Os lembretes do Ari sempre tocam.",
+    ),
+    "artise|hours|description_computer": (
+        "Outside these hours, this workspace's notifications arrive without sound on this computer. Ari's reminders always sound.",
+        "Fuera de este horario, las notificaciones de este espacio de trabajo llegan sin sonido en esta computadora. Los recordatorios de Ari siempre suenan.",
+        "Fora deste horário, as notificações deste espaço de trabalho chegam sem som neste computador. Os lembretes do Ari sempre tocam.",
+    ),
+    "artise|hours|days": ("Days", "Días", "Dias"),
+    "artise|hours|every_day": ("Every day", "Todos los días", "Todos os dias"),
+    "artise|hours|weekdays": ("Monday to Friday", "De lunes a viernes", "De segunda a sexta"),
+    "artise|hours|custom": ("Custom", "Personalizado", "Personalizado"),
+    "artise|hours|weekdays_footer": (
+        "On Saturday and Sunday, notifications arrive without sound.",
+        "El sábado y el domingo, las notificaciones llegan sin sonido.",
+        "No sábado e no domingo, as notificações chegam sem som.",
+    ),
+    "artise|hours|custom_footer": (
+        "On a day that's off, notifications arrive without sound. If Until is earlier than From, the hours go past midnight.",
+        "En un día apagado, las notificaciones llegan sin sonido. Si «Hasta» es antes que «Desde», el horario pasa de la medianoche.",
+        "Num dia desligado, as notificações chegam sem som. Se “Até” for antes de “De”, o horário passa da meia-noite.",
+    ),
+    "artise|hours|hours": ("Hours", "Horario", "Horário"),
+    "artise|hours|from": ("From", "Desde", "De"),
+    "artise|hours|until": ("Until", "Hasta", "Até"),
+    "artise|hours|mentions": (
+        "Mentions and replies always sound",
+        "Las menciones y respuestas siempre suenan",
+        "Menções e respostas sempre tocam",
+    ),
+    "artise|hours|not_kept": (
+        "This browser won't keep these settings (its storage is blocked).",
+        "Este navegador no guarda esta configuración (tiene bloqueado el almacenamiento).",
+        "Este navegador não guarda estas configurações (o armazenamento está bloqueado).",
+    ),
     # The Notes page (W3-2), worded like Android's artise/notes texts.
     "artise|notes|title": ("Notes", "Notas", "Notas"),
     "artise|notes|back": ("Back to the chat", "Volver al chat", "Voltar à conversa"),
