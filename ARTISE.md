@@ -86,6 +86,17 @@ trabajo" / "espaço de trabalho" instead of the homeserver. The words are the ph
 - `python3 -m unittest discover -s tools/artise` (also in CI) fails when Element renames a key in the table, a
   language is missing, a text loses a placeholder or tag, or the JSON is stale.
 
+## Element settings Artise turns on
+
+`artise/settings/artiseDefaults.ts` runs once per browser at start (from `registerArtise`) and turns on, only where
+the person hasn't chosen yet, the settings that show the link previews the phones put in messages (MSC4095):
+`feature_msc4095_url_preview_bundle` and `urlPreviewsEnabled_e2ee`. Element's "bundled only" stays on (its default),
+so previews in encrypted chats come only from the message itself: nobody's server or website is contacted to show
+them. Element's own defaults aren't changed, because its tests rely on them; a later choice is never undone.
+
+The web doesn't make previews when sending: a browser can't read other sites, and the workspaces' Synapse keeps
+`url_preview_enabled: false` on purpose, so the server never fetches the links people share.
+
 ## The server's `config.json`
 
 The server mounts its own `config.json` over `/app/config.json` (family-wiki `deploy/`). Besides what it has, Artise
