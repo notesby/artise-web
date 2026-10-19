@@ -19,6 +19,8 @@ import { Shell } from "./Shell.js";
 import { prepareWorkspaces } from "../workspace/openWorkspaces.js";
 import { setLinkTargets } from "../links.js";
 import { WorkspaceViews } from "../views/workspaceViews.js";
+import { Rail } from "../rail/rail.js";
+import * as tray from "../../tray.js";
 
 const SCHEME = "artise-shell";
 
@@ -59,7 +61,29 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         if (!url.startsWith(`${SHELL_ORIGIN}/`)) event.preventDefault();
     });
 
-    const views = new WorkspaceViews(window);
+    // The workspace rail: script-free like the shell, on the same scheme and session.
+    const railView = new WebContentsView({
+        webPreferences: { session: shellSession, javascript: false, sandbox: true, contextIsolation: true },
+    });
+    railView.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+    railView.webContents.on("will-navigate", (event, url) => {
+        if (!url.startsWith(`${SHELL_ORIGIN}/rail`)) event.preventDefault();
+    });
+    let buildDir: string | undefined;
+    void getIconPath().then((iconPath) => (buildDir = path.dirname(iconPath)));
+    const views = new WorkspaceViews(window, {
+        rail: railView,
+        buildDir: () => buildDir,
+        refreshTray: () => tray.initApplicationMenu(),
+    });
+    const rail = new Rail({
+        items: () => views.railItems(),
+        logoUrl: (index) => views.open[index]?.info.logo,
+        show: (index) => views.show(index),
+        fetch: (url) => net.fetch(url),
+        unreadLabel: (count) => artiseT("artise|desktop|rail|unread", { count }, shellLocale()),
+        language: () => textLanguage(shellLocale()),
+    });
     setLinkTargets({
         signInReturn: (sessionId, url) => {
             const open = views.bySessionId(sessionId);
@@ -110,7 +134,12 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         t: (key) => artiseT(key, {}, shellLocale()),
         language: () => textLanguage(shellLocale()),
     });
-    shellSession.protocol.handle(SCHEME, (request) => shell.handle(new URL(request.url)));
+    shellSession.protocol.handle(SCHEME, async (request) => {
+        const url = new URL(request.url);
+        return (await rail.handle(url)) ?? shell.handle(url);
+    });
+    // The rail loads its (still empty) page now; it joins the window when a workspace opens.
+    void railView.webContents.loadURL(`${SHELL_ORIGIN}/rail`);
 
     void shell.start();
     return true;

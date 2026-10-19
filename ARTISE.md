@@ -69,6 +69,7 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`). Links Artise handles go to `artise/links.ts` first: Artise ID's sign-in returns to the shell, each workspace's to its own view.                                                                                     |
 | `apps/desktop/src/electron-main.ts`                                   | Calls into `artise/main.ts`: before the app is ready, the start-up language (`artise/language.ts`); in `configureSentry`, crash reports only with consent (`artise/crashReports.ts`); the shell's `artise-shell:` scheme in Element's privileged-scheme list; and the shell, not Element, decides what the window first shows (`artise/shell/`). |
 | `apps/desktop/src/seshat.ts`                                          | Message search keeps each workspace's index in its own folder (`artise/views/context.ts`).                                                                                                                                                                                                                                                       |
+| `apps/desktop/src/tray.ts`                                            | The tray menu lists the open workspaces with their unread counts, above Element's items (`artise/trayItems.ts`).                                                                                                                                                                                                                                 |
 | `apps/desktop/src/vectormenu.ts`                                      | The Help menu gets "Acerca de Artise": the version, the AGPL licence and this version's source code (`artise/about.ts`).                                                                                                                                                                                                                         |
 | `knip.ts`                                                             | Lists the Artise build's `apps/desktop/artise/electron-builder.ts` as an entry, so knip doesn't call it unused.                                                                                                                                                                                                                                  |
 
@@ -141,6 +142,14 @@ its own persistent partition (`persist:workspace-<key>`, the key a hash of the s
 on `vector://`, Element's preload, link handling and media auth, a permission policy (notifications, calls, screen
 sharing, clipboard writing and full screen, only for `vector://vector`), its own `getConfig` and `getProtocol`
 answers (the second sends its sign-in return back to it), and its own Seshat.
+
+The rail (`src/artise/rail/`): a 72 px column on the left of the window with each open workspace's logo (or initials
+on its colour) and unread count; a click or Ctrl/⌘+number shows it. Like the shell's pages it is script-free HTML on
+the `artise-shell:` scheme, drawn again when something changes; logos are downloaded by the main process so the
+page's policy stays `img-src 'self'`. Each workspace's web app reports its own count (`setBadgeCount`); Artise adds
+them up before Element's badge code shows the total: the dock badge on macOS, and on Windows a taskbar overlay
+drawn by `tools/artise/desktop_icons.py` (`artise/icons/overlay/`), since Element Web draws one per page. The tray
+menu lists the workspaces with their counts.
 
 Element's main process is written for one page, so `routing.ts` lets it serve several without changing its
 handlers:

@@ -40,7 +40,12 @@ export function artiseBuilderConfig(element: Configuration, sourceRef = ""): Con
         // app-update.yml pointing at Element's GitHub releases.
         publish: null,
         // The window and tray icons are read at run time from resources/build/ (src/icon.ts).
-        extraResources: [{ from: ARTISE_ICONS, to: "build", filter: ["icon.png", "icon.ico"] }, "webapp.asar"],
+        extraResources: [
+            { from: ARTISE_ICONS, to: "build", filter: ["icon.png", "icon.ico"] },
+            // Windows' taskbar badge with every workspace's unread count added up (src/artise/views/unread.ts).
+            { from: `${ARTISE_ICONS}/overlay`, to: "build/overlay" },
+            "webapp.asar",
+        ],
         mac: { ...element.mac, icon: `${ARTISE_ICONS}/icon.icon` },
         dmg: { ...element.dmg, badgeIcon: `${ARTISE_ICONS}/icon.icon` },
         win: { ...element.win, icon: `${ARTISE_ICONS}/icon.ico` },

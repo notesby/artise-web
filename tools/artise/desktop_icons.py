@@ -15,7 +15,9 @@ It writes:
 - icon.png (512 px) for Linux, the window and the tray;
 - icon.ico (16-256 px) for Windows;
 - icon.icon/, an Icon Composer bundle for macOS. macOS draws its own rounded shape around it, so the
-  layer is the full square.
+  layer is the full square;
+- overlay/1.png … 9.png and 9plus.png: Windows' taskbar badge with the unread count of every workspace added
+  up (Element Web draws one per page, which can't show a total). Drawn with DejaVu Sans Bold.
 
 The PNG and ICO get rounded corners with a small margin, as Windows and Linux don't round icons themselves.
 Needs Pillow (`pip install pillow`).
@@ -27,11 +29,16 @@ import json
 import pathlib
 import sys
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "apps/web/res/vector-icons/1024.png"
 OUTPUT = ROOT / "apps/desktop/artise/icons"
+
+FONT = pathlib.Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+# Element Web's badge colour (its "critical" red), drawn at 32 px for Windows' 16 px overlay at 200 %.
+BADGE_RED = (213, 25, 40, 255)
+OVERLAY_SIZE = 32
 
 ICO_SIZES = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
 # Margin and corner radius as a share of the icon's side, close to Windows 11's app icons.
@@ -66,6 +73,16 @@ def rounded(square: Image.Image) -> Image.Image:
     return out
 
 
+def overlay(text: str) -> Image.Image:
+    """A red disc with the count in white, as Element's own overlay looks."""
+    image = Image.new("RGBA", (OVERLAY_SIZE, OVERLAY_SIZE), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    draw.ellipse((0, 0, OVERLAY_SIZE - 1, OVERLAY_SIZE - 1), fill=BADGE_RED)
+    font = ImageFont.truetype(str(FONT), 22 if len(text) == 1 else 15)
+    draw.text((OVERLAY_SIZE / 2, OVERLAY_SIZE / 2), text, font=font, fill="white", anchor="mm")
+    return image
+
+
 def main() -> int:
     square = Image.open(SOURCE).convert("RGBA")
     if square.size != (1024, 1024):
@@ -84,7 +101,12 @@ def main() -> int:
     text = json.dumps(ICON_JSON, indent=4).replace('[\n            "macOS"\n        ]', '["macOS"]')
     (bundle / "icon.json").write_text(text + "\n", encoding="utf-8")
 
-    print(f"Wrote {OUTPUT.relative_to(ROOT)}: icon.png, icon.ico, icon.icon/")
+    (OUTPUT / "overlay").mkdir(exist_ok=True)
+    for count in range(1, 10):
+        overlay(str(count)).save(OUTPUT / "overlay" / f"{count}.png")
+    overlay("9+").save(OUTPUT / "overlay" / "9plus.png")
+
+    print(f"Wrote {OUTPUT.relative_to(ROOT)}: icon.png, icon.ico, icon.icon/, overlay/")
     return 0
 
 

@@ -57,6 +57,11 @@ export const DESKTOP_WORDING = {
         es: "Ayúdanos a mejorar Artise",
         pt: "Ajude a melhorar o Artise",
     },
+    "artise|desktop|rail|unread": {
+        en: "Unread: %(count)s",
+        es: "Sin leer: %(count)s",
+        pt: "Não lidas: %(count)s",
+    },
     "artise|desktop|welcome|apple": {
         en: "Continue with Apple",
         es: "Continuar con Apple",
