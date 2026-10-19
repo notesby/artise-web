@@ -49,7 +49,13 @@ import { getAsarPath } from "./asar.js";
 import { getIconPath } from "./icon.js";
 import { getArgs } from "./args.js";
 import { type ConfigOptions, loadConfig } from "./config.js";
-import { applyArtiseLanguage, isArtise, startArtiseCrashReports } from "./artise/main.js";
+import {
+    applyArtiseLanguage,
+    artisePrivilegedSchemes,
+    isArtise,
+    startArtiseCrashReports,
+    startArtiseShell,
+} from "./artise/main.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -122,6 +128,8 @@ protocol.registerSchemesAsPrivileged([
             supportFetchAPI: true,
         },
     },
+    // Artise: the shell's own pages (artise/shell)
+    ...artisePrivilegedSchemes(),
 ]);
 
 // Turn the sandbox on for *all* windows we might generate. Doing this means we don't
@@ -289,7 +297,8 @@ app.on("ready", async () => {
 
     // do this after we know we are the primary instance of the app
     const hasDeeplink = protocolHandler.initialise(args);
-    if (!hasDeeplink) {
+    // Artise: the shell decides what the window shows, its welcome or the person's workspaces (artise/shell)
+    if (!hasDeeplink && !startArtiseShell(global.mainWindow)) {
         void global.mainWindow.loadURL("vector://vector/webapp/");
     }
 

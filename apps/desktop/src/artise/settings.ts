@@ -14,6 +14,8 @@ export interface ArtiseSettings {
     crashReports?: boolean;
     /** The language of the person's first workspace (co.artise.workspace.language), saved by the shell. */
     workspaceLanguage?: string;
+    /** The server names of the workspaces the person chose to open, opened again at the next start. */
+    openWorkspaces?: string[];
 }
 
 const FILE_NAME = "artise-settings.json";

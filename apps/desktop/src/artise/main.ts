@@ -10,3 +10,4 @@ export { isArtise } from "./variant.js";
 export { startArtiseCrashReports } from "./crashReports.js";
 export { applyArtiseLanguage } from "./language.js";
 export { artiseHandlesLink } from "./artiseId/instance.js";
+export { artisePrivilegedSchemes, startArtiseShell } from "./shell/shellView.js";
