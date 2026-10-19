@@ -5,8 +5,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 */
 
 // Two workspaces open side by side, each in its own view and storage (D3-1). There's no Artise ID account in
-// CI, so the test stands in for Artise ID inside the app and lists two real workspaces. It blocks their sign-in
-// servers, so nothing is registered there and no browser opens.
+// CI, so the test stands in for Artise ID inside the app and lists two real workspaces. Their web apps are kept
+// offline, so nothing reaches their sign-in servers and no browser opens.
 
 import { type ElectronApplication, type Page } from "@playwright/test";
 
@@ -32,24 +32,28 @@ const WORKSPACES = [
 async function openTwoWorkspaces(app: ElectronApplication): Promise<Page[]> {
     const isShell = (page: Page): boolean => page.url().startsWith("artise-shell://shell/");
     const shell = app.windows().find(isShell) ?? (await app.waitForEvent("window", { predicate: isShell }));
-    await app.evaluate(({ app, session }, workspaces) => {
+    await app.evaluate(async ({ app, session, shell }, workspaces) => {
         // The app's own modules, as the app loaded them.
         const require = process
             .getBuiltinModule("node:module")
             .createRequire(`${app.getAppPath()}/lib/electron-main.js`);
         const lib = "./artise/"; // the packaged app's lib/artise/, not a file in this repository
+        // oxlint-disable-next-line import/no-dynamic-require -- the app's own files, not this repository's
         const artiseId = require(`${lib}artiseId/instance.js`).getArtiseId();
+        // oxlint-disable-next-line import/no-dynamic-require -- as above
         const { workspaceKey } = require(`${lib}views/context.js`);
         artiseId.isSignedIn = async (): Promise<boolean> => true;
         artiseId.workspaces = async (): Promise<object> => ({ ok: true, value: workspaces });
-        for (const { serverName } of workspaces) {
-            session
-                .fromPartition(`persist:workspace-${workspaceKey(serverName)}`)
-                .webRequest.onBeforeRequest(
-                    { urls: ["https://auth.mas-k8s.artise.co/*", "https://auth.artise.co/*"] },
-                    (_details, callback) => callback({ cancel: true }),
-                );
-        }
+        // The workspaces' web apps stay offline (a proxy that answers nothing), so they never reach their
+        // sign-in servers, and nothing opens in a browser.
+        await Promise.all(
+            workspaces.map(({ serverName }) =>
+                session
+                    .fromPartition(`persist:workspace-${workspaceKey(serverName)}`)
+                    .setProxy({ proxyRules: "http://127.0.0.1:9" }),
+            ),
+        );
+        shell.openExternal = async (): Promise<void> => {};
     }, WORKSPACES);
 
     // The shell's action redirects back to its page, which Playwright reports as an aborted navigation.
