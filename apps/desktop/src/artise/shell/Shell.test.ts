@@ -43,7 +43,7 @@ function setUp(
         updateSettings: (change) => Object.assign(saved, change),
         show: vi.fn(),
         hide: vi.fn(),
-        openWorkspaces: vi.fn(),
+        openWorkspaces: vi.fn(async (): Promise<Result<unknown>> => ({ ok: true, value: undefined })),
         icon: async () => new Uint8Array([137, 80, 78, 71]),
         t: (key) => artiseT(key, {}, "es"),
         language: () => "es",
@@ -94,9 +94,28 @@ describe("Shell", () => {
             await vi.waitFor(() => expect(world.shell.current.screen).toBe("workspaces"));
 
             await world.shell.handle(at("/open?workspace=mas-k8s.artise.co"));
-            expect(world.deps.hide).toHaveBeenCalled();
+            await vi.waitFor(() => expect(world.deps.hide).toHaveBeenCalled());
             expect(world.deps.openWorkspaces).toHaveBeenCalledWith(["mas-k8s.artise.co"]);
             expect(world.saved.openWorkspaces).toEqual(["mas-k8s.artise.co"]);
+        });
+
+        it("stays on the list, as ticked, when the workspace can't be reached", async () => {
+            vi.mocked(world.deps.openWorkspaces).mockResolvedValue({ ok: false, error: "unreachable" });
+            await world.shell.handle(at("/sign-in"));
+            await vi.waitFor(() => expect(world.shell.current.screen).toBe("workspaces"));
+
+            await world.shell.handle(at("/open?workspace=artise.co"));
+            await vi.waitFor(() => expect(world.shell.current).toHaveProperty("error", "unreachable"));
+            expect(world.shell.current).toEqual({
+                screen: "workspaces",
+                error: "unreachable",
+                workspaces: [
+                    { serverName: "artise.co", name: "Casa", selected: true },
+                    { serverName: "mas-k8s.artise.co", name: "Prueba MAS", selected: false },
+                ],
+            });
+            expect(world.deps.hide).not.toHaveBeenCalled();
+            expect(world.saved.openWorkspaces).toBeUndefined();
         });
 
         it("opens only workspaces from the person's own list", async () => {
@@ -146,6 +165,14 @@ describe("Shell", () => {
         await world.shell.start();
         expect(world.deps.openWorkspaces).toHaveBeenCalledWith(["artise.co"]);
         expect(world.deps.show).not.toHaveBeenCalled();
+    });
+
+    it("shows the list when last time's workspace can't be reached at start", async () => {
+        world = setUp(true, { openWorkspaces: ["artise.co"] });
+        vi.mocked(world.deps.openWorkspaces).mockResolvedValue({ ok: false, error: "unreachable" });
+        await world.shell.start();
+        expect(world.deps.show).toHaveBeenCalled();
+        expect(world.shell.current.screen).toBe("workspaces");
     });
 
     it("shows the list when signed in but nothing was opened yet", async () => {

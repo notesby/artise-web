@@ -12,6 +12,7 @@ import { randomArray } from "./utils.js";
 import { consumeDisplayMediaCallback } from "./displayMediaCallback.js";
 import Store, { clearData } from "./store.js";
 import { getConfig } from "./config.js";
+import { configFor } from "./artise/main.js";
 
 let focusHandlerAttached = false;
 ipcMain.on("loudNotification", function (): void {
@@ -244,7 +245,8 @@ ipcMain.on("ipcCall", async function (_ev: IpcMainEvent, payload) {
     });
 });
 
-ipcMain.handle("getConfig", getConfig);
+// Artise: each workspace's web app gets that workspace's config (artise/workspace)
+ipcMain.handle("getConfig", (event) => configFor(event.sender) ?? getConfig());
 
 const initialisePromiseWithResolvers = Promise.withResolvers<void>();
 export const initialisePromise = initialisePromiseWithResolvers.promise;

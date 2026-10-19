@@ -11,3 +11,4 @@ export { startArtiseCrashReports } from "./crashReports.js";
 export { applyArtiseLanguage } from "./language.js";
 export { artiseHandlesLink } from "./artiseId/instance.js";
 export { artisePrivilegedSchemes, startArtiseShell } from "./shell/shellView.js";
+export { configFor } from "./workspace/openWorkspaces.js";
