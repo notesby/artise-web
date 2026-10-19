@@ -12,6 +12,7 @@ import { type MatrixClient } from "matrix-js-sdk/src/matrix";
 import { useMatrixClientContext } from "../../contexts/MatrixClientContext";
 import { artiseT } from "../i18n/artiseT";
 import { notesApiFor } from "./NotesApi";
+import { getWorkspaceFile } from "../workspace/WorkspaceFile";
 import { NOTES_STATE_EVENT } from "./NotesPageViewModel";
 import { notesHash } from "./notesLocation";
 
@@ -40,13 +41,15 @@ export function resetChatsWithNotes(): void {
 /**
  * Whether a chat has notes: it does when the bot set its `co.artise.notes` state; otherwise the Notes API's
  * list of chats says (a chat can lack the state, see the contract's "Live updates").
+ *
+ * @param client - The signed-in client; `null` (outside a client's context, as in some of Element's tests) is no.
  */
-function useHasNotes(roomId: string): boolean {
-    const client = useMatrixClientContext();
-    const hasState = !!client.getRoom(roomId)?.currentState.getStateEvents(NOTES_STATE_EVENT, "");
+export function useHasNotes(client: MatrixClient | null, roomId: string): boolean {
+    const hasApi = !!client && !!getWorkspaceFile(client)?.links.notes_api;
+    const hasState = !!client?.getRoom(roomId)?.currentState.getStateEvents(NOTES_STATE_EVENT, "");
     const [inList, setInList] = useState(false);
     useEffect(() => {
-        if (hasState || !notesApiFor(client)) return;
+        if (!client || hasState || !hasApi) return;
         let live = true;
         knownChats(client)
             .then((ids) => live && setInList(ids.has(roomId)))
@@ -54,13 +57,13 @@ function useHasNotes(roomId: string): boolean {
         return () => {
             live = false;
         };
-    }, [client, roomId, hasState]);
-    return (hasState && !!notesApiFor(client)) || inList;
+    }, [client, roomId, hasState, hasApi]);
+    return hasApi && (hasState || inList);
 }
 
 /** "Notas" in a chat's header, when the chat has notes. */
 export function NotesHeaderButton({ roomId }: Readonly<{ roomId: string }>): JSX.Element | null {
-    const hasNotes = useHasNotes(roomId);
+    const hasNotes = useHasNotes(useMatrixClientContext(), roomId);
     if (!hasNotes) return null;
     const label = artiseT("artise|notes|title");
     return (

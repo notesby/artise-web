@@ -89,6 +89,31 @@ exports[`ArtiseNotesView > shows the list and the open note 1`] = `
             type="file"
           />
         </div>
+        <form
+          class="ArtiseNotesView-module_searchBox"
+          role="search"
+        >
+          <svg
+            aria-hidden="true"
+            class="ArtiseNotesView-module_searchIcon"
+            fill="currentColor"
+            height="18px"
+            viewBox="0 0 24 24"
+            width="18px"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M15.05 16.463a7.5 7.5 0 1 1 1.414-1.414l3.243 3.244a1 1 0 0 1-1.414 1.414zM16 10.5a5.5 5.5 0 1 0-11 0 5.5 5.5 0 0 0 11 0"
+            />
+          </svg>
+          <input
+            aria-label="Buscar en las notas"
+            class="ArtiseNotesView-module_searchInput"
+            placeholder="Buscar en las notas"
+            type="search"
+            value=""
+          />
+        </form>
         <ul
           class="ArtiseNotesView-module_list"
         >
@@ -443,6 +468,15 @@ exports[`ArtiseNotesView > shows the list and the open note 1`] = `
         <div
           class="ArtiseNotesView-module_noteBar"
         >
+          <button
+            class="_button_1nw83_8"
+            data-kind="tertiary"
+            data-size="md"
+            role="button"
+            tabindex="0"
+          >
+            Historial
+          </button>
           <button
             class="_button_1nw83_8"
             data-kind="secondary"

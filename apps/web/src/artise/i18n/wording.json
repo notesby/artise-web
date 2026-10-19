@@ -35,6 +35,12 @@
         "pt": "Voltar à conversa",
         "pt-br": "Voltar à conversa"
     },
+    "artise|notes|back_to_note": {
+        "en": "Back to the note",
+        "es": "Volver a la nota",
+        "pt": "Voltar à nota",
+        "pt-br": "Voltar à nota"
+    },
     "artise|notes|cancel": {
         "en": "Cancel",
         "es": "Cancelar",
@@ -64,6 +70,18 @@
         "es": "Elige un chat para ver sus notas.",
         "pt": "Escolha uma conversa para ver as notas.",
         "pt-br": "Escolha uma conversa para ver as notas."
+    },
+    "artise|notes|clear_search": {
+        "en": "Clear search",
+        "es": "Borrar búsqueda",
+        "pt": "Limpar busca",
+        "pt-br": "Limpar busca"
+    },
+    "artise|notes|close": {
+        "en": "Close",
+        "es": "Cerrar",
+        "pt": "Fechar",
+        "pt-br": "Fechar"
     },
     "artise|notes|combine": {
         "en": "Combine",
@@ -323,6 +341,30 @@
         "pt": "Use “/” para uma pasta dentro de outra, como Receitas/Sobremesas.",
         "pt-br": "Use “/” para uma pasta dentro de outra, como Receitas/Sobremesas."
     },
+    "artise|notes|history": {
+        "en": "History",
+        "es": "Historial",
+        "pt": "Histórico",
+        "pt-br": "Histórico"
+    },
+    "artise|notes|history_empty": {
+        "en": "No changes yet.",
+        "es": "Todavía no hay cambios.",
+        "pt": "Ainda não há alterações.",
+        "pt-br": "Ainda não há alterações."
+    },
+    "artise|notes|history_entry": {
+        "en": "%(by)s · %(when)s",
+        "es": "%(by)s · %(when)s",
+        "pt": "%(by)s · %(when)s",
+        "pt-br": "%(by)s · %(when)s"
+    },
+    "artise|notes|history_version": {
+        "en": "The note as it was on %(when)s, by %(by)s.",
+        "es": "La nota como estaba el %(when)s, por %(by)s.",
+        "pt": "A nota como estava em %(when)s, por %(by)s.",
+        "pt-br": "A nota como estava em %(when)s, por %(by)s."
+    },
     "artise|notes|keep_copy": {
         "en": "Keep my copy",
         "es": "Conservar mi copia",
@@ -352,6 +394,12 @@
         "es": "Salir sin guardar",
         "pt": "Sair sem salvar",
         "pt-br": "Sair sem salvar"
+    },
+    "artise|notes|linked_from": {
+        "en": "Linked from",
+        "es": "Enlazada desde",
+        "pt": "Vinculada em",
+        "pt-br": "Vinculada em"
     },
     "artise|notes|merged": {
         "en": "Someone else changed other lines while you were editing. Both changes were saved.",
@@ -437,6 +485,12 @@
         "pt": "Abrir",
         "pt-br": "Abrir"
     },
+    "artise|notes|open_note": {
+        "en": "Open the note",
+        "es": "Abrir la nota",
+        "pt": "Abrir a nota",
+        "pt-br": "Abrir a nota"
+    },
     "artise|notes|pick": {
         "en": "Pick a note to read it.",
         "es": "Elige una nota para leerla.",
@@ -461,6 +515,12 @@
         "pt": "Renomear",
         "pt-br": "Renomear"
     },
+    "artise|notes|restore": {
+        "en": "Restore this version",
+        "es": "Restaurar esta versión",
+        "pt": "Restaurar esta versão",
+        "pt-br": "Restaurar esta versão"
+    },
     "artise|notes|retry": {
         "en": "Try again",
         "es": "Reintentar",
@@ -472,6 +532,42 @@
         "es": "Guardar",
         "pt": "Salvar",
         "pt-br": "Salvar"
+    },
+    "artise|notes|save_message": {
+        "en": "Save to Notes",
+        "es": "Guardar en Notas",
+        "pt": "Salvar nas Notas",
+        "pt-br": "Salvar nas Notas"
+    },
+    "artise|notes|save_message_failed": {
+        "en": "Couldn't save it to Notes. Try again.",
+        "es": "No se pudo guardar en Notas. Inténtalo de nuevo.",
+        "pt": "Não foi possível salvar nas Notas. Tente de novo.",
+        "pt-br": "Não foi possível salvar nas Notas. Tente de novo."
+    },
+    "artise|notes|saved_message": {
+        "en": "Saved to this chat's Notes",
+        "es": "Guardado en las Notas de este chat",
+        "pt": "Salvo nas Notas desta conversa",
+        "pt-br": "Salvo nas Notas desta conversa"
+    },
+    "artise|notes|saved_messages_folder": {
+        "en": "Saved messages",
+        "es": "Mensajes guardados",
+        "pt": "Mensagens salvas",
+        "pt-br": "Mensagens salvas"
+    },
+    "artise|notes|search": {
+        "en": "Search notes",
+        "es": "Buscar en las notas",
+        "pt": "Buscar notas",
+        "pt-br": "Buscar notas"
+    },
+    "artise|notes|search_empty": {
+        "en": "Nothing found for “%(query)s”.",
+        "es": "No se encontró nada para “%(query)s”.",
+        "pt": "Nada encontrado para “%(query)s”.",
+        "pt-br": "Nada encontrado para “%(query)s”."
     },
     "artise|notes|suggestions": {
         "en": "Notes and files",
