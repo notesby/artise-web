@@ -4,7 +4,14 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { type JsonObject } from "shared-types";
+
 import { getBuildConfig } from "../build-config.js";
+import { loadJsonFile } from "../utils.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** The Artise variant's app ID and sign-in scheme (apps/desktop/artise/build.json). */
 export const ARTISE_APP_ID = "co.artise.desktop";
@@ -32,10 +39,22 @@ export function legacyProtocol(elementLegacy: string): string {
 }
 
 /**
- * The source code of this exact version, as the AGPL asks: the release's `desktop-v<version>` tag.
+ * The git tag or commit this build was made from, which CI writes into the packaged package.json
+ * (`artise_source_ref`, from src/artise/build/builderConfig.ts). Empty when running unpackaged.
+ */
+export function artiseSourceRef(): string {
+    const packageJson = loadJsonFile(path.join(__dirname, "..", "..", "package.json")) as JsonObject;
+    const ref = packageJson["artise_source_ref"];
+    return typeof ref === "string" ? ref : "";
+}
+
+/**
+ * The source code of this exact build, as the AGPL asks: the commit or tag it was built from, else the
+ * release's `desktop-v<version>` tag.
  *
  * @param version - the app's version, from `app.getVersion()`.
+ * @param sourceRef - the build's tag or commit ({@link artiseSourceRef}), when known.
  */
-export function sourceCodeUrl(version: string): string {
-    return `${ARTISE_SOURCE_REPO}/tree/desktop-v${encodeURIComponent(version)}`;
+export function sourceCodeUrl(version: string, sourceRef = ""): string {
+    return `${ARTISE_SOURCE_REPO}/tree/${encodeURIComponent(sourceRef || `desktop-v${version}`)}`;
 }

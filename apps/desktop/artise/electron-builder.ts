@@ -19,5 +19,7 @@ export default async function artiseConfig(): Promise<Configuration> {
     // Element's configuration reads the variant when it's imported, so set it first.
     process.env.VARIANT_PATH ??= "artise/build.json";
     const { default: element } = await import("../electron-builder.ts");
-    return artiseBuilderConfig(element);
+    // On CI: the release tag, else the commit. Locally: nothing, and About links the version's tag.
+    const sourceRef = process.env.GITHUB_REF_TYPE === "tag" ? process.env.GITHUB_REF_NAME : process.env.GITHUB_SHA;
+    return artiseBuilderConfig(element, sourceRef);
 }

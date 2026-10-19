@@ -19,6 +19,7 @@ vi.mock("electron", () => ({
 vi.mock("./variant.js", async (importOriginal) => ({
     ...(await importOriginal<typeof import("./variant.js")>()),
     isArtise: vi.fn(),
+    artiseSourceRef: (): string => "",
 }));
 
 vi.mock("counterpart", () => ({ default: { getLocale: (): string => "es" } }));

@@ -86,18 +86,26 @@ Only the Artise build (app ID `co.artise.desktop`) behaves differently (`src/art
 desktop tests keep passing as upstream. Its own texts are `DESKTOP_TEXTS` in `tools/artise/web_wording.py`, which
 writes `apps/desktop/src/artise/i18n/wording.ts`; code reads them with `artiseT` (`src/artise/i18n/artiseT.ts`).
 
+The desktop app packages this commit's `apps/web`, never Element's release tarball, so it runs the same Artise
+code as chat.<workspace>: `apps/desktop/artise/scripts/package-webapp.sh` builds the web app, adds
+`artise/config.json` and writes `webapp.asar`.
+
+Building: `.github/workflows/artise-desktop.yml` (Actions → Artise desktop → Run workflow, or a
+`desktop-v<major>.<minor>.<patch>` tag) builds an unsigned macOS universal `.dmg` and `.zip` and an unsigned Windows
+x64 `.zip`, starts each one on its OS (`apps/desktop/playwright/e2e/artise/`) and keeps them as the run's artifacts
+for 14 days. A tag `desktop-v1.2.3` builds version 1.2.3; any other run builds `0.0.1-dev.<run number>`
+(`artise/scripts/version.sh`). About links the source of the exact build: the tag, or the commit for test builds.
+
 Running it locally, from `apps/desktop`:
 
 ```sh
-(cd ../web && CI_PACKAGE=1 pnpm build)   # CI_PACKAGE skips minifying, which needs more memory than most laptops have
-ln -s ../web/webapp ./webapp
+CI_PACKAGE=1 artise/scripts/package-webapp.sh   # CI_PACKAGE skips minifying, which needs more memory than most laptops have
 pnpm start -- --config artise/config.json --profile artise
 ```
 
 `pnpm start` runs Electron unpackaged, with Element's app ID, so the Artise-only parts (About, the scheme) show
-only in a build. A Linux build to try them: `pnpm build:ts && pnpm build:res && pnpm run asar-webapp && pnpm exec
-electron-builder --config artise/electron-builder.ts --linux dir`, with `artise/config.json` copied into
-`webapp/` first.
+only in a build. A Linux build to try them: `pnpm exec tsc && node scripts/copy-res.ts && pnpm exec electron-builder
+--config artise/electron-builder.ts --linux dir`, then `dist/linux-unpacked/artise-desktop`.
 
 ## Artise's words
 
