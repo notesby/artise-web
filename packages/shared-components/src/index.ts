@@ -119,3 +119,4 @@ export * from "./artise/ArtiseWorkspaceBarView";
 export * from "./artise/ArtiseWhatsNewView";
 export * from "./artise/ArtiseNoteView";
 export * from "./artise/ArtiseNotesView";
+export * from "./artise/ArtiseNotificationHoursView";

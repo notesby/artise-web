@@ -1,0 +1,95 @@
+/*
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+*/
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-4x);
+    margin-block-start: var(--cpd-space-8x);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-4x);
+}
+
+.fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.legend {
+    margin-block-end: var(--cpd-space-2x);
+    font: var(--cpd-font-body-md-semibold);
+    color: var(--cpd-color-text-primary);
+}
+
+.radio,
+.dayName {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+    font: var(--cpd-font-body-md-regular);
+    color: var(--cpd-color-text-primary);
+}
+
+.footer,
+.warning {
+    color: var(--cpd-color-text-secondary);
+}
+
+.times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--cpd-space-4x);
+}
+
+.time {
+    display: flex;
+    align-items: center;
+    gap: var(--cpd-space-2x);
+    font: var(--cpd-font-body-md-regular);
+    color: var(--cpd-color-text-secondary);
+}
+
+.time input {
+    padding: var(--cpd-space-1x) var(--cpd-space-2x);
+    border: 1px solid var(--cpd-color-border-interactive-primary);
+    border-radius: var(--cpd-space-2x);
+    background-color: var(--cpd-color-bg-canvas-default);
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+}
+
+.time input:disabled {
+    opacity: 0.5;
+}
+
+.days {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.day {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cpd-space-3x);
+}
+
+.dayName {
+    min-inline-size: 140px;
+}

@@ -48,7 +48,7 @@ import ToastStore from "./stores/ToastStore";
 import { stripPlainReply } from "./utils/Reply";
 import { BackgroundAudio } from "./audio/BackgroundAudio";
 import { type MatrixDispatcher } from "./dispatcher/dispatcher.ts";
-import { withAutomationLevel } from "./artise/notifications/automationLevel";
+import { artiseNotifyActions } from "./artise/notifications/notifyActions";
 
 /*
  * Dispatches:
@@ -617,8 +617,8 @@ export default class Notifier extends TypedEventEmitter<keyof EmittedEvents, Emi
             return;
         }
 
-        // Artise: Ari's important and critical posts always notify (artise/notifications/automationLevel.ts)
-        const actions = withAutomationLevel(ev, this.sdkContext.client.getPushActionsForEvent(ev));
+        // Artise: Ari's important and critical posts always notify, and notification hours (artise/notifications/notifyActions.ts)
+        const actions = artiseNotifyActions(ev, this.sdkContext.client);
 
         if (actions?.notify) {
             this.performCustomEventHandling(ev);

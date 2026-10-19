@@ -29,6 +29,90 @@
         "pt": "Sair",
         "pt-br": "Sair"
     },
+    "artise|hours|custom": {
+        "en": "Custom",
+        "es": "Personalizado",
+        "pt": "Personalizado",
+        "pt-br": "Personalizado"
+    },
+    "artise|hours|custom_footer": {
+        "en": "On a day that's off, notifications arrive without sound. If Until is earlier than From, the hours go past midnight.",
+        "es": "En un día apagado, las notificaciones llegan sin sonido. Si «Hasta» es antes que «Desde», el horario pasa de la medianoche.",
+        "pt": "Num dia desligado, as notificações chegam sem som. Se “Até” for antes de “De”, o horário passa da meia-noite.",
+        "pt-br": "Num dia desligado, as notificações chegam sem som. Se “Até” for antes de “De”, o horário passa da meia-noite."
+    },
+    "artise|hours|days": {
+        "en": "Days",
+        "es": "Días",
+        "pt": "Dias",
+        "pt-br": "Dias"
+    },
+    "artise|hours|description_browser": {
+        "en": "Outside these hours, this workspace's notifications arrive without sound in this browser. Ari's reminders always sound.",
+        "es": "Fuera de este horario, las notificaciones de este espacio de trabajo llegan sin sonido en este navegador. Los recordatorios de Ari siempre suenan.",
+        "pt": "Fora deste horário, as notificações deste espaço de trabalho chegam sem som neste navegador. Os lembretes do Ari sempre tocam.",
+        "pt-br": "Fora deste horário, as notificações deste espaço de trabalho chegam sem som neste navegador. Os lembretes do Ari sempre tocam."
+    },
+    "artise|hours|description_computer": {
+        "en": "Outside these hours, this workspace's notifications arrive without sound on this computer. Ari's reminders always sound.",
+        "es": "Fuera de este horario, las notificaciones de este espacio de trabajo llegan sin sonido en esta computadora. Los recordatorios de Ari siempre suenan.",
+        "pt": "Fora deste horário, as notificações deste espaço de trabalho chegam sem som neste computador. Os lembretes do Ari sempre tocam.",
+        "pt-br": "Fora deste horário, as notificações deste espaço de trabalho chegam sem som neste computador. Os lembretes do Ari sempre tocam."
+    },
+    "artise|hours|every_day": {
+        "en": "Every day",
+        "es": "Todos los días",
+        "pt": "Todos os dias",
+        "pt-br": "Todos os dias"
+    },
+    "artise|hours|from": {
+        "en": "From",
+        "es": "Desde",
+        "pt": "De",
+        "pt-br": "De"
+    },
+    "artise|hours|hours": {
+        "en": "Hours",
+        "es": "Horario",
+        "pt": "Horário",
+        "pt-br": "Horário"
+    },
+    "artise|hours|mentions": {
+        "en": "Mentions and replies always sound",
+        "es": "Las menciones y respuestas siempre suenan",
+        "pt": "Menções e respostas sempre tocam",
+        "pt-br": "Menções e respostas sempre tocam"
+    },
+    "artise|hours|not_kept": {
+        "en": "This browser won't keep these settings (its storage is blocked).",
+        "es": "Este navegador no guarda esta configuración (tiene bloqueado el almacenamiento).",
+        "pt": "Este navegador não guarda estas configurações (o armazenamento está bloqueado).",
+        "pt-br": "Este navegador não guarda estas configurações (o armazenamento está bloqueado)."
+    },
+    "artise|hours|title": {
+        "en": "Notification hours",
+        "es": "Horario de notificaciones",
+        "pt": "Horário das notificações",
+        "pt-br": "Horário das notificações"
+    },
+    "artise|hours|until": {
+        "en": "Until",
+        "es": "Hasta",
+        "pt": "Até",
+        "pt-br": "Até"
+    },
+    "artise|hours|weekdays": {
+        "en": "Monday to Friday",
+        "es": "De lunes a viernes",
+        "pt": "De segunda a sexta",
+        "pt-br": "De segunda a sexta"
+    },
+    "artise|hours|weekdays_footer": {
+        "en": "On Saturday and Sunday, notifications arrive without sound.",
+        "es": "El sábado y el domingo, las notificaciones llegan sin sonido.",
+        "pt": "No sábado e no domingo, as notificações chegam sem som.",
+        "pt-br": "No sábado e no domingo, as notificações chegam sem som."
+    },
     "artise|notes|back": {
         "en": "Back to the chat",
         "es": "Volver al chat",
