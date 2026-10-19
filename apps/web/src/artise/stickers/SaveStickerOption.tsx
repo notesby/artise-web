@@ -16,7 +16,7 @@ import InfoDialog from "../../components/views/dialogs/InfoDialog";
 import ErrorDialog from "../../components/views/dialogs/ErrorDialog";
 import { artiseT } from "../i18n/artiseT";
 import { receivedSticker } from "./imagePack";
-import { stickerStoreFor } from "./stickerOption";
+import { stickerStoreFor } from "./stickerStores";
 
 /**
  * "Guardar en mis stickers" in a sticker message's menu, as on the phones: the sticker joins the person's own
