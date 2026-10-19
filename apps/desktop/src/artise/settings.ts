@@ -16,6 +16,8 @@ export interface ArtiseSettings {
     workspaceLanguage?: string;
     /** The server names of the workspaces the person chose to open, opened again at the next start. */
     openWorkspaces?: string[];
+    /** Whether Artise already turned "start at login" on once (then it's the person's to change). */
+    startAtLoginSet?: boolean;
 }
 
 const FILE_NAME = "artise-settings.json";

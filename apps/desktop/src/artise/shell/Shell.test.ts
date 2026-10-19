@@ -43,6 +43,7 @@ function setUp(
         updateSettings: (change) => Object.assign(saved, change),
         show: vi.fn(),
         hide: vi.fn(),
+        openServerNames: vi.fn(() => []),
         openWorkspaces: vi.fn(async (): Promise<Result<unknown>> => ({ ok: true, value: undefined })),
         icon: async () => new Uint8Array([137, 80, 78, 71]),
         t: (key) => artiseT(key, {}, "es"),
@@ -200,6 +201,64 @@ describe("Shell", () => {
         vi.mocked(world.deps.artiseId.workspaces).mockResolvedValue({ ok: false, error: "expired" });
         await world.shell.start();
         expect(world.shell.current).toMatchObject({ screen: "welcome", error: "expired" });
+    });
+
+    describe("adding a workspace from the rail", () => {
+        beforeEach(async () => {
+            world = setUp(true, { openWorkspaces: ["artise.co"] });
+            vi.mocked(world.deps.openServerNames).mockReturnValue(["artise.co"]);
+            await world.shell.start();
+            await world.shell.addWorkspaces();
+        });
+
+        it("lists only the workspaces that aren't open, none ticked", () => {
+            expect(world.shell.current).toEqual({
+                screen: "workspaces",
+                adding: true,
+                workspaces: [{ serverName: "mas-k8s.artise.co", name: "Prueba MAS", selected: false }],
+            });
+        });
+
+        it("opens the added one next to the open ones, and remembers both", async () => {
+            vi.mocked(world.deps.openServerNames).mockReturnValue(["artise.co", "mas-k8s.artise.co"]);
+            await world.shell.handle(at("/open?workspace=mas-k8s.artise.co"));
+            await vi.waitFor(() => expect(world.deps.hide).toHaveBeenCalled());
+            expect(world.deps.openWorkspaces).toHaveBeenLastCalledWith(["mas-k8s.artise.co"]);
+            expect(world.saved.openWorkspaces).toEqual(["artise.co", "mas-k8s.artise.co"]);
+        });
+
+        it("goes back to the open workspaces with Volver", async () => {
+            await world.shell.handle(at("/close"));
+            expect(world.deps.hide).toHaveBeenCalled();
+        });
+
+        it("says when every workspace is already open", async () => {
+            vi.mocked(world.deps.openServerNames).mockReturnValue(["artise.co", "mas-k8s.artise.co"]);
+            await world.shell.addWorkspaces();
+            expect(world.shell.current).toMatchObject({ screen: "workspaces", workspaces: [], adding: true });
+        });
+    });
+
+    describe("signing out of workspaces", () => {
+        beforeEach(async () => {
+            world = setUp(true, { openWorkspaces: ["artise.co", "mas-k8s.artise.co"] });
+            await world.shell.start();
+        });
+
+        it("remembers the ones left open", async () => {
+            await world.shell.closed(["mas-k8s.artise.co"]);
+            expect(world.saved.openWorkspaces).toEqual(["mas-k8s.artise.co"]);
+            expect(world.deps.artiseId.signOut).not.toHaveBeenCalled();
+        });
+
+        it("signs out of Artise ID too after the last one, in the browser as well, and shows the welcome", async () => {
+            // As on the phones (M6): leaving the last workspace ends the Artise ID sign-in.
+            await world.shell.closed([]);
+            expect(world.deps.artiseId.signOut).toHaveBeenCalledWith(true);
+            expect(world.saved.openWorkspaces).toEqual([]);
+            expect(world.shell.current.screen).toBe("welcome");
+            expect(world.deps.show).toHaveBeenCalled();
+        });
     });
 
     it("signs out of Artise ID with 'Iniciar sesión de otra forma'", async () => {

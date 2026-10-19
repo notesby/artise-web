@@ -4,12 +4,12 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, type Mock } from "vitest";
 import EventEmitter from "node:events";
 import { type BrowserWindow, type IpcMain, type IpcMainEvent, type WebContents } from "electron";
 
 import { currentView, registerView, unregisterView, type ViewContext } from "./context.js";
-import { installRouting, isWorkspaceUser, routeFor } from "./routing.js";
+import { installRouting, isWorkspaceUser, routeFor, type RoutingHooks } from "./routing.js";
 
 function contents(id: number): WebContents {
     return { id, send: vi.fn() } as unknown as WebContents;
@@ -68,6 +68,7 @@ describe("installRouting", () => {
     let window: BrowserWindow;
     let ipcMain: IpcMain;
     let shown: ViewContext | undefined;
+    let hooks: RoutingHooks & { focus: Mock; signedOut: Mock; sawUser: Mock };
     const casa = view(1, "artise.co");
     const prueba = view(2, "mas-k8s.artise.co");
 
@@ -75,12 +76,14 @@ describe("installRouting", () => {
         window = Object.create({ webContents: host }) as BrowserWindow;
         ipcMain = new EventEmitter() as unknown as IpcMain;
         shown = undefined;
-        installRouting(
-            window,
-            ipcMain,
-            () => shown,
-            (from, args) => [`total for ${from.serverName}`, ...args.slice(1)],
-        );
+        hooks = {
+            shown: () => shown,
+            badge: (from: ViewContext, args: unknown[]) => [`total for ${from.serverName}`, ...args.slice(1)],
+            focus: vi.fn(),
+            signedOut: vi.fn(),
+            sawUser: vi.fn(),
+        };
+        installRouting(window, ipcMain, hooks);
         registerView(casa);
         registerView(prueba);
         return () => {
@@ -142,6 +145,37 @@ describe("installRouting", () => {
         ipcMain.on("setBadgeCount", handler);
         ipcMain.emit("setBadgeCount", from(casa.webContents), 2);
         expect(handler).toHaveBeenCalledWith(expect.anything(), "total for artise.co");
+    });
+
+    it("shows the workspace whose notification was clicked", () => {
+        // Element Web asks for focusWindow after a notification click; that workspace is the one to show.
+        ipcMain.on("ipcCall", vi.fn());
+        ipcMain.emit("ipcCall", from(prueba.webContents), { name: "focusWindow", id: 1 });
+        expect(hooks.focus).toHaveBeenCalledWith(prueba);
+    });
+
+    it("tells when a workspace's web app signed out, once Element's handler has finished", async () => {
+        // "clear storage" is the last step of Element Web's sign-out; closing the view before Element answers would
+        // leave its answer nowhere to go.
+        const order: string[] = [];
+        ipcMain.on("ipcCall", async () => {
+            await new Promise((resolve) => setTimeout(resolve, 5));
+            expect(currentView()).toBe(casa);
+            order.push("element answered");
+        });
+        hooks.signedOut.mockImplementation(() => order.push("signed out"));
+        ipcMain.emit("ipcCall", from(casa.webContents), { name: "clearStorage", id: 2 });
+        await vi.waitFor(() => expect(order).toEqual(["element answered", "signed out"]));
+    });
+
+    it("notes the workspace's Matrix user and device from its pickle-key calls", () => {
+        ipcMain.on("ipcCall", vi.fn());
+        ipcMain.emit("ipcCall", from(casa.webContents), {
+            name: "createPickleKey",
+            id: 3,
+            args: ["@ana:artise.co", "DEV"],
+        });
+        expect(hooks.sawUser).toHaveBeenCalledWith(casa, "@ana:artise.co", "DEV");
     });
 
     it("leaves messages from anything else, such as the window itself, to Element as before", () => {

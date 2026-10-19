@@ -29,6 +29,8 @@ export interface WorkspaceView {
     context: ViewContext;
     /** The `element-desktop-ssoid` its web app puts in sign-in returns, to send them back to this view. */
     sessionId: string;
+    /** Being closed: its web app signed out. */
+    closing?: boolean;
 }
 
 /**
@@ -122,6 +124,13 @@ export async function createWorkspaceView(info: WorkspaceInfo): Promise<Workspac
     const workspaceSession = session.fromPartition(partitionFor(key));
     await serveWebApp(workspaceSession);
     setPermissionPolicy(workspaceSession);
+    if (!workspaceSession.getPreloadScripts().some((script) => script.id === "artise-notifications")) {
+        workspaceSession.registerPreloadScript({
+            id: "artise-notifications",
+            type: "frame",
+            filePath: path.join(__dirname, "notifications.cjs"),
+        });
+    }
     workspaceSession.setSpellCheckerEnabled(Store.instance?.get("spellCheckerEnabled", true) ?? true);
 
     const view = new WebContentsView({
@@ -144,6 +153,8 @@ export async function createWorkspaceView(info: WorkspaceInfo): Promise<Workspac
     const sessionId = `artise-${key}`;
     webContents.ipc.handle("getConfig", () => workspaceConfig(getConfig(), info));
     webContents.ipc.handle("getProtocol", () => ({ protocol: getBuildConfig().protocol, sessionId }));
+    // For the notifications preload (notifications.cts).
+    webContents.ipc.handle("artise:workspaceName", () => info.name ?? info.serverName);
 
     const context: ViewContext = {
         key,

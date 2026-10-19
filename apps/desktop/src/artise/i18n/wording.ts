@@ -122,6 +122,16 @@ export const DESKTOP_WORDING = {
         es: "Termina de iniciar sesión en tu navegador y vuelve aquí.",
         pt: "Termine de entrar no seu navegador e volte aqui.",
     },
+    "artise|desktop|workspaces|add_title": {
+        en: "Add a workspace",
+        es: "Agregar espacio de trabajo",
+        pt: "Adicionar espaço de trabalho",
+    },
+    "artise|desktop|workspaces|all_open": {
+        en: "All your workspaces are already open.",
+        es: "Ya tienes abiertos todos tus espacios de trabajo.",
+        pt: "Todos os seus espaços de trabalho já estão abertos.",
+    },
     "artise|desktop|workspaces|description": {
         en: "They all stay open and get your messages at the same time.",
         es: "Todos quedan abiertos y reciben tus mensajes a la vez.",

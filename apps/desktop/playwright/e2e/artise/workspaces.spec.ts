@@ -8,6 +8,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 // Artise ID account in CI, so the test stands in for Artise ID inside the app and lists two real workspaces. Their
 // web apps are kept offline, so nothing is registered on their sign-in servers and no browser opens.
 
+import fs from "node:fs";
+import path from "node:path";
 import { type ElectronApplication, type Page } from "@playwright/test";
 
 import { test, expect } from "../../element-desktop-test.js";
@@ -15,6 +17,7 @@ import { test, expect } from "../../element-desktop-test.js";
 declare global {
     interface ElectronPlatform {
         getConfig(): Promise<{ default_server_config: { "m.homeserver": { server_name: string } } }>;
+        clearStorage(): Promise<void>;
         createPickleKey(userId: string, deviceId: string): Promise<string | null>;
         getPickleKey(userId: string, deviceId: string): Promise<string | null>;
     }
@@ -111,7 +114,7 @@ test.describe("Two workspaces", () => {
     test("show on the rail, with each one's unread count", async ({ app }) => {
         const views = await openTwoWorkspaces(app);
         const rail = await railPage(app);
-        await expect(rail.locator("a.item")).toHaveCount(2);
+        await expect(rail.locator("a.item:not(.add)")).toHaveCount(2);
         await expect(rail.locator("a.item.shown")).toHaveAttribute("href", /i=0$/);
 
         // Each web app reports its own count; the rail shows each, the badge their total.
@@ -132,7 +135,9 @@ test.describe("Two workspaces", () => {
             await expect.poll(() => app.evaluate(({ app }) => app.badgeCount)).toBe(7);
         }
 
-        await expect(async () => (await railPage(app)).locator("a.item").nth(1).click({ timeout: 2000 })).toPass();
+        await expect(async () =>
+            (await railPage(app)).locator("a.item:not(.add)").nth(1).click({ timeout: 2000 }),
+        ).toPass();
         await expect
             .poll(async () =>
                 (await railPage(app))
@@ -141,6 +146,62 @@ test.describe("Two workspaces", () => {
                     .catch((): null => null),
             )
             .toMatch(/i=1$/);
+    });
+
+    test("name their notifications after themselves", async ({ app }) => {
+        const [view] = await openTwoWorkspaces(app);
+        const workspace = (await serverOf(view)) === "artise.co" ? "Artise" : "Prueba MAS";
+        const title = await view.evaluate(() => {
+            const notification = new window.Notification("Ana", { body: "Hola", silent: true });
+            notification.close();
+            return notification.title;
+        });
+        expect(title).toBe(`${workspace} · Ana`);
+    });
+
+    test("close when signed out of, leaving no files, and the last one ends at the welcome", async ({
+        app,
+        tmpDir,
+    }) => {
+        const views = await openTwoWorkspaces(app);
+        const folders = (): string[] =>
+            fs.readdirSync(path.join(tmpDir, "Partitions")).filter((name) => name.startsWith("workspace-"));
+        expect(folders()).toHaveLength(2);
+
+        // The last step of Element Web's sign-out ("Cerrar sesión en …").
+        await views[0].evaluate(() => window.mxPlatformPeg.get().clearStorage());
+        await expect.poll(() => app.windows().filter((page) => page.url().startsWith("vector://")).length).toBe(1);
+        await expect
+            .poll(async () =>
+                (await railPage(app))
+                    .locator("a.item:not(.add)")
+                    .count()
+                    .catch(() => -1),
+            )
+            .toBe(1);
+        const settings = (): { openWorkspaces?: string[] } =>
+            JSON.parse(fs.readFileSync(path.join(tmpDir, "artise-settings.json"), "utf8"));
+        expect(settings().openWorkspaces).toHaveLength(1);
+
+        const last = app.windows().find((page) => page.url().startsWith("vector://"))!;
+        await last.evaluate(() => window.mxPlatformPeg.get().clearStorage());
+        await expect.poll(() => app.windows().some((page) => page.url().startsWith("vector://"))).toBe(false);
+        const isWelcome = async (): Promise<boolean> => {
+            const shell = app.windows().find((page) => page.url() === "artise-shell://shell/");
+            return (
+                !!shell &&
+                (await shell
+                    .locator(".actions .button")
+                    .count()
+                    .catch(() => 0)) > 0
+            );
+        };
+        await expect.poll(isWelcome).toBe(true);
+        expect(settings().openWorkspaces).toEqual([]);
+        // Each closed workspace's own folder is gone already; its partition folder goes at the next start
+        // (removeClosedWorkspaces), as Electron keeps it while running.
+        const workspacesDir = path.join(tmpDir, "workspaces");
+        expect(fs.existsSync(workspacesDir) ? fs.readdirSync(workspacesDir) : []).toEqual([]);
     });
 
     test("switch with Ctrl/⌘+2 and keep both running", async ({ app }) => {

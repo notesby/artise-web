@@ -75,10 +75,15 @@ ${errorText(state, t)}
                 t("artise|desktop|welcome|back"),
             )}</a></nav>`;
         case "workspaces": {
-            const head = `<h2>${escapeHtml(t("artise|desktop|workspaces|title"))}</h2>`;
-            const otherAccount = `<a class="link" href="${SHELL_ORIGIN}/sign-out">${escapeHtml(
-                t("artise|desktop|workspaces|other_account"),
-            )}</a>`;
+            const head = `<h2>${escapeHtml(
+                t(state.adding ? "artise|desktop|workspaces|add_title" : "artise|desktop|workspaces|title"),
+            )}</h2>`;
+            // Adding from the rail: "Volver" goes back to the open workspaces instead of signing out.
+            const otherAccount = state.adding
+                ? `<a class="link" href="${SHELL_ORIGIN}/close">${escapeHtml(t("artise|desktop|welcome|back"))}</a>`
+                : `<a class="link" href="${SHELL_ORIGIN}/sign-out">${escapeHtml(
+                      t("artise|desktop|workspaces|other_account"),
+                  )}</a>`;
             if (state.workspaces === "loading") {
                 return `${head}<p class="quiet" aria-busy="true">${escapeHtml(t("artise|desktop|workspaces|loading"))}</p>`;
             }
@@ -88,7 +93,8 @@ ${errorText(state, t)}
                 )}</a>${otherAccount}</nav>`;
             }
             if (state.workspaces.length === 0) {
-                return `${head}<p class="subtitle">${escapeHtml(t("artise|desktop|workspaces|none"))}</p><nav class="actions">${otherAccount}</nav>`;
+                const none = state.adding ? "artise|desktop|workspaces|all_open" : "artise|desktop|workspaces|none";
+                return `${head}<p class="subtitle">${escapeHtml(t(none))}</p><nav class="actions">${otherAccount}</nav>`;
             }
             const items = state.workspaces
                 .map(
@@ -98,7 +104,10 @@ ${errorText(state, t)}
 </label>`,
                 )
                 .join("\n");
-            return `${head}<p class="subtitle">${escapeHtml(t("artise|desktop|workspaces|description"))}</p>
+            const description = state.adding
+                ? ""
+                : `<p class="subtitle">${escapeHtml(t("artise|desktop|workspaces|description"))}</p>`;
+            return `${head}${description}
 ${errorText(state, t)}
 <form method="get" action="${SHELL_ORIGIN}/open">
 <fieldset>${items}</fieldset>
