@@ -84,6 +84,20 @@ describe("Shell", () => {
             });
         });
 
+        it("lets the action's redirect show the page, and shows it again when the action ends", async () => {
+            // Loading the page from inside the request would abort the request's own navigation.
+            vi.mocked(world.deps.show).mockClear();
+            let finish!: () => void;
+            vi.mocked(world.deps.artiseId.signIn).mockReturnValue(
+                new Promise((resolve) => (finish = () => resolve({ ok: false, error: "cancelled" }))),
+            );
+            await world.shell.handle(at("/sign-in"));
+            expect(world.shell.current.screen).toBe("waiting");
+            expect(world.deps.show).not.toHaveBeenCalled();
+            finish();
+            await vi.waitFor(() => expect(world.deps.show).toHaveBeenCalled());
+        });
+
         it("ignores a provider it doesn't know", async () => {
             await world.shell.handle(at("/sign-in?provider=facebook"));
             await vi.waitFor(() => expect(world.deps.artiseId.signIn).toHaveBeenCalledWith(undefined));

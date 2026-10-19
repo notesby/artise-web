@@ -37,21 +37,3 @@ export function getArtiseId(): ArtiseId {
     });
     return instance;
 }
-
-/**
- * Takes a link that opened the app when it's Artise ID's return, so Element Web never loads it.
- *
- * @param link - the link, from the OS.
- * @returns whether the link was Artise ID's.
- */
-export function artiseHandlesLink(link: string): boolean {
-    if (!getArtiseId().handleReturn(link)) return false;
-    // Back from the browser: bring Artise to the front (macOS doesn't for its open-url links).
-    const window = global.mainWindow;
-    if (window) {
-        if (window.isMinimized()) window.restore();
-        window.show();
-        window.focus();
-    }
-    return true;
-}

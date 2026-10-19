@@ -18,6 +18,7 @@ import IpcMainEvent = Electron.IpcMainEvent;
 import { randomArray } from "./utils.js";
 import Store from "./store.js";
 import { initEventIndex } from "./seshat-index.js";
+import { artiseUserDataDir } from "./artise/views/context.js";
 
 let seshatSupported = false;
 let Seshat: typeof SeshatType;
@@ -82,7 +83,8 @@ ipcMain.on("seshat", async function (_ev: IpcMainEvent, payload): Promise<void> 
     if (!global.mainWindow || !store) return;
 
     // We do this here to ensure we get the path after --profile has been resolved
-    const eventStorePath = path.join(app.getPath("userData"), "EventStore");
+    // Artise: each workspace keeps its own index, in its own folder (artise/views)
+    const eventStorePath = path.join(artiseUserDataDir() ?? app.getPath("userData"), "EventStore");
 
     const sendError = (id: string, e: Error): void => {
         const error = {

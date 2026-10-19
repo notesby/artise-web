@@ -14,7 +14,7 @@ import { randomUUID } from "node:crypto";
 
 import { type Args, getArgsForProtocolRegistration } from "./args.js";
 import { legacyProtocol } from "./artise/variant.js";
-import { artiseHandlesLink } from "./artise/main.js";
+import { artiseHandlesLink } from "./artise/links.js";
 
 // Artise: the Artise build doesn't register or answer Element's element:// links (artise/variant.ts)
 const LEGACY_PROTOCOL = legacyProtocol("element");
@@ -76,7 +76,7 @@ export default class ProtocolHandler {
     };
 
     private handleDeeplink(url: string): boolean {
-        // Artise: Artise ID's sign-in returns go to the shell, never to Element Web; nothing is loaded (artise/artiseId)
+        // Artise: Artise ID's returns go to the shell and each workspace's to its own view (artise/links.ts)
         if (artiseHandlesLink(url)) return false;
         if (!global.mainWindow) return false;
 
