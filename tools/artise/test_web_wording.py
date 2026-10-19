@@ -143,6 +143,21 @@ class DesktopTextsTest(unittest.TestCase):
         self.assertIn('    "artise|desktop|v": {\n        en: "Version",\n        es: "Versión",\n        pt: "Versão",\n    },\n', module)
         self.assertTrue(module.startswith("/*\nCopyright 2026 Artise.\n"))
 
+    def test_macos_permission_texts_are_written_per_language(self) -> None:
+        files = web_wording.render_mac()
+        spanish = files[web_wording.MAC_OUTPUT / "es.lproj" / "InfoPlist.strings"]
+        self.assertIn('"NSCameraUsageDescription" = "Artise usa la cámara para las videollamadas.";', spanish)
+        self.assertEqual({path.parent.name for path in files}, {"en.lproj", "es.lproj", "pt.lproj"})
+
+    def test_a_quote_in_a_macos_text_is_escaped(self) -> None:
+        with mock.patch.dict(web_wording.DESKTOP_TEXTS, {"artise|desktop|mac|camera": ('Say "hi"', "x", "y")}):
+            english = web_wording.render_mac()[web_wording.MAC_OUTPUT / "en.lproj" / "InfoPlist.strings"]
+        self.assertIn('"NSCameraUsageDescription" = "Say \\"hi\\"";', english)
+
+    def test_the_committed_macos_texts_are_current(self) -> None:
+        for path, text in web_wording.render_mac().items():
+            self.assertEqual(path.read_text(encoding="utf-8"), text)
+
     def test_the_committed_module_is_current(self) -> None:
         self.assertEqual(web_wording.DESKTOP_OUTPUT.read_text(encoding="utf-8"), web_wording.render_desktop())
 

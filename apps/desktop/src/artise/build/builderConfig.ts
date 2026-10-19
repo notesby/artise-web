@@ -68,7 +68,23 @@ export function artiseBuilderConfig(
             { from: `${ARTISE_ICONS}/overlay`, to: "build/overlay" },
             "webapp.asar",
         ],
-        mac: { ...element.mac, icon: `${ARTISE_ICONS}/icon.icon` },
+        mac: {
+            ...element.mac,
+            icon: `${ARTISE_ICONS}/icon.icon`,
+            // macOS asks before the camera and microphone are first used; the app's own words, in each language
+            // (tools/artise/web_wording.py writes artise/mac/<lang>.lproj/InfoPlist.strings).
+            extendInfo: {
+                ...element.mac?.extendInfo,
+                CFBundleDevelopmentRegion: "es",
+                CFBundleLocalizations: ["es", "en", "pt"],
+                NSCameraUsageDescription: "Artise uses the camera for video calls.",
+                NSMicrophoneUsageDescription: "Artise uses the microphone for calls and voice messages.",
+            },
+            extraResources: ["en", "es", "pt"].map((language) => ({
+                from: `artise/mac/${language}.lproj`,
+                to: `${language}.lproj`,
+            })),
+        },
         dmg: { ...element.dmg, badgeIcon: `${ARTISE_ICONS}/icon.icon` },
         win: { ...element.win, icon: `${ARTISE_ICONS}/icon.ico` },
         linux: { ...element.linux, icon: `${ARTISE_ICONS}/icon.png` },

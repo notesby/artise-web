@@ -119,12 +119,16 @@ jobs:
                   CSC_IDENTITY_AUTO_DISCOVERY: false
                   VERSION: ${{ needs.webapp.outputs.version }}
 
-            - name: Check the dmg and zip are there
+            - name: Check the dmg and zip are there, and the app's permission texts
               working-directory: apps/desktop
               run: |
                   ls dist
                   test -f dist/Artise-*.dmg
                   test -f dist/Artise-*-mac.zip
+                  for language in en es pt; do
+                      test -f "dist/mac-universal/Artise.app/Contents/Resources/$language.lproj/InfoPlist.strings"
+                  done
+                  /usr/libexec/PlistBuddy -c "Print :NSCameraUsageDescription" dist/mac-universal/Artise.app/Contents/Info.plist
 
             # Not the unpacked app: the dmg and zip already hold it.
             - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
