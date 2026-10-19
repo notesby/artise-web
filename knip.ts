@@ -88,7 +88,13 @@ export default {
             ],
         },
         "apps/desktop": {
-            entry: ["src/preload.cts!", "electron-builder.ts!", "scripts/**"],
+            entry: [
+                "src/preload.cts!",
+                "electron-builder.ts!",
+                "scripts/**",
+                // Artise: the Artise build's electron-builder config (ARTISE.md)
+                "artise/electron-builder.ts!",
+            ],
             project: ["**/*.{js,ts,pcss}"],
             ignoreBinaries: [
                 // Used by the fetch-package script (optional)

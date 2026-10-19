@@ -10,6 +10,7 @@ import { app, shell, Menu, type MenuItem, type MenuItemConstructorOptions } from
 
 import { _t } from "./language-helper.js";
 import { getConfig } from "./config.js";
+import { artiseHelpMenuItems } from "./artise/about.js";
 
 const isMac = process.platform === "darwin";
 
@@ -135,6 +136,8 @@ export function buildMenuTemplate(): Menu {
                         void shell.openExternal(getConfig().help_url);
                     },
                 },
+                // Artise: "About Artise", with the licence and the source code (artise/about.ts)
+                ...artiseHelpMenuItems(),
             ],
         },
     ];

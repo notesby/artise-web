@@ -1,0 +1,7 @@
+{
+    "appId": "co.artise.desktop",
+    "name": "artise-desktop",
+    "productName": "Artise",
+    "description": "Artise: your workspace's chats and assistant",
+    "protocols": ["co.artise.desktop"]
+}
