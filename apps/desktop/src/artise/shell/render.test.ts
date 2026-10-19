@@ -75,6 +75,20 @@ describe("renderShell", () => {
         expect(html).not.toContain("<img src=x");
     });
 
+    it("keeps the list and shows the error when opening failed", () => {
+        const html = renderShell(
+            {
+                screen: "workspaces",
+                error: "unreachable",
+                workspaces: [{ serverName: "artise.co", name: "Casa", selected: true }],
+            },
+            es,
+            "es",
+        );
+        expect(html).toContain("No se puede conectar con Artise.");
+        expect(html).toContain('value="artise.co" checked>');
+    });
+
     it("explains an empty list as the phones do", () => {
         const html = renderShell({ screen: "workspaces", workspaces: [] }, es, "es");
         expect(html).toContain("Todavía no estás en ningún espacio de trabajo.");

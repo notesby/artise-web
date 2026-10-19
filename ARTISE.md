@@ -68,6 +68,7 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button.                                                                                                                                                                       |
 | `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`). Artise ID's sign-in returns go to the shell, never to Element Web (`artise/artiseId/`).                                                                                                                             |
 | `apps/desktop/src/electron-main.ts`                                   | Calls into `artise/main.ts`: before the app is ready, the start-up language (`artise/language.ts`); in `configureSentry`, crash reports only with consent (`artise/crashReports.ts`); the shell's `artise-shell:` scheme in Element's privileged-scheme list; and the shell, not Element, decides what the window first shows (`artise/shell/`). |
+| `apps/desktop/src/ipc.ts`                                             | `getConfig` answers with the open workspace's config when there is one (`artise/workspace/openWorkspaces.ts`), else Element's.                                                                                                                                                                                                                   |
 | `apps/desktop/src/vectormenu.ts`                                      | The Help menu gets "Acerca de Artise": the version, the AGPL licence and this version's source code (`artise/about.ts`).                                                                                                                                                                                                                         |
 | `knip.ts`                                                             | Lists the Artise build's `apps/desktop/artise/electron-builder.ts` as an entry, so knip doesn't call it unused.                                                                                                                                                                                                                                  |
 
@@ -123,6 +124,17 @@ while the person is still signed in. The screens are HTML drawn in the main proc
 `artise-shell:` scheme in a view over the window, with its own in-memory session, no preload, JavaScript off and a
 CSP with `script-src 'none'`: every button is a link or a form the main process answers (`Shell.ts`). Texts are
 `artise|desktop|welcome|…` and `artise|desktop|workspaces|…` in `tools/artise/web_wording.py`, the phones' words.
+
+Opening a workspace (`src/artise/workspace/`): the shell reads its `/.well-known/matrix/client` and its
+homeserver's `auth_metadata` for MAS's issuer. Element Web then gets a config (`getConfig`) for that workspace:
+
+- its homeserver only;
+- `oidc_static_clients` with the desktop's MAS client, once the workspace file lists it (`desktop_oauth`);
+- `sso_redirect_options.on_welcome_page`, so a workspace without a session goes straight to its sign-in page in
+  the browser.
+
+The first workspace's language becomes the start-up language next time. Until D3-1 gives each workspace its own
+view, the window shows the first chosen workspace.
 
 Building: `.github/workflows/artise-desktop.yml` (Actions → Artise desktop → Run workflow, or a
 `desktop-v<major>.<minor>.<patch>` tag) builds an unsigned macOS universal `.dmg` and `.zip` and an unsigned Windows

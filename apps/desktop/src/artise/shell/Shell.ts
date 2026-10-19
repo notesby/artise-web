@@ -5,7 +5,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 */
 
 import { type ArtiseId } from "../artiseId/ArtiseId.js";
-import { type ArtiseIdError } from "../artiseId/authorization.js";
+import { type ArtiseIdError, type Result } from "../artiseId/authorization.js";
 import { type ArtiseIdProvider } from "../artiseId/signInConfig.js";
 import { type DesktopTextKey } from "../i18n/artiseT.js";
 import { type ArtiseSettings } from "../settings.js";
@@ -21,8 +21,8 @@ export interface ShellDeps {
     show(): void;
     /** Takes the shell's page away. */
     hide(): void;
-    /** Opens these workspaces in the window. */
-    openWorkspaces(serverNames: string[]): void;
+    /** Opens these workspaces in the window; fails when the first can't be reached. */
+    openWorkspaces(serverNames: string[]): Promise<Result<unknown>>;
     /** The Artise icon, as PNG bytes. */
     icon(): Promise<Uint8Array>;
     /** Artise's texts in the current language, and that language's code. */
@@ -54,12 +54,10 @@ export class Shell {
      */
     public async start(): Promise<void> {
         const opened = this.deps.readSettings().openWorkspaces ?? [];
-        if (opened.length > 0 && (await this.deps.artiseId.isSignedIn())) {
-            this.deps.openWorkspaces(opened);
-            return;
-        }
+        const signedIn = await this.deps.artiseId.isSignedIn();
+        if (opened.length > 0 && signedIn && (await this.deps.openWorkspaces(opened)).ok) return;
         this.deps.show();
-        if (await this.deps.artiseId.isSignedIn()) {
+        if (signedIn) {
             await this.loadWorkspaces();
         } else {
             await this.welcome();
@@ -103,15 +101,25 @@ export class Shell {
         }
     }
 
-    private open(chosen: string[]): void {
-        if (this.state.screen !== "workspaces" || this.state.workspaces === "loading") return;
+    private async open(chosen: string[]): Promise<void> {
+        const state = this.state;
+        if (state.screen !== "workspaces" || state.workspaces === "loading") return;
         // Only workspaces from the person's own list, whatever the form sent.
-        const listed = new Set(this.state.workspaces.map((workspace) => workspace.serverName));
+        const listed = new Set(state.workspaces.map((workspace) => workspace.serverName));
         const serverNames = chosen.filter((serverName) => listed.has(serverName));
         if (serverNames.length === 0) return;
-        this.deps.updateSettings({ openWorkspaces: serverNames });
-        this.deps.hide();
-        this.deps.openWorkspaces(serverNames);
+        const list = state.workspaces.map((workspace) => ({
+            ...workspace,
+            selected: serverNames.includes(workspace.serverName),
+        }));
+        this.set({ screen: "workspaces", workspaces: "loading" });
+        const opened = await this.deps.openWorkspaces(serverNames);
+        if (opened.ok) {
+            this.deps.updateSettings({ openWorkspaces: serverNames });
+            this.deps.hide();
+        } else {
+            this.set({ screen: "workspaces", workspaces: list, error: opened.error });
+        }
     }
 
     private async signOut(): Promise<void> {
@@ -160,7 +168,7 @@ export class Shell {
                 void this.loadWorkspaces();
                 return back();
             case "/open":
-                this.open(url.searchParams.getAll("workspace"));
+                void this.open(url.searchParams.getAll("workspace"));
                 return back();
             case "/sign-out":
                 void this.signOut();

@@ -82,7 +82,7 @@ ${errorText(state, t)}
             if (state.workspaces === "loading") {
                 return `${head}<p class="quiet" aria-busy="true">${escapeHtml(t("artise|desktop|workspaces|loading"))}</p>`;
             }
-            if (state.error) {
+            if (state.error && state.workspaces.length === 0) {
                 return `${head}${errorText(state, t)}<nav class="actions"><a class="button primary" href="${SHELL_ORIGIN}/workspaces">${escapeHtml(
                     t("artise|desktop|welcome|retry"),
                 )}</a>${otherAccount}</nav>`;
@@ -99,6 +99,7 @@ ${errorText(state, t)}
                 )
                 .join("\n");
             return `${head}<p class="subtitle">${escapeHtml(t("artise|desktop|workspaces|description"))}</p>
+${errorText(state, t)}
 <form method="get" action="${SHELL_ORIGIN}/open">
 <fieldset>${items}</fieldset>
 <nav class="actions"><button class="button primary" type="submit">${escapeHtml(t("artise|desktop|workspaces|open"))}</button>${otherAccount}</nav>
