@@ -52,6 +52,12 @@ const ACTIONS: (keyof ArtiseNotesViewActions)[] = [
     "cancelAction",
     "upload",
     "attach",
+    "openHistory",
+    "closeHistory",
+    "viewVersion",
+    "restoreVersion",
+    "changeSearch",
+    "clearSearch",
 ];
 
 const ArtiseNotesViewWrapperImpl = (props: ArtiseNotesProps): JSX.Element => {
@@ -122,7 +128,14 @@ const meta = {
             folderName: "Nombre de la carpeta",
             upload: "Agregar archivo",
             moveHere: "Está aquí ahora",
+            history: "Historial",
+            restore: "Restaurar esta versión",
+            backToNote: "Volver a la nota",
+            linkedFrom: "Enlazada desde",
+            search: "Buscar en las notas",
+            clearSearch: "Borrar búsqueda",
         },
+        search: { query: "", state: "idle", results: [] },
         ...(Object.fromEntries(ACTIONS.map((key) => [key, fn()])) as unknown as ArtiseNotesViewActions),
     },
 } satisfies Meta<typeof ArtiseNotesViewWrapper>;
@@ -307,4 +320,62 @@ export const Renaming: Story = {
 /** An upload running. */
 export const Uploading: Story = {
     args: { uploading: "Subiendo “foto.jpg”…" },
+};
+
+/** The open note with the notes that link to it. */
+export const WithBacklinks: Story = {
+    args: {
+        backlinks: [
+            { path: "Súper.md", name: "Súper", line: "Para el [[Mole]] faltan chiles." },
+            { path: "Recetas/Postres/Flan.md", name: "Flan", line: "Después del [[Mole]]." },
+        ],
+    },
+};
+
+/** Mole's history: who changed it and when. */
+export const History: Story = {
+    args: {
+        history: {
+            path: "Recetas/Mole.md",
+            title: "Mole",
+            state: "ready",
+            emptyText: "Todavía no hay cambios.",
+            items: [
+                { commit: "a41f", label: "Ana · 18 oct 2026, 9:05", message: "app: edit Recetas/Mole.md" },
+                { commit: "93b2", label: "Ari · 17 oct 2026, 20:11", message: "ari: add chocolate" },
+            ],
+        },
+    },
+};
+
+/** An old version, read-only, with "Restaurar esta versión". */
+export const OldVersion: Story = {
+    args: {
+        history: {
+            path: "Recetas/Mole.md",
+            title: "Mole",
+            state: "ready",
+            emptyText: "Todavía no hay cambios.",
+            items: [],
+            viewing: { commit: "93b2", caption: "La nota como estaba el 17 oct 2026, 20:11, por Ari.", document: MOLE },
+        },
+    },
+};
+
+/** Searching "chile": names and lines that match, in place of the list. */
+export const Searching: Story = {
+    args: {
+        search: {
+            query: "chile",
+            state: "ready",
+            results: [{ path: "Recetas/Mole.md", name: "Mole", lines: ["- 1 kg de chile mulato"] }],
+        },
+    },
+};
+
+/** A search with nothing found. */
+export const NothingFound: Story = {
+    args: {
+        search: { query: "zzz", state: "ready", results: [], message: "No se encontró nada para “zzz”." },
+    },
 };

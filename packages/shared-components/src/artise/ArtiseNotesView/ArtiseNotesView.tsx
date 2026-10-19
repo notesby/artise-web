@@ -18,6 +18,7 @@ import { ArtiseNoteView } from "../ArtiseNoteView/ArtiseNoteView";
 import styles from "./ArtiseNotesView.module.css";
 import { LeavePrompt, NoteChoice, NoteEditor, NoteNaming } from "./NotesEditing";
 import { ActionPanel, FileButton, RowActions } from "./NotesFileActions";
+import { Backlinks, NoteHistory, NotesSearchBox, SearchResults } from "./NotesMore";
 import { type ArtiseNotesContent, type ArtiseNotesTreeItem, type ArtiseNotesViewModel } from "./types";
 
 interface ArtiseNotesViewProps {
@@ -73,6 +74,9 @@ function Content({ content, vm }: Readonly<{ content: ArtiseNotesContent; vm: Ar
             return (
                 <>
                     <div className={styles.noteBar}>
+                        <Button kind="tertiary" size="md" onClick={vm.openHistory}>
+                            {labels.history}
+                        </Button>
                         <Button kind="secondary" size="md" onClick={vm.edit}>
                             {labels.edit}
                         </Button>
@@ -84,6 +88,7 @@ function Content({ content, vm }: Readonly<{ content: ArtiseNotesContent; vm: Ar
                         onToggleTask={vm.toggleTask}
                         taskLabel={labels.task}
                     />
+                    <Backlinks vm={vm} />
                 </>
             );
         case "image":
@@ -148,6 +153,8 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
         notice,
         problem,
         uploading,
+        history,
+        search,
     } = useViewModel(vm);
 
     let body: JSX.Element;
@@ -194,7 +201,9 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
                             <FileButton kind="tertiary" label={labels.upload} onFiles={vm.upload} />
                         </div>
                     )}
-                    <ul className={styles.list}>
+                    <NotesSearchBox vm={vm} />
+                    <SearchResults vm={vm} />
+                    <ul className={styles.list} hidden={search.state !== "idle"}>
                         {items.map((item) => (
                             <TreeRow key={item.path} item={item} selected={item.path === selectedPath} vm={vm} />
                         ))}
@@ -215,6 +224,8 @@ export function ArtiseNotesView({ vm }: Readonly<ArtiseNotesViewProps>): JSX.Ele
                     {problem && <Alert type="critical" title={problem} onClose={vm.dismissNotice} />}
                     {choice ? (
                         <NoteChoice choice={choice} vm={vm} />
+                    ) : history ? (
+                        <NoteHistory history={history} vm={vm} />
                     ) : editor ? (
                         <NoteEditor editor={editor} vm={vm} />
                     ) : (

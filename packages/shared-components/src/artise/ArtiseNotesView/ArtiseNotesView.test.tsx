@@ -4,7 +4,7 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
-import { render, screen } from "@test-utils";
+import { render, screen, within } from "@test-utils";
 import { composeStories } from "@storybook/react-vite";
 import React from "react";
 import userEvent from "@testing-library/user-event";
@@ -29,6 +29,11 @@ const {
     NewFolder,
     Renaming,
     Uploading,
+    WithBacklinks,
+    History,
+    OldVersion,
+    Searching,
+    NothingFound,
 } = composeStories(stories);
 
 describe("ArtiseNotesView", () => {
@@ -250,5 +255,61 @@ describe("ArtiseNotesView", () => {
     it("says while an upload runs", () => {
         render(<Uploading />);
         expect(screen.getByRole("status")).toHaveTextContent("Subiendo “foto.jpg”…");
+    });
+
+    // "Enlazada desde": each note that links here opens it.
+    it("lists the notes that link here", async () => {
+        const select = fn();
+        render(<WithBacklinks select={select} />);
+        const region = screen.getByRole("region", { name: "Enlazada desde" });
+        expect(region.textContent).toContain("Para el [[Mole]] faltan chiles.");
+        await userEvent.click(within(region).getByRole("button", { name: /^Flan/ }));
+        expect(select).toHaveBeenCalledWith("Recetas/Postres/Flan.md");
+    });
+
+    // History: open it from the note, pick a version, restore it, or go back.
+    it("shows the history and opens a version", async () => {
+        const openHistory = fn();
+        const { unmount } = render(<Default openHistory={openHistory} />);
+        await userEvent.click(screen.getByRole("button", { name: "Historial" }));
+        expect(openHistory).toHaveBeenCalled();
+        unmount();
+        const viewVersion = fn();
+        const closeHistory = fn();
+        render(<History viewVersion={viewVersion} closeHistory={closeHistory} />);
+        await userEvent.click(screen.getByRole("button", { name: /^Ari · 17 oct 2026/ }));
+        expect(viewVersion).toHaveBeenCalledWith("93b2");
+        await userEvent.click(screen.getByRole("button", { name: "Volver a la nota" }));
+        expect(closeHistory).toHaveBeenCalled();
+    });
+
+    it("restores an old version", async () => {
+        const restoreVersion = fn();
+        render(<OldVersion restoreVersion={restoreVersion} />);
+        expect(screen.getByText("La nota como estaba el 17 oct 2026, 20:11, por Ari.")).toBeVisible();
+        await userEvent.click(screen.getByRole("button", { name: "Restaurar esta versión" }));
+        expect(restoreVersion).toHaveBeenCalled();
+    });
+
+    // Search: typing goes to the view model; results replace the list and open notes.
+    it("searches", async () => {
+        const changeSearch = fn();
+        const { unmount } = render(<Default changeSearch={changeSearch} />);
+        await userEvent.type(screen.getByRole("searchbox", { name: "Buscar en las notas" }), "c");
+        expect(changeSearch).toHaveBeenCalledWith("c");
+        unmount();
+        const select = fn();
+        const clearSearch = fn();
+        render(<Searching select={select} clearSearch={clearSearch} />);
+        expect(screen.queryByRole("button", { name: "Súper" })).toBeNull();
+        await userEvent.click(screen.getByRole("button", { name: /^Mole/ }));
+        expect(select).toHaveBeenCalledWith("Recetas/Mole.md");
+        await userEvent.click(screen.getByRole("button", { name: "Borrar búsqueda" }));
+        expect(clearSearch).toHaveBeenCalled();
+    });
+
+    it("says when nothing was found", () => {
+        render(<NothingFound />);
+        expect(screen.getByRole("status")).toHaveTextContent("No se encontró nada para “zzz”.");
     });
 });

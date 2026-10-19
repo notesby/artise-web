@@ -66,6 +66,7 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/web/src/components/views/rooms/RoomListPanel/RoomListPanel.tsx` | Draws Artise's top of the chat list (`artise/chatList/ChatListTop.tsx`): the workspace bar (name, menu of the person's other workspaces, browser only) and "What's new".   |
 | `apps/web/src/components/views/dialogs/LogoutDialog.tsx`              | The sign-out confirmation names the workspace (`artise/signOut/signOutTexts.ts`): "¿Cerrar sesión en {espacio}?" and what it does in this browser or on this computer.     |
 | `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button. |
+| `apps/web/src/components/views/context_menus/MessageContextMenu.tsx`  | Adds "Guardar en Notas" for text messages in chats with notes (`artise/notes/SaveToNotesOption.tsx`), writing `Mensajes guardados/<date> <sender>.md` as Android does.     |
 
 ## Artise's words
 

@@ -119,6 +119,13 @@ export class NotesPageViewModel
     private restorePath: string | null = null;
     /** Where the editor's cursor last was, for putting uploaded files in the note. */
     private cursor = 0;
+    /** The old version being looked at in the history. */
+    private historyText: string | null = null;
+    /** The open history's versions, by commit, for a version's caption. */
+    private historyVersions = new Map<string, { at: string; by: string }>();
+    /** Each search gets a number; answers for an older one are dropped. */
+    private searchId = 0;
+    private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
     public constructor(props: NotesPageViewModelProps) {
         const assistant = getWorkspaceFile(props.client)?.assistantName ?? "Ari";
@@ -164,7 +171,14 @@ export class NotesPageViewModel
                 folderName: artiseT("artise|notes|folder_name"),
                 upload: artiseT("artise|notes|upload"),
                 moveHere: artiseT("artise|notes|move_here"),
+                history: artiseT("artise|notes|history"),
+                restore: artiseT("artise|notes|restore"),
+                backToNote: artiseT("artise|notes|back_to_note"),
+                linkedFrom: artiseT("artise|notes|linked_from"),
+                search: artiseT("artise|notes|search"),
+                clearSearch: artiseT("artise|notes|clear_search"),
             },
+            search: { query: "", state: "idle", results: [] },
         });
         if (props.roomId) {
             this.disposables.trackListener(props.client, RoomStateEvent.Events, this.onStateEvent as () => void);
@@ -173,6 +187,7 @@ export class NotesPageViewModel
             this.disposables.track(() => window.removeEventListener("focus", onFocus));
         }
         this.disposables.track(() => this.freeUrls());
+        this.disposables.track(() => clearTimeout(this.searchTimer));
         void this.load();
     }
 
@@ -282,6 +297,8 @@ export class NotesPageViewModel
             choice: undefined,
             notice: undefined,
             problem: undefined,
+            history: undefined,
+            backlinks: undefined,
         });
         this.note = null;
         const id = ++this.loadId;
@@ -314,6 +331,7 @@ export class NotesPageViewModel
             const note = await api.note(roomId, path);
             if (this.isDisposed || id !== this.loadId) return;
             this.note = { path, text: note.content, version: note.version };
+            void this.loadBacklinks(id, path);
             await this.showNote(id, path, note.content);
         } catch (e) {
             if (this.isDisposed || id !== this.loadId) return;
@@ -1064,6 +1082,156 @@ export class NotesPageViewModel
         if (done.length) void this.reloadTree();
         return done;
     }
+
+    /** "Enlazada desde": the notes that link to the open one. */
+    private async loadBacklinks(id: number, path: string): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        try {
+            const links = await api.links(roomId, path);
+            if (this.isDisposed || id !== this.loadId) return;
+            const seen = new Set<string>();
+            const backlinks = links.backlinks
+                .filter((link) => link.path !== path && !seen.has(link.path) && seen.add(link.path))
+                .map((link) => ({ path: link.path, name: displayName(link.path), line: link.line }));
+            this.snapshot.merge({ backlinks: backlinks.length ? backlinks : undefined });
+        } catch (e) {
+            logger.warn("Artise: couldn't read a note's links", e);
+        }
+    }
+
+    private static when(at: string): string {
+        const date = new Date(at);
+        if (Number.isNaN(date.getTime())) return at;
+        return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+    }
+
+    public openHistory = (): void => {
+        const note = this.note;
+        const { api, roomId } = this.props;
+        if (!note || !roomId) return;
+        const base = {
+            path: note.path,
+            title: displayName(note.path),
+            emptyText: artiseT("artise|notes|history_empty"),
+            items: [],
+        };
+        this.historyText = null;
+        this.snapshot.merge({ history: { ...base, state: "loading" }, notice: undefined, problem: undefined });
+        void (async () => {
+            try {
+                const versions = await api.history(roomId, note.path);
+                if (this.isDisposed || this.snapshot.current.history?.path !== note.path) return;
+                this.historyVersions = new Map(versions.map((version) => [version.commit, version]));
+                const items = versions.map((version) => ({
+                    commit: version.commit,
+                    label: artiseT("artise|notes|history_entry", {
+                        by: version.by,
+                        when: NotesPageViewModel.when(version.at),
+                    }),
+                    message: version.message,
+                }));
+                this.snapshot.merge({ history: { ...base, state: "ready", items } });
+            } catch (e) {
+                if (this.isDisposed) return;
+                this.snapshot.merge({ history: { ...base, state: "error", errorText: errorText(e) } });
+            }
+        })();
+    };
+
+    public closeHistory = (): void => {
+        this.historyText = null;
+        this.snapshot.merge({ history: undefined });
+    };
+
+    public viewVersion = (commit: string): void => {
+        const history = this.snapshot.current.history;
+        const { api, roomId } = this.props;
+        if (!history || !roomId) return;
+        const version = this.historyVersions.get(commit);
+        void (async () => {
+            try {
+                const old = await api.note(roomId, history.path, commit);
+                const current = this.snapshot.current.history;
+                if (this.isDisposed || current?.path !== history.path) return;
+                this.historyText = old.content;
+                const caption = artiseT("artise|notes|history_version", {
+                    when: version ? NotesPageViewModel.when(version.at) : commit,
+                    by: version?.by ?? "",
+                });
+                this.snapshot.merge({
+                    history: {
+                        ...current,
+                        viewing: { commit, caption, document: this.documentFor(history.path, old.content) },
+                    },
+                });
+            } catch (e) {
+                if (this.isDisposed) return;
+                this.snapshot.merge({ history: { ...history, state: "error", errorText: errorText(e) } });
+            }
+        })();
+    };
+
+    /** Saves the old version as the note's text: a normal edit on the current version, as the contract says. */
+    public restoreVersion = (): void => {
+        const note = this.note;
+        const text = this.historyText;
+        if (!note || text === null) return;
+        this.historyText = null;
+        this.snapshot.merge({ history: undefined });
+        void this.saveText(note.path, text, note.version);
+    };
+
+    public changeSearch = (query: string): void => {
+        clearTimeout(this.searchTimer);
+        const id = ++this.searchId;
+        // One letter or none: nothing to ask yet; the list shows again.
+        if (query.trim().length < 2) {
+            this.snapshot.merge({ search: { query, state: "idle", results: [] } });
+            return;
+        }
+        this.snapshot.merge({ search: { ...this.snapshot.current.search, query, state: "loading" } });
+        // Ask once the person pauses typing.
+        this.searchTimer = setTimeout(() => void this.runSearch(id, query.trim()), 300);
+    };
+
+    private async runSearch(id: number, query: string): Promise<void> {
+        const { api, roomId } = this.props;
+        if (!roomId) return;
+        try {
+            const found = await api.search(roomId, query);
+            if (this.isDisposed || id !== this.searchId) return;
+            const results = found.map((result) => ({
+                path: result.path,
+                name: displayName(result.path),
+                lines: [...new Set(result.lines)],
+            }));
+            this.snapshot.merge({
+                search: {
+                    query: this.snapshot.current.search.query,
+                    state: "ready",
+                    results,
+                    message: results.length ? undefined : artiseT("artise|notes|search_empty", { query }),
+                },
+            });
+        } catch (e) {
+            if (this.isDisposed || id !== this.searchId) return;
+            this.snapshot.merge({
+                search: {
+                    query: this.snapshot.current.search.query,
+                    state: "error",
+                    results: [],
+                    message: errorText(e),
+                },
+            });
+        }
+    }
+
+    public clearSearch = (): void => {
+        clearTimeout(this.searchTimer);
+        this.searchId++;
+        this.snapshot.merge({ search: { query: "", state: "idle", results: [] } });
+    };
 
     private async withRaw(path: string, handle: (blob: Blob) => void): Promise<void> {
         const { api, roomId } = this.props;

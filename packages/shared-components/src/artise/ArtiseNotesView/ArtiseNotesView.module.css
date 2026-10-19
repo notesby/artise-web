@@ -172,6 +172,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 .noteBar {
     display: flex;
     justify-content: flex-end;
+    gap: var(--cpd-space-2x);
     margin-block-end: var(--cpd-space-2x);
 }
 
@@ -391,4 +392,79 @@ SPDX-License-Identifier: AGPL-3.0-only
 .status {
     margin-block-end: var(--cpd-space-3x);
     color: var(--cpd-color-text-secondary);
+}
+
+.history,
+.backlinks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-3x);
+}
+
+.backlinks {
+    margin-block-start: var(--cpd-space-8x);
+    padding-block-start: var(--cpd-space-4x);
+    border-block-start: 1px solid var(--cpd-color-border-interactive-secondary);
+}
+
+.historyRow {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-0-5x);
+    inline-size: 100%;
+    padding: var(--cpd-space-2x);
+    border: none;
+    border-radius: var(--cpd-space-2x);
+    background: none;
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+    text-align: start;
+    cursor: pointer;
+}
+
+.historyRow:hover,
+.historyRow[aria-current="page"] {
+    background-color: var(--cpd-color-bg-subtle-secondary);
+}
+
+.historyRow:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
+}
+
+.searchBox {
+    margin-block-end: var(--cpd-space-2x);
+}
+
+.searchResults {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cpd-space-2x);
+}
+
+.searchBox {
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    inset-inline-start: var(--cpd-space-2x);
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    color: var(--cpd-color-icon-secondary);
+    pointer-events: none;
+}
+
+.searchInput {
+    inline-size: 100%;
+    box-sizing: border-box;
+    padding: var(--cpd-space-1-5x) var(--cpd-space-2x) var(--cpd-space-1-5x) var(--cpd-space-8x);
+    border: 1px solid var(--cpd-color-border-interactive-secondary);
+    border-radius: var(--cpd-space-2x);
+    background-color: var(--cpd-color-bg-canvas-default);
+    color: var(--cpd-color-text-primary);
+    font: var(--cpd-font-body-md-regular);
+}
+
+.searchInput:focus-visible {
+    outline: 2px solid var(--cpd-color-border-focused);
 }

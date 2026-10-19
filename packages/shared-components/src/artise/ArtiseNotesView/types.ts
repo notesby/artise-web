@@ -94,6 +94,29 @@ export type ArtiseNotesAction =
           saving: boolean;
       };
 
+/** A note's history: its last versions, newest first, and the one being looked at. */
+export interface ArtiseNotesHistory {
+    path: string;
+    title: string;
+    state: "loading" | "ready" | "error";
+    errorText?: string;
+    /** "Ana · 18 oct 2026, 9:05" and the change's message. */
+    items: { commit: string; label: string; message: string }[];
+    /** "Todavía no hay cambios." when there are none. */
+    emptyText: string;
+    /** An old version, read-only, with "Restaurar esta versión". */
+    viewing?: { commit: string; caption: string; document: ArtiseNoteDocument };
+}
+
+/** Searching the chat's notes: names and lines that match. */
+export interface ArtiseNotesSearch {
+    query: string;
+    state: "idle" | "loading" | "ready" | "error";
+    results: { path: string; name: string; lines: string[] }[];
+    /** "No se encontró nada para “x”." or the error's sentence. */
+    message?: string;
+}
+
 export interface ArtiseNotesViewSnapshot {
     /** "Notas". */
     title: string;
@@ -127,6 +150,11 @@ export interface ArtiseNotesViewSnapshot {
     action?: ArtiseNotesAction;
     /** "Subiendo “foto.jpg”…" while an upload runs. */
     uploading?: string;
+    /** Set while the open note's history is shown. */
+    history?: ArtiseNotesHistory;
+    /** The notes that link to the open one ("Enlazada desde"). */
+    backlinks?: { path: string; name: string; line: string }[];
+    search: ArtiseNotesSearch;
     labels: {
         back: string;
         retry: string;
@@ -161,6 +189,12 @@ export interface ArtiseNotesViewSnapshot {
         folderName: string;
         upload: string;
         moveHere: string;
+        history: string;
+        restore: string;
+        backToNote: string;
+        linkedFrom: string;
+        search: string;
+        clearSearch: string;
     };
 }
 
@@ -230,6 +264,16 @@ export interface ArtiseNotesViewActions {
     upload: (files: File[]) => void;
     /** Upload files and put them in the note being edited, at the cursor. */
     attach: (files: File[]) => void;
+    /** Show the open note's history. */
+    openHistory: () => void;
+    closeHistory: () => void;
+    /** Look at the note as it was at a commit. */
+    viewVersion: (commit: string) => void;
+    /** Save the version being looked at as the note's text. */
+    restoreVersion: () => void;
+    /** The search box's text changed. */
+    changeSearch: (query: string) => void;
+    clearSearch: () => void;
 }
 
 export type ArtiseNotesViewModel = ViewModel<ArtiseNotesViewSnapshot, ArtiseNotesViewActions>;

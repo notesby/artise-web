@@ -54,7 +54,8 @@ function fakeApi(tree: NotesTree = TREE): { [K in keyof NotesApi]: Mock } {
     return {
         chats: vi.fn().mockResolvedValue([{ id: ROOM, name: "Familia", tree: "t1" }]),
         tree: vi.fn().mockResolvedValue(tree),
-        note: vi.fn().mockImplementation(async (_room: string, path: string) => {
+        note: vi.fn().mockImplementation(async (_room: string, path: string, at?: string) => {
+            if (at) return { path, version: "old", content: `# Antes (${at})` };
             if (!(path in NOTES)) throw new NotesApiError("not_found", 404);
             const version = tree.files.find((f) => f.path === path)?.version ?? "x";
             return { path, version, content: NOTES[path] };
@@ -84,6 +85,11 @@ function fakeApi(tree: NotesTree = TREE): { [K in keyof NotesApi]: Mock } {
         createFolder: vi.fn().mockImplementation(async (_room: string, path: string) => ({ path })),
         putRaw: vi.fn().mockImplementation(async (_room: string, path: string) => ({ path, version: v(80) })),
         links: vi.fn().mockResolvedValue({ path: "x", outgoing: [], backlinks: [] }),
+        history: vi.fn().mockResolvedValue([
+            { commit: "c2", at: "2026-10-18T09:05:00-06:00", message: "app: edit Súper.md", by: "Ana" },
+            { commit: "c1", at: "2026-10-17T20:11:00-06:00", message: "ari: create Súper.md", by: "Ari" },
+        ]),
+        search: vi.fn().mockResolvedValue([{ path: "Recetas/Mole.md", lines: ["- chile mulato"] }]),
         raw: vi.fn().mockImplementation(async (_room: string, path: string) => ({
             blob: new Blob([`bytes of ${path}`], { type: "text/html" }),
             contentType: "text/html",
@@ -826,5 +832,130 @@ describe("NotesPageViewModel", () => {
         await vi.waitFor(() =>
             expect(vm.getSnapshot().editor?.draft).toBe("- [ ] leche\n- [x] pan\n![[factura (2).pdf]]\n"),
         );
+    });
+
+    describe("history, links and search", () => {
+        async function opened() {
+            const made = makeVm({ path: "Súper.md" });
+            await vi.waitFor(() => expect(made.vm.getSnapshot().content.kind).toBe("note"));
+            return made;
+        }
+
+        // The open note's versions, newest first, with who and when.
+        it("shows a note's history", async () => {
+            const { vm, api } = await opened();
+            vm.openHistory();
+            await vi.waitFor(() => expect(vm.getSnapshot().history?.state).toBe("ready"));
+            expect(api.history).toHaveBeenCalledWith(ROOM, "Súper.md");
+            const items = vm.getSnapshot().history?.items ?? [];
+            expect(items.map((i) => [i.commit, i.message])).toEqual([
+                ["c2", "app: edit Súper.md"],
+                ["c1", "ari: create Súper.md"],
+            ]);
+            expect(items[0].label).toMatch(/^Ana · /);
+        });
+
+        // An old version opens with at=, read-only, captioned with when and who.
+        it("opens an old version", async () => {
+            const { vm, api } = await opened();
+            vm.openHistory();
+            await vi.waitFor(() => expect(vm.getSnapshot().history?.state).toBe("ready"));
+            vm.viewVersion("c1");
+            await vi.waitFor(() => expect(vm.getSnapshot().history?.viewing).toBeDefined());
+            expect(api.note).toHaveBeenLastCalledWith(ROOM, "Súper.md", "c1");
+            expect(vm.getSnapshot().history?.viewing).toMatchObject({
+                commit: "c1",
+                caption: expect.stringMatching(/^The note as it was on .+, by Ari\.$/),
+                document: [{ type: "heading", level: 1 }],
+            });
+        });
+
+        // Restore: the old text saved as a normal edit on the current version.
+        it("restores an old version as an edit", async () => {
+            const { vm, api } = await opened();
+            vm.openHistory();
+            await vi.waitFor(() => expect(vm.getSnapshot().history?.state).toBe("ready"));
+            vm.viewVersion("c1");
+            await vi.waitFor(() => expect(vm.getSnapshot().history?.viewing).toBeDefined());
+            vm.restoreVersion();
+            expect(vm.getSnapshot().history).toBeUndefined();
+            await vi.waitFor(() => expect(api.saveNote).toHaveBeenCalledWith(ROOM, "Súper.md", "# Antes (c1)", v(1)));
+        });
+
+        it("says when the history can't load", async () => {
+            const { vm, api } = await opened();
+            api.history.mockRejectedValueOnce(new NotesApiError("offline", 0));
+            vm.openHistory();
+            await vi.waitFor(() =>
+                expect(vm.getSnapshot().history).toMatchObject({
+                    state: "error",
+                    errorText: "This needs a connection. Try again when you're online.",
+                }),
+            );
+            vm.closeHistory();
+            expect(vm.getSnapshot().history).toBeUndefined();
+        });
+
+        // "Enlazada desde": other notes that link here, once each.
+        it("lists the notes that link to the open one", async () => {
+            const made = makeVm();
+            made.api.links.mockResolvedValue({
+                path: "Súper.md",
+                outgoing: [],
+                backlinks: [
+                    { path: "Recetas/Mole.md", line: "Ver [[Súper]]." },
+                    { path: "Recetas/Mole.md", line: "Otra vez [[Súper]]." },
+                    { path: "Súper.md", line: "[[Súper]]" },
+                ],
+            });
+            await ready(made.vm);
+            made.vm.select("Súper.md");
+            await vi.waitFor(() =>
+                expect(made.vm.getSnapshot().backlinks).toEqual([
+                    { path: "Recetas/Mole.md", name: "Mole", line: "Ver [[Súper]]." },
+                ]),
+            );
+        });
+
+        // Search waits for a pause, asks /search, and shows names and lines.
+        it("searches after a pause", async () => {
+            vi.useFakeTimers();
+            try {
+                const { vm, api } = makeVm();
+                await vi.waitFor(() => expect(vm.getSnapshot().state).toBe("ready"));
+                vm.changeSearch("c");
+                expect(vm.getSnapshot().search.state).toBe("idle");
+                vm.changeSearch("ch");
+                vm.changeSearch("chile");
+                expect(vm.getSnapshot().search.state).toBe("loading");
+                await vi.advanceTimersByTimeAsync(300);
+                expect(api.search).toHaveBeenCalledTimes(1);
+                expect(api.search).toHaveBeenCalledWith(ROOM, "chile");
+                expect(vm.getSnapshot().search).toEqual({
+                    query: "chile",
+                    state: "ready",
+                    results: [{ path: "Recetas/Mole.md", name: "Mole", lines: ["- chile mulato"] }],
+                    message: undefined,
+                });
+                vm.clearSearch();
+                expect(vm.getSnapshot().search).toEqual({ query: "", state: "idle", results: [] });
+            } finally {
+                vi.useRealTimers();
+            }
+        });
+
+        it("says when nothing was found", async () => {
+            vi.useFakeTimers();
+            try {
+                const { vm, api } = makeVm();
+                await vi.waitFor(() => expect(vm.getSnapshot().state).toBe("ready"));
+                api.search.mockResolvedValueOnce([]);
+                vm.changeSearch("zzz");
+                await vi.advanceTimersByTimeAsync(300);
+                expect(vm.getSnapshot().search).toMatchObject({ state: "ready", message: "Nothing found for “zzz”." });
+            } finally {
+                vi.useRealTimers();
+            }
+        });
     });
 });

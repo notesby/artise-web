@@ -392,6 +392,39 @@ ARTISE_TEXTS: dict[str, tuple[object, object, object]] = {
         "No se pudo adjuntar el archivo. Inténtalo de nuevo.",
         "Não foi possível adicionar o arquivo. Tente de novo.",
     ),
+    # History, search, links and saving messages (W3-4), worded like Android's artise/notes texts.
+    "artise|notes|history": ("History", "Historial", "Histórico"),
+    "artise|notes|history_empty": ("No changes yet.", "Todavía no hay cambios.", "Ainda não há alterações."),
+    "artise|notes|history_entry": ("%(by)s · %(when)s", "%(by)s · %(when)s", "%(by)s · %(when)s"),
+    "artise|notes|history_version": (
+        "The note as it was on %(when)s, by %(by)s.",
+        "La nota como estaba el %(when)s, por %(by)s.",
+        "A nota como estava em %(when)s, por %(by)s.",
+    ),
+    "artise|notes|restore": ("Restore this version", "Restaurar esta versión", "Restaurar esta versão"),
+    "artise|notes|back_to_note": ("Back to the note", "Volver a la nota", "Voltar à nota"),
+    "artise|notes|linked_from": ("Linked from", "Enlazada desde", "Vinculada em"),
+    "artise|notes|search": ("Search notes", "Buscar en las notas", "Buscar notas"),
+    "artise|notes|search_empty": (
+        "Nothing found for “%(query)s”.",
+        "No se encontró nada para “%(query)s”.",
+        "Nada encontrado para “%(query)s”.",
+    ),
+    "artise|notes|clear_search": ("Clear search", "Borrar búsqueda", "Limpar busca"),
+    "artise|notes|save_message": ("Save to Notes", "Guardar en Notas", "Salvar nas Notas"),
+    "artise|notes|saved_messages_folder": ("Saved messages", "Mensajes guardados", "Mensagens salvas"),
+    "artise|notes|saved_message": (
+        "Saved to this chat's Notes",
+        "Guardado en las Notas de este chat",
+        "Salvo nas Notas desta conversa",
+    ),
+    "artise|notes|save_message_failed": (
+        "Couldn't save it to Notes. Try again.",
+        "No se pudo guardar en Notas. Inténtalo de nuevo.",
+        "Não foi possível salvar nas Notas. Tente de novo.",
+    ),
+    "artise|notes|open_note": ("Open the note", "Abrir la nota", "Abrir a nota"),
+    "artise|notes|close": ("Close", "Cerrar", "Fechar"),
     # The Notes API's errors, one plain sentence each (Android's artise/notes texts where they exist).
     "artise|notes|error|unauthorized": (
         "Couldn't confirm it's you. Reload the page and try again.",
