@@ -117,13 +117,17 @@ test.describe("Two workspaces", () => {
         // Each web app reports its own count; the rail shows each, the badge their total.
         await views[0].evaluate(() => window.electron.send("setBadgeCount", 2));
         await views[1].evaluate(() => window.electron.send("setBadgeCount", 5));
-        // The rail draws itself again on each change, so a read can meet a page being replaced: read again.
-        const counts = async (): Promise<string[]> =>
+        // Each workspace's rail item has its own count, whatever order the views were listed in. The rail draws
+        // itself again on each change, so a read can meet a page being replaced: read again.
+        const nameOf = async (view: Page): Promise<string> =>
+            (await serverOf(view)) === "artise.co" ? "Artise" : "Prueba MAS";
+        const expected = [`${await nameOf(views[0])}. Unread: 2`, `${await nameOf(views[1])}. Unread: 5`].sort();
+        const labels = async (): Promise<string[]> =>
             (await railPage(app))
-                .locator(".count")
-                .allInnerTexts()
+                .locator("a.item:not(.add)")
+                .evaluateAll((items) => items.map((item) => item.getAttribute("aria-label") ?? "").sort())
                 .catch((): string[] => []);
-        await expect.poll(counts).toEqual(["2", "5"]);
+        await expect.poll(labels).toEqual(expected);
         if (process.platform === "darwin") {
             await expect.poll(() => app.evaluate(({ app }) => app.badgeCount)).toBe(7);
         }
