@@ -4,9 +4,9 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
-// Two workspaces open side by side, each in its own view and storage (D3-1). There's no Artise ID account in
-// CI, so the test stands in for Artise ID inside the app and lists two real workspaces. Their web apps are kept
-// offline, so nothing reaches their sign-in servers and no browser opens.
+// Two workspaces open side by side, each in its own view and storage (D3-1), on the rail (D3-2). There's no
+// Artise ID account in CI, so the test stands in for Artise ID inside the app and lists two real workspaces. Their
+// web apps are kept offline, so nothing is registered on their sign-in servers and no browser opens.
 
 import { type ElectronApplication, type Page } from "@playwright/test";
 
@@ -21,6 +21,7 @@ declare global {
 
     interface Window {
         mxPlatformPeg: { get(): ElectronPlatform };
+        electron: { send(channel: string, ...args: unknown[]): void };
     }
 }
 
@@ -30,7 +31,8 @@ const WORKSPACES = [
 ];
 
 async function openTwoWorkspaces(app: ElectronApplication): Promise<Page[]> {
-    const isShell = (page: Page): boolean => page.url().startsWith("artise-shell://shell/");
+    const isShell = (page: Page): boolean =>
+        page.url().startsWith("artise-shell://shell/") && !page.url().startsWith("artise-shell://shell/rail");
     const shell = app.windows().find(isShell) ?? (await app.waitForEvent("window", { predicate: isShell }));
     await app.evaluate(async ({ app, session, shell }, workspaces) => {
         // The app's own modules, as the app loaded them.
@@ -67,6 +69,12 @@ async function openTwoWorkspaces(app: ElectronApplication): Promise<Page[]> {
     return views;
 }
 
+/** The rail's page, whichever load of it is current. */
+async function railPage(app: ElectronApplication): Promise<Page> {
+    const isRail = (page: Page): boolean => page.url().startsWith("artise-shell://shell/rail");
+    return app.windows().find(isRail) ?? (await app.waitForEvent("window", { predicate: isRail }));
+}
+
 const serverOf = (view: Page): Promise<string> =>
     view.evaluate(
         async () => (await window.mxPlatformPeg.get().getConfig()).default_server_config["m.homeserver"].server_name,
@@ -100,15 +108,54 @@ test.describe("Two workspaces", () => {
         ).rejects.toThrow("Not this workspace's user");
     });
 
+    test("show on the rail, with each one's unread count", async ({ app }) => {
+        const views = await openTwoWorkspaces(app);
+        const rail = await railPage(app);
+        await expect(rail.locator("a.item")).toHaveCount(2);
+        await expect(rail.locator("a.item.shown")).toHaveAttribute("href", /i=0$/);
+
+        // Each web app reports its own count; the rail shows each, the badge their total.
+        await views[0].evaluate(() => window.electron.send("setBadgeCount", 2));
+        await views[1].evaluate(() => window.electron.send("setBadgeCount", 5));
+        // The rail draws itself again on each change, so a read can meet a page being replaced: read again.
+        const counts = async (): Promise<string[]> =>
+            (await railPage(app))
+                .locator(".count")
+                .allInnerTexts()
+                .catch((): string[] => []);
+        await expect.poll(counts).toEqual(["2", "5"]);
+        if (process.platform === "darwin") {
+            await expect.poll(() => app.evaluate(({ app }) => app.badgeCount)).toBe(7);
+        }
+
+        await expect(async () => (await railPage(app)).locator("a.item").nth(1).click({ timeout: 2000 })).toPass();
+        await expect
+            .poll(async () =>
+                (await railPage(app))
+                    .locator("a.item.shown")
+                    .getAttribute("href")
+                    .catch((): null => null),
+            )
+            .toMatch(/i=1$/);
+    });
+
     test("switch with Ctrl/⌘+2 and keep both running", async ({ app }) => {
         await openTwoWorkspaces(app);
         const visible = (): Promise<boolean[]> =>
             app.evaluate(({ BrowserWindow }) =>
-                BrowserWindow.getAllWindows()[0].contentView.children.map((child) => child.getVisible()),
+                BrowserWindow.getAllWindows()[0]
+                    .contentView.children.filter((child) =>
+                        (child as Electron.WebContentsView).webContents.getURL().startsWith("vector://"),
+                    )
+                    .map((child) => child.getVisible()),
             );
         expect(await visible()).toEqual([true, false]);
         await app.evaluate(({ BrowserWindow }) => {
-            const shown = BrowserWindow.getAllWindows()[0].contentView.children.find((child) => child.getVisible());
+            const shown = BrowserWindow.getAllWindows()[0].contentView.children.find(
+                (child) =>
+                    child.getVisible() &&
+                    (child as Electron.WebContentsView).webContents.getURL().startsWith("vector://"),
+            );
             const modifier = process.platform === "darwin" ? "meta" : "control";
             (shown as Electron.WebContentsView).webContents.sendInputEvent({
                 type: "keyDown",
