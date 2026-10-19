@@ -520,6 +520,70 @@ DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
     "artise|desktop|crash_reports|allow": ("Share crash reports", "Compartir informes de fallos", "Compartilhar relatórios de falhas"),
     "artise|desktop|crash_reports|deny": ("Not now", "Ahora no", "Agora não"),
     "artise|desktop|crash_reports|menu": ("Share crash reports", "Compartir informes de fallos", "Compartilhar relatórios de falhas"),
+    # The welcome and workspace screens. The words are the phones' (iOS screen_artise_id_*), except where the
+    # desktop opens several workspaces at once.
+    "artise|desktop|welcome|subtitle": (
+        "Sign in once and open your workspaces.",
+        "Inicia sesión una vez y abre tus espacios de trabajo.",
+        "Entre uma vez e abra seus espaços de trabalho.",
+    ),
+    "artise|desktop|welcome|apple": ("Continue with Apple", "Continuar con Apple", "Continuar com a Apple"),
+    "artise|desktop|welcome|google": ("Continue with Google", "Continuar con Google", "Continuar com o Google"),
+    "artise|desktop|welcome|microsoft": ("Continue with Microsoft", "Continuar con Microsoft", "Continuar com a Microsoft"),
+    "artise|desktop|welcome|email": ("Continue with email", "Continuar con correo", "Continuar com e-mail"),
+    "artise|desktop|welcome|waiting": (
+        "Finish signing in in your browser, then come back here.",
+        "Termina de iniciar sesión en tu navegador y vuelve aquí.",
+        "Termine de entrar no seu navegador e volte aqui.",
+    ),
+    "artise|desktop|welcome|back": ("Back", "Volver", "Voltar"),
+    "artise|desktop|welcome|retry": ("Try again", "Intentar de nuevo", "Tentar de novo"),
+    "artise|desktop|welcome|error_refused": (
+        "Can’t sign in with Artise ID right now. Try again.",
+        "No se pudo iniciar sesión con Artise ID. Inténtalo de nuevo.",
+        "Não foi possível entrar com o Artise ID agora. Tente de novo.",
+    ),
+    "artise|desktop|welcome|error_unreachable": (
+        "Can’t reach Artise. Check your connection and try again.",
+        "No se puede conectar con Artise. Revisa tu conexión y vuelve a intentarlo.",
+        "Não foi possível conectar ao Artise. Verifique sua conexão e tente de novo.",
+    ),
+    "artise|desktop|welcome|error_not_available": (
+        "Signing in on computers isn’t ready yet. Try again later.",
+        "Todavía no se puede iniciar sesión en la computadora. Inténtalo más tarde.",
+        "Ainda não dá para entrar no computador. Tente mais tarde.",
+    ),
+    "artise|desktop|welcome|error_expired": (
+        "Sign in again with your Artise ID.",
+        "Vuelve a entrar con tu Artise ID.",
+        "Entre de novo com seu Artise ID.",
+    ),
+    "artise|desktop|workspaces|title": (
+        "Choose your workspaces",
+        "Elige tus espacios de trabajo",
+        "Escolha seus espaços de trabalho",
+    ),
+    "artise|desktop|workspaces|description": (
+        "They all stay open and get your messages at the same time.",
+        "Todos quedan abiertos y reciben tus mensajes a la vez.",
+        "Todos ficam abertos e recebem suas mensagens ao mesmo tempo.",
+    ),
+    "artise|desktop|workspaces|loading": (
+        "Looking for your workspaces…",
+        "Buscando tus espacios de trabajo…",
+        "Procurando seus espaços de trabalho…",
+    ),
+    "artise|desktop|workspaces|open": ("Open", "Abrir", "Abrir"),
+    "artise|desktop|workspaces|none": (
+        "You’re not in any workspace yet. Ask the person who invited you for the invite link.",
+        "Todavía no estás en ningún espacio de trabajo. Pídele a quien te invitó el enlace de invitación.",
+        "Você ainda não está em nenhum espaço de trabalho. Peça o link de convite a quem te convidou.",
+    ),
+    "artise|desktop|workspaces|other_account": (
+        "Sign in another way",
+        "Iniciar sesión de otra forma",
+        "Entrar de outra forma",
+    ),
 }
 
 PLACEHOLDER = re.compile(r"%\(\w+\)s|<\w+>|</\w+>")

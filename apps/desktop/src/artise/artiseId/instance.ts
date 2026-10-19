@@ -45,5 +45,13 @@ export function getArtiseId(): ArtiseId {
  * @returns whether the link was Artise ID's.
  */
 export function artiseHandlesLink(link: string): boolean {
-    return getArtiseId().handleReturn(link);
+    if (!getArtiseId().handleReturn(link)) return false;
+    // Back from the browser: bring Artise to the front (macOS doesn't for its open-url links).
+    const window = global.mainWindow;
+    if (window) {
+        if (window.isMinimized()) window.restore();
+        window.show();
+        window.focus();
+    }
+    return true;
 }
