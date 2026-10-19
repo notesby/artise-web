@@ -10,7 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Configuration } from "electron-builder";
 
-import { ARTISE_ICONS, artiseBuilderConfig } from "./builderConfig.js";
+import { ARTISE_ICONS, artiseBuilderConfig, storeIdentity } from "./builderConfig.js";
 
 const desktopDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -97,6 +97,54 @@ describe("artiseBuilderConfig", () => {
             appId: "co.artise.desktop",
             productName: "Artise",
             protocols: ["co.artise.desktop"],
+        });
+    });
+
+    it("builds the Store package unsigned, in Spanish first, starting at login", () => {
+        expect(artise.appx).toMatchObject({
+            applicationId: "Artise",
+            displayName: "Artise",
+            languages: ["es-MX", "en-US", "pt-BR"],
+            capabilities: ["runFullTrust", "internetClient", "microphone", "webcam"],
+            customExtensionsPath: "artise/appx/extensions.xml",
+        });
+        const extensions = fs.readFileSync(path.join(desktopDir, "artise/appx/extensions.xml"), "utf8");
+        expect(extensions).toContain('<desktop:StartupTask TaskId="ArtiseStartup" Enabled="true"');
+        // The executable electron-builder puts in the package: app\<productName>.exe.
+        expect(extensions).toContain('Executable="app\\Artise.exe"');
+    });
+
+    it("has every Store tile", () => {
+        const tiles = [
+            "StoreLogo",
+            "Square44x44Logo",
+            "Square150x150Logo",
+            "Wide310x150Logo",
+            "SmallTile",
+            "LargeTile",
+        ];
+        expect(
+            tiles.filter((tile) => !fs.existsSync(path.join(desktopDir, ARTISE_ICONS, "appx", `${tile}.png`))),
+        ).toEqual([]);
+    });
+});
+
+describe("storeIdentity", () => {
+    it("takes Partner Center's values from the environment", () => {
+        expect(
+            storeIdentity({
+                ARTISE_STORE_IDENTITY_NAME: "12345Artise.Artise",
+                ARTISE_STORE_PUBLISHER: "CN=ABCD-1234",
+                ARTISE_STORE_PUBLISHER_DISPLAY_NAME: "Artise",
+            }),
+        ).toEqual({ identityName: "12345Artise.Artise", publisher: "CN=ABCD-1234", publisherDisplayName: "Artise" });
+    });
+
+    it("builds with placeholders before the app is registered", () => {
+        expect(storeIdentity({})).toEqual({
+            identityName: "Artise.Desktop",
+            publisher: "CN=00000000-0000-0000-0000-000000000000",
+            publisherDisplayName: "Artise",
         });
     });
 });

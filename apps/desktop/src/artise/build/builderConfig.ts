@@ -12,6 +12,23 @@ import { ARTISE_SOURCE_REPO } from "../variant.js";
 export const ARTISE_ICONS = "artise/icons";
 
 /**
+ * The Microsoft Store package's identity, from Partner Center ("Product identity"). CI passes them from the
+ * repository's variables; until the app is registered there, placeholders let the package build for checking.
+ * Microsoft: "Values in the manifest are case-sensitive. Spaces and other punctuation must also match."
+ */
+export function storeIdentity(env: NodeJS.ProcessEnv): {
+    identityName: string;
+    publisher: string;
+    publisherDisplayName: string;
+} {
+    return {
+        identityName: env.ARTISE_STORE_IDENTITY_NAME || "Artise.Desktop",
+        publisher: env.ARTISE_STORE_PUBLISHER || "CN=00000000-0000-0000-0000-000000000000",
+        publisherDisplayName: env.ARTISE_STORE_PUBLISHER_DISPLAY_NAME || "Artise",
+    };
+}
+
+/**
  * Element's electron-builder configuration turned into Artise's: Artise's icons, publisher and licence.
  * The app ID, names and the sign-in scheme come from the variant file (artise/build.json), which Element's
  * configuration already reads through VARIANT_PATH.
@@ -20,8 +37,13 @@ export const ARTISE_ICONS = "artise/icons";
  *
  * @param element - Element's configuration, built with the Artise variant.
  * @param sourceRef - the git tag or commit being built, for About's source link (the AGPL offer).
+ * @param env - the environment, for the Store identity.
  */
-export function artiseBuilderConfig(element: Configuration, sourceRef = ""): Configuration {
+export function artiseBuilderConfig(
+    element: Configuration,
+    sourceRef = "",
+    env: NodeJS.ProcessEnv = process.env,
+): Configuration {
     return {
         ...element,
         // macOS shows it in About and Finder's info; Element's default would read "Copyright © Element".
@@ -50,6 +72,21 @@ export function artiseBuilderConfig(element: Configuration, sourceRef = ""): Con
         dmg: { ...element.dmg, badgeIcon: `${ARTISE_ICONS}/icon.icon` },
         win: { ...element.win, icon: `${ARTISE_ICONS}/icon.ico` },
         linux: { ...element.linux, icon: `${ARTISE_ICONS}/icon.png` },
+        // The Microsoft Store package (the appx target, built on Windows): unsigned, as the Store signs it. Its tiles
+        // are artise/icons/appx/, which the CI copies to build/appx/ where electron-builder looks for them.
+        appx: {
+            ...storeIdentity(env),
+            applicationId: "Artise",
+            displayName: "Artise",
+            languages: ["es-MX", "en-US", "pt-BR"],
+            backgroundColor: "transparent",
+            // Calls need the camera and microphone; Electron apps run with full trust.
+            capabilities: ["runFullTrust", "internetClient", "microphone", "webcam"],
+            customExtensionsPath: "artise/appx/extensions.xml",
+            // Windows 10 1809 and later; the start-at-login extension needs 1709.
+            minVersion: "10.0.17763.0",
+            maxVersionTested: "10.0.26100.0",
+        },
         // Element's package recommends Element's own apt keyring.
         deb: { ...element.deb, recommends: [] },
     };

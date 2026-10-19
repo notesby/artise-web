@@ -16,6 +16,8 @@ It writes:
 - icon.ico (16-256 px) for Windows;
 - icon.icon/, an Icon Composer bundle for macOS. macOS draws its own rounded shape around it, so the
   layer is the full square;
+- appx/: the Microsoft Store package's tiles (StoreLogo, Square44x44Logo, Square150x150Logo, Wide310x150Logo,
+  SmallTile, LargeTile), the icon on Artise's blue; the CI copies them to build/appx/ for the Store build;
 - overlay/1.png … 9.png and 9plus.png: Windows' taskbar badge with the unread count of every workspace added
   up (Element Web draws one per page, which can't show a total). Drawn with DejaVu Sans Bold.
 
@@ -83,6 +85,31 @@ def overlay(text: str) -> Image.Image:
     return image
 
 
+# The Store package's images (file name: size), as electron-builder's AppX target names them.
+APPX_TILES = {
+    "StoreLogo.png": (50, 50),
+    "Square44x44Logo.png": (44, 44),
+    "Square150x150Logo.png": (150, 150),
+    "Wide310x150Logo.png": (310, 150),
+    "SmallTile.png": (71, 71),
+    "LargeTile.png": (310, 310),
+}
+
+def tile(square: Image.Image, size: tuple[int, int]) -> Image.Image:
+    """The full-bleed icon, scaled to the tile's height and centred; on a wide tile its own edges are stretched
+    to the sides, so its gradient carries on without a seam."""
+    width, height = size
+    icon = square.resize((height, height), Image.LANCZOS)
+    left = (width - height) // 2
+    out = Image.new("RGBA", size)
+    if left > 0:
+        out.paste(icon.crop((0, 0, 1, height)).resize((left, height)), (0, 0))
+        right = width - left - height
+        out.paste(icon.crop((height - 1, 0, height, height)).resize((right, height)), (left + height, 0))
+    out.paste(icon, (left, 0))
+    return out
+
+
 def main() -> int:
     square = Image.open(SOURCE).convert("RGBA")
     if square.size != (1024, 1024):
@@ -101,12 +128,16 @@ def main() -> int:
     text = json.dumps(ICON_JSON, indent=4).replace('[\n            "macOS"\n        ]', '["macOS"]')
     (bundle / "icon.json").write_text(text + "\n", encoding="utf-8")
 
+    (OUTPUT / "appx").mkdir(exist_ok=True)
+    for name, size in APPX_TILES.items():
+        tile(square, size).save(OUTPUT / "appx" / name)
+
     (OUTPUT / "overlay").mkdir(exist_ok=True)
     for count in range(1, 10):
         overlay(str(count)).save(OUTPUT / "overlay" / f"{count}.png")
     overlay("9+").save(OUTPUT / "overlay" / "9plus.png")
 
-    print(f"Wrote {OUTPUT.relative_to(ROOT)}: icon.png, icon.ico, icon.icon/, overlay/")
+    print(f"Wrote {OUTPUT.relative_to(ROOT)}: icon.png, icon.ico, icon.icon/, appx/, overlay/")
     return 0
 
 

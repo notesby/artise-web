@@ -1,0 +1,13 @@
+<!--
+Copyright 2026 Artise.
+
+SPDX-License-Identifier: AGPL-3.0-only
+
+Added to the Store package's manifest (appx.customExtensionsPath in src/artise/build/builderConfig.ts). The
+Microsoft Store build starts at login through this, on by default: a packaged app can't use the registry Run key
+Element's auto-launch writes. People turn it off in Windows' Settings → Apps → Startup.
+https://learn.microsoft.com/en-us/uwp/schemas/appxpackage/uapmanifestschema/element-uap5-startuptask
+-->
+        <desktop:Extension Category="windows.startupTask" Executable="app\Artise.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="ArtiseStartup" Enabled="true" DisplayName="Artise" />
+        </desktop:Extension>
