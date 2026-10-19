@@ -41,6 +41,8 @@ const HTML = { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-
  */
 export class Shell {
     private state: ShellState = { screen: "loading" };
+    /** While an action's request is being answered: its redirect shows the page, so don't load it twice. */
+    private answering = false;
 
     public constructor(private readonly deps: ShellDeps) {}
 
@@ -66,7 +68,7 @@ export class Shell {
 
     private set(state: ShellState): void {
         this.state = state;
-        this.deps.show();
+        if (!this.answering) this.deps.show();
     }
 
     private async welcome(error?: ArtiseIdError): Promise<void> {
@@ -129,6 +131,19 @@ export class Shell {
     }
 
     /**
+     * Starts an action for a request. Its first state change happens before the request is answered, and the
+     * answer's redirect shows the page; changes after that show it again.
+     */
+    private begin(action: () => Promise<void>): void {
+        this.answering = true;
+        try {
+            void action();
+        } finally {
+            this.answering = false;
+        }
+    }
+
+    /**
      * Answers a request on the shell's scheme: the page, its styles and icon, or one of its actions.
      *
      * @param url - the requested URL.
@@ -155,23 +170,23 @@ export class Shell {
                 if (this.state.screen !== "welcome") return back();
                 const asked = url.searchParams.get("provider");
                 const provider = PROVIDER_ORDER.find((known) => known === asked);
-                void this.signIn(provider);
+                this.begin(() => this.signIn(provider));
                 return back();
             }
             case "/retry":
-                if (this.state.screen === "welcome") void this.welcome();
+                if (this.state.screen === "welcome") this.begin(() => this.welcome());
                 return back();
             case "/cancel":
                 this.deps.artiseId.cancelSignIn();
                 return back();
             case "/workspaces":
-                void this.loadWorkspaces();
+                this.begin(() => this.loadWorkspaces());
                 return back();
             case "/open":
-                void this.open(url.searchParams.getAll("workspace"));
+                this.begin(() => this.open(url.searchParams.getAll("workspace")));
                 return back();
             case "/sign-out":
-                void this.signOut();
+                this.begin(() => this.signOut());
                 return back();
             default:
                 return new Response(null, { status: 404 });

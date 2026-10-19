@@ -23,6 +23,11 @@ async function shellPage(app: ElectronApplication): Promise<Page> {
 test.describe("Artise starts", () => {
     test.slow();
 
+    // Close Artise before the fixture removes its profile folder.
+    test.afterEach(async ({ app }) => {
+        await app.close().catch(() => {});
+    });
+
     test("with its welcome, never Element's", async ({ app }) => {
         const shell = await shellPage(app);
         await expect(shell.locator("h1")).toHaveText("Artise");

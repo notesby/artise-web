@@ -66,9 +66,9 @@ Element's own files change only where Artise needs a hook. Each hook is one call
 | `apps/web/src/components/views/rooms/RoomListPanel/RoomListPanel.tsx` | Draws Artise's top of the chat list (`artise/chatList/ChatListTop.tsx`): the workspace bar (name, menu of the person's other workspaces, browser only) and "What's new".                                                                                                                                                                         |
 | `apps/web/src/components/views/dialogs/LogoutDialog.tsx`              | The sign-out confirmation names the workspace (`artise/signOut/signOutTexts.ts`): "¿Cerrar sesión en {espacio}?" and what it does in this browser or on this computer.                                                                                                                                                                           |
 | `apps/web/src/vector/init.tsx`                                        | `loadPlugins` registers Artise's pages and buttons with Element's module API (`artise/module/registerArtise.tsx`): the Notes page at `#/notes` and its chat-header button.                                                                                                                                                                       |
-| `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`). Artise ID's sign-in returns go to the shell, never to Element Web (`artise/artiseId/`).                                                                                                                             |
+| `apps/desktop/src/protocol.ts`                                        | The Artise build registers and answers only `co.artise.desktop:`, never Element's legacy `element://` (`artise/variant.ts`). Links Artise handles go to `artise/links.ts` first: Artise ID's sign-in returns to the shell, each workspace's to its own view.                                                                                     |
 | `apps/desktop/src/electron-main.ts`                                   | Calls into `artise/main.ts`: before the app is ready, the start-up language (`artise/language.ts`); in `configureSentry`, crash reports only with consent (`artise/crashReports.ts`); the shell's `artise-shell:` scheme in Element's privileged-scheme list; and the shell, not Element, decides what the window first shows (`artise/shell/`). |
-| `apps/desktop/src/ipc.ts`                                             | `getConfig` answers with the open workspace's config when there is one (`artise/workspace/openWorkspaces.ts`), else Element's.                                                                                                                                                                                                                   |
+| `apps/desktop/src/seshat.ts`                                          | Message search keeps each workspace's index in its own folder (`artise/views/context.ts`).                                                                                                                                                                                                                                                       |
 | `apps/desktop/src/vectormenu.ts`                                      | The Help menu gets "Acerca de Artise": the version, the AGPL licence and this version's source code (`artise/about.ts`).                                                                                                                                                                                                                         |
 | `knip.ts`                                                             | Lists the Artise build's `apps/desktop/artise/electron-builder.ts` as an entry, so knip doesn't call it unused.                                                                                                                                                                                                                                  |
 
@@ -133,8 +133,24 @@ homeserver's `auth_metadata` for MAS's issuer. Element Web then gets a config (`
 - `sso_redirect_options.on_welcome_page`, so a workspace without a session goes straight to its sign-in page in
   the browser.
 
-The first workspace's language becomes the start-up language next time. Until D3-1 gives each workspace its own
-view, the window shows the first chosen workspace.
+The first workspace's language becomes the start-up language next time.
+
+One view per workspace (`src/artise/views/`): every open workspace runs in its own view over Element's main window,
+all at once (hidden ones keep syncing, `backgroundThrottling: false`), one shown; Ctrl/⌘+1…9 switches. Each view has
+its own persistent partition (`persist:workspace-<key>`, the key a hash of the server name) with Artise's web app
+on `vector://`, Element's preload, link handling and media auth, a permission policy (notifications, calls, screen
+sharing, clipboard writing and full screen, only for `vector://vector`), its own `getConfig` and `getProtocol`
+answers (the second sends its sign-in return back to it), and its own Seshat.
+
+Element's main process is written for one page, so `routing.ts` lets it serve several without changing its
+handlers:
+
+- IPC from a view runs Element's handlers inside that view's context (`AsyncLocalStorage`);
+- in that context `mainWindow.webContents` is the sending view (elsewhere, the shown one), so replies, spell
+  check and "clear storage" reach the right workspace;
+- calls about another workspace's Matrix user (pickle keys, Seshat's index) are refused;
+- Seshat is loaded once per workspace (`seshat.js?workspace=<key>` is a new module, with its own index), and its
+  handler is called only for that view.
 
 Building: `.github/workflows/artise-desktop.yml` (Actions → Artise desktop → Run workflow, or a
 `desktop-v<major>.<minor>.<patch>` tag) builds an unsigned macOS universal `.dmg` and `.zip` and an unsigned Windows

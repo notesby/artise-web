@@ -230,7 +230,8 @@ jobs:
             # The build turns the EnableNodeCliInspectArguments fuse off; Playwright needs it to drive Electron.
             # This copy is only for the check and is thrown away with the runner.
             - name: Let Playwright drive the app
-              run: pnpm exec electron-fuses write --app "$EXECUTABLE" EnableNodeCliInspectArguments=on
+              # From the desktop package's own bin folder, where @electron/fuses installs it.
+              run: '"$(pnpm bin)/electron-fuses" write --app "$EXECUTABLE" EnableNodeCliInspectArguments=on'
               env:
                   EXECUTABLE: ${{ matrix.executable }}
 
