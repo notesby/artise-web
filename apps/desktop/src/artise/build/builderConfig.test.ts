@@ -129,6 +129,29 @@ describe("artiseBuilderConfig", () => {
     });
 });
 
+describe("macOS permission texts", () => {
+    const mac = artiseBuilderConfig(element).mac!;
+
+    it("asks for the camera and microphone in Spanish, English and Portuguese", () => {
+        expect(mac.extendInfo).toMatchObject({ CFBundleLocalizations: ["es", "en", "pt"] });
+        expect(mac.extraResources).toEqual([
+            { from: "artise/mac/en.lproj", to: "en.lproj" },
+            { from: "artise/mac/es.lproj", to: "es.lproj" },
+            { from: "artise/mac/pt.lproj", to: "pt.lproj" },
+        ]);
+        const spanish = fs.readFileSync(path.join(desktopDir, "artise/mac/es.lproj/InfoPlist.strings"), "utf8");
+        expect(spanish).toContain('"NSCameraUsageDescription" = "Artise usa la cámara para las videollamadas.";');
+    });
+
+    it("has the English texts in Info.plist itself, as the fallback", () => {
+        const english = fs.readFileSync(path.join(desktopDir, "artise/mac/en.lproj/InfoPlist.strings"), "utf8");
+        expect(english).toContain(
+            `"NSMicrophoneUsageDescription" = "${mac.extendInfo?.NSMicrophoneUsageDescription}";`,
+        );
+        expect(english).toContain(`"NSCameraUsageDescription" = "${mac.extendInfo?.NSCameraUsageDescription}";`);
+    });
+});
+
 describe("storeIdentity", () => {
     it("takes Partner Center's values from the environment", () => {
         expect(

@@ -77,6 +77,16 @@ export const DESKTOP_WORDING = {
         es: "No se puede abrir la invitación ahora. Revisa tu conexión e inténtalo de nuevo.",
         pt: "Não foi possível abrir o convite agora. Confira sua conexão e tente de novo.",
     },
+    "artise|desktop|mac|camera": {
+        en: "Artise uses the camera for video calls.",
+        es: "Artise usa la cámara para las videollamadas.",
+        pt: "O Artise usa a câmera nas chamadas de vídeo.",
+    },
+    "artise|desktop|mac|microphone": {
+        en: "Artise uses the microphone for calls and voice messages.",
+        es: "Artise usa el micrófono para las llamadas y los mensajes de voz.",
+        pt: "O Artise usa o microfone nas chamadas e nas mensagens de voz.",
+    },
     "artise|desktop|rail|unread": {
         en: "Unread: %(count)s",
         es: "Sin leer: %(count)s",

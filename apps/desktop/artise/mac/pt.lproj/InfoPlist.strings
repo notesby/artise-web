@@ -1,0 +1,3 @@
+/* Written by tools/artise/web_wording.py from DESKTOP_TEXTS: edit the table and run the script. */
+"NSCameraUsageDescription" = "O Artise usa a câmera nas chamadas de vídeo.";
+"NSMicrophoneUsageDescription" = "O Artise usa o microfone nas chamadas e nas mensagens de voz.";
