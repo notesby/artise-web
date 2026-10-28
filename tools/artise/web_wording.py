@@ -520,6 +520,30 @@ DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
     "artise|desktop|crash_reports|allow": ("Share crash reports", "Compartir informes de fallos", "Compartilhar relatórios de falhas"),
     "artise|desktop|crash_reports|deny": ("Not now", "Ahora no", "Agora não"),
     "artise|desktop|crash_reports|menu": ("Share crash reports", "Compartir informes de fallos", "Compartilhar relatórios de falhas"),
+    # Updates: test versions (the beta channel) in the Help menu, and the phones' "Actualiza Artise" notice when
+    # a workspace needs a newer Artise than this one.
+    "artise|desktop|updates|beta_menu": ("Get test versions", "Recibir versiones de prueba", "Receber versões de teste"),
+    "artise|desktop|updates|outdated_title": ("Update Artise", "Actualiza Artise", "Atualize o Artise"),
+    "artise|desktop|updates|outdated_detail": (
+        "%(workspace)s needs Artise %(version)s or newer. You have %(current)s.",
+        "%(workspace)s necesita Artise %(version)s o más reciente. Tienes la %(current)s.",
+        "%(workspace)s precisa do Artise %(version)s ou mais recente. Você tem a %(current)s.",
+    ),
+    "artise|desktop|updates|check": ("Look for the update", "Buscar la actualización", "Procurar a atualização"),
+    "artise|desktop|updates|download": ("Download it", "Descargarla", "Baixá-la"),
+    "artise|desktop|updates|later": ("Not now", "Ahora no", "Agora não"),
+    # Updates: test versions (the beta channel) in the Help menu, and the phones' "Actualiza Artise" notice when
+    # a workspace needs a newer Artise than this one.
+    "artise|desktop|updates|beta_menu": ("Get test versions", "Recibir versiones de prueba", "Receber versões de teste"),
+    "artise|desktop|updates|outdated_title": ("Update Artise", "Actualiza Artise", "Atualize o Artise"),
+    "artise|desktop|updates|outdated_detail": (
+        "%(workspace)s needs Artise %(version)s or newer. You have %(current)s.",
+        "%(workspace)s necesita Artise %(version)s o más reciente. Tienes la %(current)s.",
+        "%(workspace)s precisa do Artise %(version)s ou mais recente. Você tem a %(current)s.",
+    ),
+    "artise|desktop|updates|check": ("Look for the update", "Buscar la actualización", "Procurar a atualização"),
+    "artise|desktop|updates|download": ("Download it", "Descargarla", "Baixá-la"),
+    "artise|desktop|updates|later": ("Not now", "Ahora no", "Agora não"),
     # The welcome and workspace screens. The words are the phones' (iOS screen_artise_id_*), except where the
     # desktop opens several workspaces at once.
     "artise|desktop|welcome|subtitle": (

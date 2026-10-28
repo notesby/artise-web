@@ -18,6 +18,8 @@ export interface ArtiseSettings {
     openWorkspaces?: string[];
     /** Whether Artise already turned "start at login" on once (then it's the person's to change). */
     startAtLoginSet?: boolean;
+    /** Whether the person asked for test versions (the beta channel) instead of the stable ones. */
+    betaUpdates?: boolean;
 }
 
 const FILE_NAME = "artise-settings.json";

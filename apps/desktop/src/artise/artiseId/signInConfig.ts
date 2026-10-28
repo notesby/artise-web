@@ -4,6 +4,8 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
+import { minDesktopVersion as minDesktopVersionOf } from "../workspace/discovery.js";
+
 /** The sign-in providers Artise ID can open directly. */
 export type ArtiseIdProvider = "apple" | "google" | "microsoft";
 
@@ -21,6 +23,8 @@ export interface SignInConfig {
     scopes: string[];
     /** Artise ID's id for each provider, for the scope that opens it directly. */
     providers: Partial<Record<ArtiseIdProvider, string>>;
+    /** The oldest Artise desktop Artise ID still signs in (`min_app_version.desktop`), as `1.2.3`. */
+    minDesktopVersion?: string;
 }
 
 /** The issuer's endpoints, from its OpenID discovery document. */
@@ -73,12 +77,14 @@ export function parseSignInConfig(body: unknown): SignInConfig | undefined {
     for (const provider of PROVIDERS) {
         if (isToken(listed[provider])) providers[provider] = listed[provider];
     }
+    const minDesktopVersion = minDesktopVersionOf(object.min_app_version);
     return {
         issuer: issuer.href.replace(/\/$/, ""),
         clientId,
         redirectUri,
         scopes: scopes.length ? scopes : ["openid"],
         providers,
+        ...(minDesktopVersion ? { minDesktopVersion } : {}),
     };
 }
 

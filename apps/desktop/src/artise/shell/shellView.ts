@@ -26,6 +26,7 @@ import { Rail } from "../rail/rail.js";
 import * as tray from "../../tray.js";
 import { AutoLaunch } from "../../auto-launch.js";
 import { cleanUpWorkspace, removeClosedWorkspaces } from "../views/cleanup.js";
+import { warnIfOutdated } from "../updates.js";
 
 const SCHEME = "artise-shell";
 
@@ -126,6 +127,11 @@ export function startArtiseShell(window: BrowserWindow): boolean {
                 if (!views.hostWebContents.getURL()) void views.hostWebContents.loadURL("about:blank");
                 await views.openAll(prepared.value);
                 startAtLoginOnce();
+                // "Actualiza Artise" when a workspace (or Artise ID) needs a newer Artise; the workspaces still open.
+                void getArtiseId()
+                    .signInConfig()
+                    .then((signIn) => warnIfOutdated(window, prepared.value, signIn.ok ? signIn.value : undefined))
+                    .catch((e: unknown) => console.warn("Couldn't check the minimum desktop version", e));
             }
             return prepared;
         },

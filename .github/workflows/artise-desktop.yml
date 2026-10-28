@@ -7,8 +7,13 @@
 # macOS is a universal .dmg and .zip, signed with Artise's Developer ID and notarized when the repository has
 # Apple's secrets (APPLE_CSC_LINK, APPLE_CSC_KEY_PASSWORD, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, set by
 # tools/artise/mac_signing.py; see ARTISE.md), else unsigned, to try with right-click → Open. Windows is an unsigned
-# x64 .zip to try on a PC and the Microsoft Store package (.appx, unsigned: the Store signs it). Nothing is
-# published yet; the builds are kept as this run's artifacts for 14 days.
+# x64 .zip to try on a PC and the Microsoft Store package (.appx, unsigned: the Store signs it). The builds are kept
+# as this run's artifacts for 14 days.
+#
+# A release tag also publishes: a GitHub release (beta) with the .dmg, the .zip files and the macOS feed, and the
+# beta channel's feed on the desktop-feeds branch, which Macs on "Recibir versiones de prueba" read
+# (tools/artise/desktop_feed.py). Moving it to stable is artise-desktop-promote.yml, by hand, after the checklist.
+# The Store package goes to Partner Center by hand, from this run's artifacts.
 #
 # The Store package's identity comes from Partner Center ("Product identity"), set as the repository variables
 # STORE_IDENTITY_NAME, STORE_PUBLISHER and STORE_PUBLISHER_DISPLAY_NAME; without them it builds with placeholders,
@@ -335,3 +340,53 @@ jobs:
                   name: start-up-${{ matrix.artifact }}
                   path: apps/desktop/playwright/test-results
                   retention-days: 7
+
+    release:
+        name: Release to the beta channel
+        if: github.ref_type == 'tag'
+        needs: [webapp, start-up]
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        env:
+            VERSION: ${{ needs.webapp.outputs.version }}
+        steps:
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+              with:
+                  persist-credentials: false
+
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+              with:
+                  pattern: artise-*
+                  path: dist
+                  merge-multiple: true
+
+            # Every release has its what's-new note in en, es and pt (apps/desktop/artise/CHECKLIST.md).
+            - name: The release note
+              run: |
+                  if [ ! -f "apps/desktop/artise/releases/$VERSION.md" ]; then
+                      echo "::error title=Release::Write the what's-new note first: apps/desktop/artise/releases/$VERSION.md"
+                      exit 1
+                  fi
+
+            - name: The macOS feed
+              run: |
+                  zip="$(basename dist/*-mac.zip)"
+                  url="https://github.com/$GITHUB_REPOSITORY/releases/download/$GITHUB_REF_NAME/${zip// /%20}"
+                  python3 tools/artise/desktop_feed.py releases-json --version "$VERSION" --url "$url" \
+                      --notes-file "apps/desktop/artise/releases/$VERSION.md" > dist/releases.json
+                  cat dist/releases.json
+
+            # The Store package stays out: it's unsigned until the Store signs it, so nobody can install it from here.
+            - name: Publish the GitHub release, as a pre-release until promoted
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh release create "$GITHUB_REF_NAME" --prerelease --title "Artise $VERSION" \
+                      --notes-file "apps/desktop/artise/releases/$VERSION.md" \
+                      dist/*.dmg dist/*-mac.zip dist/*-win.zip dist/releases.json
+
+            - name: Point the beta channel at it
+              env:
+                  GH_TOKEN: ${{ github.token }}
+              run: python3 tools/artise/desktop_feed.py --repo "$GITHUB_REPOSITORY" publish --channel beta dist/releases.json
