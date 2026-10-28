@@ -4,7 +4,7 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
-import { app, net, session, WebContentsView, type BrowserWindow, type CustomScheme } from "electron";
+import { app, dialog, net, session, WebContentsView, type BrowserWindow, type CustomScheme } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -18,6 +18,9 @@ import { SHELL_ORIGIN } from "./render.js";
 import { Shell } from "./Shell.js";
 import { prepareWorkspaces } from "../workspace/openWorkspaces.js";
 import { setLinkTargets } from "../links.js";
+import { join } from "../join/joinFlow.js";
+import { lookUpWorkspace } from "../join/joinLink.js";
+import { openJoinWindow } from "../join/joinWindow.js";
 import { WorkspaceViews } from "../views/workspaceViews.js";
 import { Rail } from "../rail/rail.js";
 import * as tray from "../../tray.js";
@@ -90,15 +93,6 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         addLabel: () => artiseT("artise|desktop|workspaces|add_title", {}, shellLocale()),
         language: () => textLanguage(shellLocale()),
     });
-    setLinkTargets({
-        signInReturn: (sessionId, url) => {
-            const open = views.bySessionId(sessionId);
-            if (!open) return false;
-            void open.view.webContents.loadURL(url);
-            views.show(views.open.indexOf(open));
-            return true;
-        },
-    });
 
     let shown = false;
     const fit = (): void => {
@@ -142,6 +136,30 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         t: (key) => artiseT(key, {}, shellLocale()),
         language: () => textLanguage(shellLocale()),
     });
+    // Set once the shell has started, so an invite that opened Artise (queued until then) isn't covered by the
+    // welcome or the first workspaces opening.
+    const linkTargets: Parameters<typeof setLinkTargets>[0] = {
+        signInReturn: (sessionId, url) => {
+            const open = views.bySessionId(sessionId);
+            if (!open) return false;
+            void open.view.webContents.loadURL(url);
+            views.show(views.open.indexOf(open));
+            return true;
+        },
+        join: (link) =>
+            void join(link, {
+                lookUp: (slug) => lookUpWorkspace(slug, (url, init) => net.fetch(url, init)),
+                isOpen: (serverName) => views.open.some((open) => open.info.serverName === serverName),
+                show: (serverName) => {
+                    views.show(views.open.findIndex((open) => open.info.serverName === serverName));
+                    shell.hideIfAdding();
+                },
+                openJoinPage: (url) => openJoinWindow(window, url),
+                openWorkspace: (serverName) => shell.openWorkspace(serverName),
+                alert: (key) =>
+                    void dialog.showMessageBox(window, { type: "info", message: artiseT(key, {}, shellLocale()) }),
+            }),
+    };
     shellSession.protocol.handle(SCHEME, async (request) => {
         const url = new URL(request.url);
         return (await rail.handle(url)) ?? shell.handle(url);
@@ -152,7 +170,10 @@ export function startArtiseShell(window: BrowserWindow): boolean {
     // Workspaces signed out of last time leave folders Electron couldn't remove while it was running.
     void removeClosedWorkspaces(app.getPath("userData"), readArtiseSettings().openWorkspaces ?? [])
         .catch((e: unknown) => console.warn("Couldn't remove closed workspaces' folders", e))
-        .then(() => shell.start());
+        .then(async () => {
+            await shell.start();
+            setLinkTargets(linkTargets);
+        });
     return true;
 }
 
