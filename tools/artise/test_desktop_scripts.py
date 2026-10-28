@@ -31,6 +31,16 @@ class VersionTest(unittest.TestCase):
         result = version("feature/desktop-ci", "7")
         self.assertEqual((result.returncode, result.stdout), (0, "0.0.1-dev.7\n"))
 
+    def test_a_release_starts_at_one_for_the_store(self) -> None:
+        # The Microsoft Store turns 1.2.3 into 1.2.3.0 and refuses a first part of 0.
+        result = version("desktop-v0.1.0")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("desktop-v1.0.0", result.stderr)
+
+    def test_a_part_above_65535_fails_the_run(self) -> None:
+        self.assertNotEqual(version("desktop-v1.65536.0").returncode, 0)
+        self.assertEqual(version("desktop-v1.65535.0").stdout, "1.65535.0\n")
+
     def test_a_malformed_release_tag_fails_the_run(self) -> None:
         # desktop-v1.2 would otherwise build as a test version and look like a release.
         result = version("desktop-v1.2")

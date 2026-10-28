@@ -5,8 +5,12 @@
 # - On a pull request that changes this workflow or its scripts, so a change to the build is tried before merging.
 #
 # Nothing is signed or published yet: macOS is an unsigned universal .dmg and .zip (Developer ID signing and
-# notarization wait, D4-1), Windows an unsigned x64 .zip to try on a PC (the Store's MSIX comes in D4-2). The
-# builds are kept as this run's artifacts for 14 days.
+# notarization wait, D4-1), Windows an unsigned x64 .zip to try on a PC and the Microsoft Store package (.appx,
+# unsigned: the Store signs it). The builds are kept as this run's artifacts for 14 days.
+#
+# The Store package's identity comes from Partner Center ("Product identity"), set as the repository variables
+# STORE_IDENTITY_NAME, STORE_PUBLISHER and STORE_PUBLISHER_DISPLAY_NAME; without them it builds with placeholders,
+# for checking only.
 #
 # It reuses the steps of Element's build_desktop_macos.yaml and build_desktop_windows.yaml, which stay disabled,
 # but packages this commit's apps/web (artise/scripts/package-webapp.sh) instead of Element's release tarball.
@@ -164,22 +168,36 @@ jobs:
               run: |
                   pnpm exec tsc
                   node scripts/copy-res.ts
-                  pnpm exec electron-builder --config artise/electron-builder.ts --x64 --publish never --win zip
+                  # The Store package's tiles, where electron-builder looks for them.
+                  mkdir -p build/appx
+                  cp artise/icons/appx/*.png build/appx/
+                  pnpm exec electron-builder --config artise/electron-builder.ts --x64 --publish never --win zip appx
               env:
                   VERSION: ${{ needs.webapp.outputs.version }}
+                  ARTISE_STORE_IDENTITY_NAME: ${{ vars.STORE_IDENTITY_NAME }}
+                  ARTISE_STORE_PUBLISHER: ${{ vars.STORE_PUBLISHER }}
+                  ARTISE_STORE_PUBLISHER_DISPLAY_NAME: ${{ vars.STORE_PUBLISHER_DISPLAY_NAME }}
 
-            - name: Check the zip is there
+            - name: Check the zip and the Store package are there
               working-directory: apps/desktop
               shell: bash
               run: |
                   ls dist
                   test -f dist/win-unpacked/Artise.exe
                   test -f dist/Artise-*-win.zip
+                  test -f dist/Artise*.appx
 
             - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
               with:
                   name: artise-windows-x64
                   path: apps/desktop/dist/*-win.zip
+                  retention-days: 14
+                  if-no-files-found: error
+
+            - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+              with:
+                  name: artise-windows-store
+                  path: apps/desktop/dist/*.appx
                   retention-days: 14
                   if-no-files-found: error
 
