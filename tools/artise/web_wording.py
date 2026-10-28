@@ -579,6 +579,7 @@ DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
         "Todavía no estás en ningún espacio de trabajo. Pídele a quien te invitó el enlace de invitación.",
         "Você ainda não está em nenhum espaço de trabalho. Peça o link de convite a quem te convidou.",
     ),
+    "artise|desktop|rail|unread": ("Unread: %(count)s", "Sin leer: %(count)s", "Não lidas: %(count)s"),
     "artise|desktop|workspaces|other_account": (
         "Sign in another way",
         "Iniciar sesión de otra forma",

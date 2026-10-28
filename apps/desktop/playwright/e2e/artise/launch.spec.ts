@@ -15,7 +15,8 @@ import { test, expect } from "../../element-desktop-test.js";
 
 /** The shell's page: a view over the main window, so not the fixture's first window. */
 async function shellPage(app: ElectronApplication): Promise<Page> {
-    const isShell = (page: Page): boolean => page.url().startsWith("artise-shell://shell/");
+    const isShell = (page: Page): boolean =>
+        page.url().startsWith("artise-shell://shell/") && !page.url().startsWith("artise-shell://shell/rail");
     const open = app.windows().find(isShell);
     return open ?? (await app.waitForEvent("window", { predicate: isShell }));
 }

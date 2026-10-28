@@ -38,6 +38,7 @@ describe("artiseBuilderConfig", () => {
         // The window and tray read them from resources/build/ at run time.
         expect(artise.extraResources).toEqual([
             { from: "artise/icons", to: "build", filter: ["icon.png", "icon.ico"] },
+            { from: "artise/icons/overlay", to: "build/overlay" },
             "webapp.asar",
         ]);
     });
@@ -78,7 +79,14 @@ describe("artiseBuilderConfig", () => {
 
     it("points at icons that exist", () => {
         // tools/artise/desktop_icons.py writes them; a missing one would fail the build late, on CI.
-        const files = ["icon.png", "icon.ico", "icon.icon/icon.json", "icon.icon/Assets/artise.png"];
+        const files = [
+            "icon.png",
+            "icon.ico",
+            "icon.icon/icon.json",
+            "icon.icon/Assets/artise.png",
+            "overlay/1.png",
+            "overlay/9plus.png",
+        ];
         expect(files.filter((file) => !fs.existsSync(path.join(desktopDir, ARTISE_ICONS, file)))).toEqual([]);
     });
 

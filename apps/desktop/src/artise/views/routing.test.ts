@@ -40,13 +40,17 @@ describe("routeFor", () => {
         expect(routeFor(casa, "seshat", { name: "searchEventIndex" })).toBe("drop");
     });
 
+    it("adds a view's unread count to the others' before Element's badge code sees it", () => {
+        expect(routeFor(casa, "setBadgeCount", 3)).toBe("badge");
+    });
+
     it("keeps media-auth answers to the view", () => {
         expect(routeFor(casa, "userAccessToken", "token")).toBe("drop");
     });
 
     it("lets everything else through to Element, for the view", () => {
         expect(routeFor(casa, "ipcCall", { name: "clearStorage" })).toBe("element");
-        expect(routeFor(casa, "setBadgeCount", 3)).toBe("element");
+        expect(routeFor(casa, "loudNotification", undefined)).toBe("element");
     });
 });
 
@@ -71,7 +75,12 @@ describe("installRouting", () => {
         window = Object.create({ webContents: host }) as BrowserWindow;
         ipcMain = new EventEmitter() as unknown as IpcMain;
         shown = undefined;
-        installRouting(window, ipcMain, () => shown);
+        installRouting(
+            window,
+            ipcMain,
+            () => shown,
+            (from, args) => [`total for ${from.serverName}`, ...args.slice(1)],
+        );
         registerView(casa);
         registerView(prueba);
         return () => {
@@ -126,6 +135,13 @@ describe("installRouting", () => {
         expect(casa.seshat).toHaveBeenCalled();
         expect(prueba.seshat).not.toHaveBeenCalled();
         expect(shared).not.toHaveBeenCalled();
+    });
+
+    it("gives Element's badge code the arguments the views manager makes", () => {
+        const handler = vi.fn();
+        ipcMain.on("setBadgeCount", handler);
+        ipcMain.emit("setBadgeCount", from(casa.webContents), 2);
+        expect(handler).toHaveBeenCalledWith(expect.anything(), "total for artise.co");
     });
 
     it("leaves messages from anything else, such as the window itself, to Element as before", () => {
