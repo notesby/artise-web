@@ -6,6 +6,9 @@
 #
 """Writes apps/web/src/artise/i18n/wording.json: Element Web's texts in Artise's words.
 
+It also writes apps/desktop/src/artise/i18n/wording.ts: the desktop shell's own texts (`DESKTOP_TEXTS`), with
+the same words, so the desktop app and the web say the same thing.
+
 The words are the phones' (artise-android tools/artise/wording_overrides.py, artise-ios
 Artise/Scripts/wording_overrides.py): chat instead of room, sign out instead of "remove this device",
 "espacio de trabajo" / "espaço de trabalho" instead of the homeserver. Matrix spaces keep "espacio".
@@ -31,6 +34,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ELEMENT_EN = ROOT / "apps/web/src/i18n/strings/en_EN.json"
 OUTPUT = ROOT / "apps/web/src/artise/i18n/wording.json"
+ELEMENT_DESKTOP_EN = ROOT / "apps/desktop/src/i18n/strings/en_EN.json"
+DESKTOP_OUTPUT = ROOT / "apps/desktop/src/artise/i18n/wording.ts"
 
 # Element's language keys, as languages.json names them (lower case, "-" for "_").
 LANGUAGES = ("en", "es", "pt", "pt-br")
@@ -483,6 +488,23 @@ ARTISE_TEXTS: dict[str, tuple[object, object, object]] = {
     ),
 }
 
+# The desktop shell's own texts (menus, dialogs and the shell's screens in the main process): key (always
+# "artise|desktop|…"): (English, Spanish, Portuguese). Plain texts only; the shell has no plurals yet.
+DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
+    "artise|desktop|about|menu": ("About Artise", "Acerca de Artise", "Sobre o Artise"),
+    "artise|desktop|about|version": ("Version %(version)s", "Versión %(version)s", "Versão %(version)s"),
+    "artise|desktop|about|license": (
+        "Artise is free software, licensed under the GNU Affero General Public License, version 3. It's based on"
+        " Element, by New Vector Ltd and Element Creations Ltd.",
+        "Artise es software libre, con la licencia GNU Affero General Public License, versión 3. Está basado en"
+        " Element, de New Vector Ltd y Element Creations Ltd.",
+        "O Artise é software livre, sob a licença GNU Affero General Public License, versão 3. É baseado no"
+        " Element, da New Vector Ltd e da Element Creations Ltd.",
+    ),
+    "artise|desktop|about|source_code": ("Source code", "Código fuente", "Código-fonte"),
+    "artise|desktop|about|close": ("Close", "Cerrar", "Fechar"),
+}
+
 PLACEHOLDER = re.compile(r"%\(\w+\)s|<\w+>|</\w+>")
 
 
@@ -545,6 +567,50 @@ def problems(element_en: dict[str, object]) -> list[str]:
     return found
 
 
+def desktop_problems(element_desktop_en: dict[str, object]) -> list[str]:
+    """What's wrong with the desktop's texts; empty when they're fine.
+
+    Keys start with "artise|desktop|", never clash with Element Desktop's own keys, every language is filled
+    in and keeps the English text's placeholders.
+    """
+    found: list[str] = []
+    for key, texts in DESKTOP_TEXTS.items():
+        if not key.startswith("artise|desktop|"):
+            found.append(f"{key}: the desktop's texts start with 'artise|desktop|'")
+        if key in element_desktop_en:
+            found.append(f"{key}: already one of Element Desktop's keys")
+        wanted = sorted(PLACEHOLDER.findall(texts[0]))
+        for language, text in zip(("en", "es", "pt"), texts):
+            if not text.strip():
+                found.append(f"{key} [{language}]: empty")
+            if sorted(PLACEHOLDER.findall(text)) != wanted:
+                found.append(f"{key} [{language}]: placeholders differ from the English {wanted}")
+    return found
+
+
+def render_desktop() -> str:
+    """The desktop's texts as a TypeScript module (the desktop's tsc doesn't take JSON imports), formatted as
+    oxfmt formats it."""
+    lines = [
+        "/*",
+        "Copyright 2026 Artise.",
+        "",
+        "SPDX-License-Identifier: AGPL-3.0-only",
+        "*/",
+        "",
+        "// Written by tools/artise/web_wording.py from its DESKTOP_TEXTS table: edit the table and run the script.",
+        "",
+        "export const DESKTOP_WORDING = {",
+    ]
+    for key, (en, es, pt) in sorted(DESKTOP_TEXTS.items()):
+        lines.append(f"    {json.dumps(key)}: {{")
+        for language, text in (("en", en), ("es", es), ("pt", pt)):
+            lines.append(f"        {language}: {json.dumps(text, ensure_ascii=False)},")
+        lines.append("    },")
+    lines.append("} as const;")
+    return "\n".join(lines) + "\n"
+
+
 def build() -> dict[str, dict[str, object]]:
     """The custom translations file: key → language → text."""
     table: dict[str, tuple[object, object, object]] = {**WORDING, **ARTISE_TEXTS}
@@ -557,7 +623,8 @@ def render() -> str:
 
 def main(argv: list[str]) -> int:
     element_en = _flatten(json.loads(ELEMENT_EN.read_text(encoding="utf-8")))
-    found = problems(element_en)
+    element_desktop_en = _flatten(json.loads(ELEMENT_DESKTOP_EN.read_text(encoding="utf-8")))
+    found = problems(element_en) + desktop_problems(element_desktop_en)
     if found:
         print("\n".join(found), file=sys.stderr)
         return 1
@@ -565,11 +632,20 @@ def main(argv: list[str]) -> int:
         if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != render():
             print(f"{OUTPUT.relative_to(ROOT)} is stale: run python3 tools/artise/web_wording.py", file=sys.stderr)
             return 1
-        print(f"Artise wording: {len(WORDING)} of Element's texts and {len(ARTISE_TEXTS)} of Artise's OK")
+        if not DESKTOP_OUTPUT.exists() or DESKTOP_OUTPUT.read_text(encoding="utf-8") != render_desktop():
+            print(f"{DESKTOP_OUTPUT.relative_to(ROOT)} is stale: run python3 tools/artise/web_wording.py", file=sys.stderr)
+            return 1
+        print(
+            f"Artise wording: {len(WORDING)} of Element's texts, {len(ARTISE_TEXTS)} of Artise's and"
+            f" {len(DESKTOP_TEXTS)} of the desktop's OK"
+        )
         return 0
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT.write_text(render(), encoding="utf-8")
     print(f"Wrote {OUTPUT.relative_to(ROOT)} ({len(WORDING) + len(ARTISE_TEXTS)} texts)")
+    DESKTOP_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+    DESKTOP_OUTPUT.write_text(render_desktop(), encoding="utf-8")
+    print(f"Wrote {DESKTOP_OUTPUT.relative_to(ROOT)} ({len(DESKTOP_TEXTS)} texts)")
     return 0
 
 

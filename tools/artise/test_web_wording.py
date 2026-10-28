@@ -113,5 +113,39 @@ class ArtiseTextsTest(unittest.TestCase):
         self.assertEqual(web_wording.build()["artise|settings|help"], {"en": "Help", "es": "Ayuda", "pt": "Ajuda", "pt-br": "Ajuda"})
 
 
+class DesktopTextsTest(unittest.TestCase):
+    """The desktop shell's texts, written to apps/desktop/src/artise/i18n/wording.ts."""
+
+    def test_the_table_is_fine_against_element_desktops_strings(self) -> None:
+        # No key clashes with Element Desktop's, every language is filled in and placeholders match.
+        element_desktop_en = web_wording._flatten(json.loads(web_wording.ELEMENT_DESKTOP_EN.read_text(encoding="utf-8")))
+        self.assertEqual(web_wording.desktop_problems(element_desktop_en), [])
+
+    def test_a_key_outside_the_desktop_namespace_is_reported(self) -> None:
+        with mock.patch.dict(web_wording.DESKTOP_TEXTS, {"artise|about": ("About", "Acerca de", "Sobre")}, clear=True):
+            found = web_wording.desktop_problems({})
+        self.assertEqual(found, ["artise|about: the desktop's texts start with 'artise|desktop|'"])
+
+    def test_a_key_element_desktop_already_has_is_reported(self) -> None:
+        with mock.patch.dict(web_wording.DESKTOP_TEXTS, {"artise|desktop|x": ("X", "X", "X")}, clear=True):
+            found = web_wording.desktop_problems({"artise|desktop|x": "X"})
+        self.assertEqual(found, ["artise|desktop|x: already one of Element Desktop's keys"])
+
+    def test_a_lost_placeholder_is_reported_for_that_language(self) -> None:
+        texts = {"artise|desktop|v": ("Version %(version)s", "Versión", "Versão %(version)s")}
+        with mock.patch.dict(web_wording.DESKTOP_TEXTS, texts, clear=True):
+            found = web_wording.desktop_problems({})
+        self.assertEqual(found, ["artise|desktop|v [es]: placeholders differ from the English ['%(version)s']"])
+
+    def test_the_module_has_every_language_and_keeps_accents(self) -> None:
+        with mock.patch.dict(web_wording.DESKTOP_TEXTS, {"artise|desktop|v": ("Version", "Versión", "Versão")}, clear=True):
+            module = web_wording.render_desktop()
+        self.assertIn('    "artise|desktop|v": {\n        en: "Version",\n        es: "Versión",\n        pt: "Versão",\n    },\n', module)
+        self.assertTrue(module.startswith("/*\nCopyright 2026 Artise.\n"))
+
+    def test_the_committed_module_is_current(self) -> None:
+        self.assertEqual(web_wording.DESKTOP_OUTPUT.read_text(encoding="utf-8"), web_wording.render_desktop())
+
+
 if __name__ == "__main__":
     unittest.main()

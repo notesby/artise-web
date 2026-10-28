@@ -6,7 +6,7 @@
 # (Artise/Scripts/check-headers.sh). Run from the repository root.
 set -euo pipefail
 
-dirs=(apps/web/src/artise packages/shared-components/src/artise apps/desktop/src/artise tools/artise)
+dirs=(apps/web/src/artise packages/shared-components/src/artise apps/desktop/src/artise apps/desktop/artise tools/artise)
 missing=0
 for dir in "${dirs[@]}"; do
     [ -d "$dir" ] || continue
