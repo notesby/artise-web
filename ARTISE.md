@@ -238,6 +238,13 @@ Microsoft's pages (read 2026-10-18; Microsoft's dates are shown as updated 2026-
 electron-builder's AppX options are read from its own types in the installed version 26.16.1
 (`app-builder-lib/out/options/AppXOptions.d.ts`), as its web page doesn't render without JavaScript.
 
+macOS asks before Artise first uses the camera and the microphone, in the computer's language: the texts are
+`artise|desktop|mac|…` in `tools/artise/web_wording.py`, written to `artise/mac/<lang>.lproj/InfoPlist.strings`
+and put in the app's Resources (English is also in Info.plist itself).
+
+Before every beta and stable release, someone runs the hand checklist (`apps/desktop/artise/CHECKLIST.md`) on a
+real Windows 11 PC and a real Mac, and writes the result in the release's PR.
+
 Running it locally, from `apps/desktop`:
 
 ```sh

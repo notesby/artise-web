@@ -610,6 +610,17 @@ DESKTOP_TEXTS: dict[str, tuple[str, str, str]] = {
         "No se puede abrir la invitación ahora. Revisa tu conexión e inténtalo de nuevo.",
         "Não foi possível abrir o convite agora. Confira sua conexão e tente de novo.",
     ),
+    # macOS asks before Artise first uses the camera or the microphone, with these words (InfoPlist.strings).
+    "artise|desktop|mac|camera": (
+        "Artise uses the camera for video calls.",
+        "Artise usa la cámara para las videollamadas.",
+        "O Artise usa a câmera nas chamadas de vídeo.",
+    ),
+    "artise|desktop|mac|microphone": (
+        "Artise uses the microphone for calls and voice messages.",
+        "Artise usa el micrófono para las llamadas y los mensajes de voz.",
+        "O Artise usa o microfone nas chamadas e nas mensagens de voz.",
+    ),
     "artise|desktop|rail|unread": ("Unread: %(count)s", "Sin leer: %(count)s", "Não lidas: %(count)s"),
     "artise|desktop|workspaces|other_account": (
         "Sign in another way",
@@ -724,6 +735,26 @@ def render_desktop() -> str:
     return "\n".join(lines) + "\n"
 
 
+# macOS's permission texts: Info.plist key → the desktop text it shows, per language folder in the app.
+MAC_PERMISSIONS = {
+    "NSCameraUsageDescription": "artise|desktop|mac|camera",
+    "NSMicrophoneUsageDescription": "artise|desktop|mac|microphone",
+}
+MAC_OUTPUT = ROOT / "apps/desktop/artise/mac"
+
+
+def render_mac() -> dict[pathlib.Path, str]:
+    """Each language's InfoPlist.strings: macOS shows these in its camera and microphone questions."""
+    files: dict[pathlib.Path, str] = {}
+    for index, language in enumerate(("en", "es", "pt")):
+        lines = ["/* Written by tools/artise/web_wording.py from DESKTOP_TEXTS: edit the table and run the script. */"]
+        for plist_key, text_key in MAC_PERMISSIONS.items():
+            text = DESKTOP_TEXTS[text_key][index].replace("\\", "\\\\").replace('"', '\\"')
+            lines.append(f'"{plist_key}" = "{text}";')
+        files[MAC_OUTPUT / f"{language}.lproj" / "InfoPlist.strings"] = "\n".join(lines) + "\n"
+    return files
+
+
 def build() -> dict[str, dict[str, object]]:
     """The custom translations file: key → language → text."""
     table: dict[str, tuple[object, object, object]] = {**WORDING, **ARTISE_TEXTS}
@@ -748,6 +779,10 @@ def main(argv: list[str]) -> int:
         if not DESKTOP_OUTPUT.exists() or DESKTOP_OUTPUT.read_text(encoding="utf-8") != render_desktop():
             print(f"{DESKTOP_OUTPUT.relative_to(ROOT)} is stale: run python3 tools/artise/web_wording.py", file=sys.stderr)
             return 1
+        for path, text in render_mac().items():
+            if not path.exists() or path.read_text(encoding="utf-8") != text:
+                print(f"{path.relative_to(ROOT)} is stale: run python3 tools/artise/web_wording.py", file=sys.stderr)
+                return 1
         print(
             f"Artise wording: {len(WORDING)} of Element's texts, {len(ARTISE_TEXTS)} of Artise's and"
             f" {len(DESKTOP_TEXTS)} of the desktop's OK"
@@ -759,6 +794,10 @@ def main(argv: list[str]) -> int:
     DESKTOP_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     DESKTOP_OUTPUT.write_text(render_desktop(), encoding="utf-8")
     print(f"Wrote {DESKTOP_OUTPUT.relative_to(ROOT)} ({len(DESKTOP_TEXTS)} texts)")
+    for path, text in render_mac().items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+    print(f"Wrote {MAC_OUTPUT.relative_to(ROOT)}/<lang>.lproj/InfoPlist.strings")
     return 0
 
 
