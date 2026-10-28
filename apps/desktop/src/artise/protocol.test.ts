@@ -68,16 +68,19 @@ describe("ProtocolHandler in the Artise build", () => {
     it("keeps Artise ID's sign-in returns away from Element Web", () => {
         // Same scheme and path as a workspace's return, but Artise ID's state: the shell takes it.
         const loadURL = vi.fn();
-        vi.stubGlobal("mainWindow", { loadURL });
+        const window = { loadURL, isMinimized: () => true, restore: vi.fn(), show: vi.fn(), focus: vi.fn() };
+        vi.stubGlobal("mainWindow", window);
 
         const opened = new ProtocolHandler("co.artise.desktop").initialise({
             ...args,
             positional: ["/bin/artise-desktop", "co.artise.desktop:/vector/webapp/?code=abc&state=artise-id.xyz"],
         });
 
-        // Nothing was loaded, so a cold start still opens the shell.
+        // Nothing was loaded, so a cold start still opens the shell; Artise comes back to the front.
         expect(opened).toBe(false);
         expect(loadURL).not.toHaveBeenCalled();
+        expect(window.restore).toHaveBeenCalled();
+        expect(window.focus).toHaveBeenCalled();
     });
 
     it("ignores element:// links", () => {
