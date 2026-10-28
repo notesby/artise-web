@@ -17,6 +17,8 @@ import { isArtise } from "../variant.js";
 import { SHELL_ORIGIN } from "./render.js";
 import { Shell } from "./Shell.js";
 import { prepareWorkspaces } from "../workspace/openWorkspaces.js";
+import { setLinkTargets } from "../links.js";
+import { WorkspaceViews } from "../views/workspaceViews.js";
 
 const SCHEME = "artise-shell";
 
@@ -57,6 +59,17 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         if (!url.startsWith(`${SHELL_ORIGIN}/`)) event.preventDefault();
     });
 
+    const views = new WorkspaceViews(window);
+    setLinkTargets({
+        signInReturn: (sessionId, url) => {
+            const open = views.bySessionId(sessionId);
+            if (!open) return false;
+            void open.view.webContents.loadURL(url);
+            views.show(views.open.indexOf(open));
+            return true;
+        },
+    });
+
     let shown = false;
     const fit = (): void => {
         const { width, height } = window.getContentBounds();
@@ -71,12 +84,11 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         show: () => {
             // Element shows the window once its page is ready (and keeps it hidden when started with
             // --hidden), so give it an empty page under the shell.
-            if (!window.webContents.getURL()) void window.loadURL("about:blank");
-            if (!shown) {
-                window.contentView.addChildView(view);
-                fit();
-                shown = true;
-            }
+            if (!views.hostWebContents.getURL()) void views.hostWebContents.loadURL("about:blank");
+            // Added again when shown again, so it's on top of the workspaces' views.
+            window.contentView.addChildView(view);
+            fit();
+            shown = true;
             void view.webContents.loadURL(`${SHELL_ORIGIN}/`);
         },
         hide: () => {
@@ -85,8 +97,10 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         },
         openWorkspaces: async (serverNames) => {
             const prepared = await prepareWorkspaces(serverNames, (url, init) => net.fetch(url, init));
-            // The web app asks for its config (getConfig), which is now the first workspace's.
-            if (prepared.ok) void window.loadURL("vector://vector/webapp/");
+            if (prepared.ok) {
+                if (!views.hostWebContents.getURL()) void views.hostWebContents.loadURL("about:blank");
+                await views.openAll(prepared.value);
+            }
             return prepared;
         },
         icon: async () => {
