@@ -24,6 +24,8 @@ export interface WorkspaceInfo {
     webUrl?: string;
     logo?: string;
     color?: string;
+    /** The oldest Artise desktop this workspace still works with (`min_app_version.desktop`), as `1.2.3`. */
+    minDesktopVersion?: string;
 }
 
 /** The network, as Electron's `net.fetch`. */
@@ -69,6 +71,17 @@ export function desktopClientId(file: Record<string, unknown>): string | undefin
 }
 
 /**
+ * The desktop's minimum version from a `min_app_version` object (the workspace file's, or `/v1/sign-in`'s):
+ * its `desktop` entry when it is a plain `major.minor.patch`.
+ *
+ * @param minAppVersion - the object's value, whatever the server sent.
+ */
+export function minDesktopVersion(minAppVersion: unknown): string | undefined {
+    const version = asObject(minAppVersion)?.desktop;
+    return typeof version === "string" && /^\d{1,5}\.\d{1,5}\.\d{1,5}$/.test(version) ? version : undefined;
+}
+
+/**
  * Reads a workspace's `/.well-known/matrix/client`.
  *
  * @param serverName - the workspace's server name, e.g. `mas-k8s.artise.co`.
@@ -89,6 +102,7 @@ export function parseWellKnown(serverName: string, body: unknown): WorkspaceInfo
         webUrl: httpsUrl(asObject(file.links)?.web),
         logo: httpsUrl(file.logo),
         color: color && /^#[0-9a-fA-F]{6}$/.test(color) ? color : undefined,
+        minDesktopVersion: minDesktopVersion(file.min_app_version),
     };
 }
 

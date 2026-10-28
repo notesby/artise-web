@@ -11,4 +11,5 @@ SPDX-License-Identifier: AGPL-3.0-only
 export { isArtise } from "./variant.js";
 export { startArtiseCrashReports } from "./crashReports.js";
 export { applyArtiseLanguage } from "./language.js";
+export { artiseUpdateBaseUrl } from "./updates.js";
 export { artisePrivilegedSchemes, startArtiseShell } from "./shell/shellView.js";

@@ -92,6 +92,36 @@ export const DESKTOP_WORDING = {
         es: "Sin leer: %(count)s",
         pt: "Não lidas: %(count)s",
     },
+    "artise|desktop|updates|beta_menu": {
+        en: "Get test versions",
+        es: "Recibir versiones de prueba",
+        pt: "Receber versões de teste",
+    },
+    "artise|desktop|updates|check": {
+        en: "Look for the update",
+        es: "Buscar la actualización",
+        pt: "Procurar a atualização",
+    },
+    "artise|desktop|updates|download": {
+        en: "Download it",
+        es: "Descargarla",
+        pt: "Baixá-la",
+    },
+    "artise|desktop|updates|later": {
+        en: "Not now",
+        es: "Ahora no",
+        pt: "Agora não",
+    },
+    "artise|desktop|updates|outdated_detail": {
+        en: "%(workspace)s needs Artise %(version)s or newer. You have %(current)s.",
+        es: "%(workspace)s necesita Artise %(version)s o más reciente. Tienes la %(current)s.",
+        pt: "%(workspace)s precisa do Artise %(version)s ou mais recente. Você tem a %(current)s.",
+    },
+    "artise|desktop|updates|outdated_title": {
+        en: "Update Artise",
+        es: "Actualiza Artise",
+        pt: "Atualize o Artise",
+    },
     "artise|desktop|welcome|apple": {
         en: "Continue with Apple",
         es: "Continuar con Apple",

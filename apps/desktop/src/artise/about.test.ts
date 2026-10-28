@@ -24,6 +24,11 @@ vi.mock("./variant.js", async (importOriginal) => ({
 
 vi.mock("counterpart", () => ({ default: { getLocale: (): string => "es" } }));
 
+vi.mock("./updates.js", () => ({
+    betaUpdatesMenuItem: (): MenuItemConstructorOptions[] => [
+        { type: "checkbox", label: "Recibir versiones de prueba" },
+    ],
+}));
 vi.mock("./crashReports.js", () => ({
     crashReportsMenuItem: (): MenuItemConstructorOptions => ({
         type: "checkbox",
@@ -43,12 +48,13 @@ describe("About Artise", () => {
         expect(app.setAboutPanelOptions).not.toHaveBeenCalled();
     });
 
-    it("adds the crash reports choice and 'Acerca de Artise' to the Help menu, in the app's language", () => {
+    it("adds the crash reports and test versions choices and 'Acerca de Artise' to the Help menu, in the app's language", () => {
         vi.mocked(isArtise).mockReturnValue(true);
         const items = artiseHelpMenuItems();
         expect(items.map((item: MenuItemConstructorOptions) => item.label ?? item.type)).toEqual([
             "separator",
             "Compartir informes de fallos",
+            "Recibir versiones de prueba",
             "Acerca de Artise",
         ]);
     });

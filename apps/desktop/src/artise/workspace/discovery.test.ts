@@ -6,7 +6,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 import { describe, expect, it, vi } from "vitest";
 
-import { desktopClientId, discoverWorkspace, parseWellKnown } from "./discovery.js";
+import { desktopClientId, discoverWorkspace, minDesktopVersion, parseWellKnown } from "./discovery.js";
 
 // mas-k8s.artise.co's /.well-known/matrix/client on 2026-10-18, trimmed, with the desktop client the server adds.
 const WELL_KNOWN = {
@@ -48,6 +48,26 @@ describe("parseWellKnown", () => {
             serverName: "x.example",
             homeserverUrl: "https://matrix.x.example",
         });
+    });
+});
+
+describe("minDesktopVersion", () => {
+    it("reads min_app_version.desktop as the phones read theirs", () => {
+        expect(minDesktopVersion({ desktop: "1.2.3", ios: "26.10.8" })).toBe("1.2.3");
+        expect(
+            parseWellKnown("a.artise.co", {
+                "m.homeserver": { base_url: "https://m.a.artise.co" },
+                "co.artise.workspace": { min_app_version: { desktop: "1.1.0" } },
+            })?.minDesktopVersion,
+        ).toBe("1.1.0");
+    });
+
+    it("ignores an empty or strange value (today's servers send {})", () => {
+        expect(minDesktopVersion({})).toBeUndefined();
+        expect(minDesktopVersion(undefined)).toBeUndefined();
+        expect(minDesktopVersion({ desktop: "soon" })).toBeUndefined();
+        expect(minDesktopVersion({ desktop: 2 })).toBeUndefined();
+        expect(minDesktopVersion({ desktop: "1.2" })).toBeUndefined();
     });
 });
 

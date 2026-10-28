@@ -69,9 +69,12 @@ and one in Portuguese; the main run in Spanish.
 - [ ] After that, Artise's folder (`%APPDATA%\Artise`, `~/Library/Application Support/Artise`) has no
       `workspaces/` and no `Partitions/workspace-*` folders after one more start.
 
-## Updates (once update feeds exist, D4-3)
+## Updates
 
-- [ ] macOS: installing the previous beta, then this one arrives by itself and keeps the sign-ins.
+- [ ] macOS: with the previous release installed and Help → "Recibir versiones de prueba" on, this one arrives by
+      itself within the hour (or at once after Settings → Help & About → check for updates), installs on restart
+      and keeps the sign-ins.
+- [ ] macOS: with "Recibir versiones de prueba" off, nothing arrives until the release is promoted to stable.
 - [ ] Windows: the Store updates it.
 
 ## The release note

@@ -52,6 +52,7 @@ import { type ConfigOptions, loadConfig } from "./config.js";
 import {
     applyArtiseLanguage,
     artisePrivilegedSchemes,
+    artiseUpdateBaseUrl,
     isArtise,
     startArtiseCrashReports,
     startArtiseShell,
@@ -239,10 +240,12 @@ app.on("ready", async () => {
         });
     });
 
+    // Artise: the stable or the test channel's feed, only where Artise updates itself (artise/updates.ts)
+    const updateBaseUrl = artiseUpdateBaseUrl(config.update_base_url);
     if (!args.update) {
         console.log("Auto update disabled via command line flag");
-    } else if (config.update_base_url) {
-        void updater.start(config.update_base_url);
+    } else if (updateBaseUrl) {
+        void updater.start(updateBaseUrl);
     } else {
         console.log("No update_base_url is defined: auto update is disabled");
     }

@@ -19,6 +19,9 @@ export const ARTISE_APP_ID = "co.artise.desktop";
 /** Where the source code of each release lives: the AGPL offer in About points at its tag. */
 export const ARTISE_SOURCE_REPO = "https://github.com/notesby/artise-web";
 
+/** Where a person gets the newest Artise by hand (the "Actualiza Artise" notice, artise/updates.ts). */
+export const ARTISE_DOWNLOAD_URL = `${ARTISE_SOURCE_REPO}/releases/latest`;
+
 /**
  * Whether this is the Artise build. Element's own variants keep Element's behaviour, so Element's tests
  * and an unbranded `pnpm start` work as upstream.

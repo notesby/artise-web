@@ -30,6 +30,14 @@ describe("parseSignInConfig", () => {
         });
     });
 
+    it("reads the minimum desktop version when the server sends one", () => {
+        expect(parseSignInConfig({ ...SIGN_IN, min_app_version: { desktop: "1.1.0" } })?.minDesktopVersion).toBe(
+            "1.1.0",
+        );
+        // Today's answer has min_app_version: {} and no field is added.
+        expect(parseSignInConfig({ ...SIGN_IN, min_app_version: {} })).not.toHaveProperty("minDesktopVersion");
+    });
+
     it("isn't available before the server has the desktop's client", () => {
         // Today's answer, before PR #231: the app says desktop sign-in isn't ready instead of using the phones' app.
         const { desktop_client_id: _, desktop_redirect_uri: __, ...phonesOnly } = SIGN_IN;
