@@ -33,7 +33,7 @@ describe("badgeText", () => {
 });
 
 describe("renderRail", () => {
-    const html = renderRail(ITEMS, (count) => `Sin leer: ${count}`, "es");
+    const html = renderRail(ITEMS, (count) => `Sin leer: ${count}`, "Agregar espacio de trabajo", "es");
 
     it("links each workspace, marks the shown one and shows its count", () => {
         expect(html).toContain('href="artise-shell://shell/rail/show?i=0"');
@@ -44,6 +44,10 @@ describe("renderRail", () => {
 
     it("uses the logo, served by the shell, when there is one", () => {
         expect(html).toContain('<img src="artise-shell://shell/rail/logo?i=1" alt="">');
+    });
+
+    it('ends with "+" to add a workspace', () => {
+        expect(html).toContain('href="artise-shell://shell/rail/add" title="Agregar espacio de trabajo"');
     });
 
     it("escapes names and has no scripts", () => {

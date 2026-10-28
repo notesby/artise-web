@@ -21,6 +21,8 @@ import { setLinkTargets } from "../links.js";
 import { WorkspaceViews } from "../views/workspaceViews.js";
 import { Rail } from "../rail/rail.js";
 import * as tray from "../../tray.js";
+import { AutoLaunch } from "../../auto-launch.js";
+import { cleanUpWorkspace, removeClosedWorkspaces } from "../views/cleanup.js";
 
 const SCHEME = "artise-shell";
 
@@ -75,6 +77,8 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         rail: railView,
         buildDir: () => buildDir,
         refreshTray: () => tray.initApplicationMenu(),
+        cleanUp: (context, user) => cleanUpWorkspace(context, user),
+        closed: (left) => void shell.closed(left),
     });
     const rail = new Rail({
         items: () => views.railItems(),
@@ -82,6 +86,8 @@ export function startArtiseShell(window: BrowserWindow): boolean {
         show: (index) => views.show(index),
         fetch: (url) => net.fetch(url),
         unreadLabel: (count) => artiseT("artise|desktop|rail|unread", { count }, shellLocale()),
+        add: () => void shell.addWorkspaces(),
+        addLabel: () => artiseT("artise|desktop|workspaces|add_title", {}, shellLocale()),
         language: () => textLanguage(shellLocale()),
     });
     setLinkTargets({
@@ -119,11 +125,13 @@ export function startArtiseShell(window: BrowserWindow): boolean {
             if (shown) window.contentView.removeChildView(view);
             shown = false;
         },
+        openServerNames: () => views.open.map((open) => open.info.serverName),
         openWorkspaces: async (serverNames) => {
             const prepared = await prepareWorkspaces(serverNames, (url, init) => net.fetch(url, init));
             if (prepared.ok) {
                 if (!views.hostWebContents.getURL()) void views.hostWebContents.loadURL("about:blank");
                 await views.openAll(prepared.value);
+                startAtLoginOnce();
             }
             return prepared;
         },
@@ -141,6 +149,20 @@ export function startArtiseShell(window: BrowserWindow): boolean {
     // The rail loads its (still empty) page now; it joins the window when a workspace opens.
     void railView.webContents.loadURL(`${SHELL_ORIGIN}/rail`);
 
-    void shell.start();
+    // Workspaces signed out of last time leave folders Electron couldn't remove while it was running.
+    void removeClosedWorkspaces(app.getPath("userData"), readArtiseSettings().openWorkspaces ?? [])
+        .catch((e: unknown) => console.warn("Couldn't remove closed workspaces' folders", e))
+        .then(() => shell.start());
     return true;
+}
+
+/**
+ * Turns "start at login, hidden" on the first time workspaces open, as the phones keep running: the desktop has no
+ * push service, so messages arrive only while Artise runs. Once; the person can turn it off in Settings. Not on
+ * Linux, which Artise doesn't ship for.
+ */
+function startAtLoginOnce(): void {
+    if (process.platform === "linux" || readArtiseSettings().startAtLoginSet) return;
+    updateArtiseSettings({ startAtLoginSet: true });
+    AutoLaunch.instance.setState("minimised").catch((e: unknown) => console.warn("Couldn't turn on start at login", e));
 }

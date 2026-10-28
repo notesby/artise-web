@@ -59,6 +59,10 @@ export interface WorkspaceViewsDeps {
     buildDir(): string | undefined;
     /** Rebuilds Element's tray menu, so its workspace items show the new counts (tray.ts). */
     refreshTray(): void;
+    /** Removes a closed workspace's files and secrets (artise/views/cleanup.ts). */
+    cleanUp(context: ViewContext, user: { userId: string; deviceId: string } | undefined): Promise<void>;
+    /** The person signed out of a workspace; `left` are the server names still open. */
+    closed(left: string[]): void;
 }
 
 /**
@@ -70,6 +74,8 @@ export class WorkspaceViews {
     private shownIndex = 0;
     private readonly host: WebContents;
     private refreshingRail = false;
+    /** Each workspace's Matrix user and device, for removing its secrets when it's closed. */
+    private readonly users = new Map<string, { userId: string; deviceId: string }>();
     /** Every workspace's unread count; their total is the dock and taskbar badge. */
     public readonly unread = new UnreadCounts();
 
@@ -77,12 +83,15 @@ export class WorkspaceViews {
         private readonly window: BrowserWindow,
         private readonly deps: WorkspaceViewsDeps,
     ) {
-        this.host = installRouting(
-            window,
-            ipcMain,
-            () => this.shownContext(),
-            (view, args) => this.badge(view, args),
-        );
+        this.host = installRouting(window, ipcMain, {
+            shown: () => this.shownContext(),
+            badge: (view, args) => this.badge(view, args),
+            focus: (view) => this.showView(view),
+            signedOut: (view) => this.closeWhenDone(view),
+            sawUser: (view, userId, deviceId) => {
+                this.users.set(view.key, { userId, deviceId });
+            },
+        });
         window.on("resize", () => this.fit());
         // Element tells the web app Artise is quitting through the window; tell every workspace.
         app.on("before-quit", () => {
@@ -205,6 +214,57 @@ export class WorkspaceViews {
         this.window.setTitle(shown.view.webContents.getTitle() || "Artise");
         if (this.window.isFocused()) shown.view.webContents.focus();
         this.changed();
+    }
+
+    private showView(view: ViewContext): void {
+        const index = this.views.findIndex((open) => open.context === view);
+        if (index >= 0) this.show(index);
+    }
+
+    /**
+     * Closes a workspace once its web app has finished signing out: its sign-out ends with "clear storage", and
+     * then it shows its welcome page. Waits for that page, or three seconds at most.
+     */
+    private closeWhenDone(view: ViewContext): void {
+        const open = this.views.find((candidate) => candidate.context === view);
+        if (!open || open.closing) return;
+        open.closing = true;
+        const { webContents } = open.view;
+        const onPage = (_event: unknown, url: string): void => {
+            if (/#\/(welcome|login)$/.test(url)) done();
+        };
+        const done = (): void => {
+            clearTimeout(timer);
+            webContents.off("did-navigate-in-page", onPage);
+            void this.close(open);
+        };
+        webContents.on("did-navigate-in-page", onPage);
+        const timer = setTimeout(done, 3000);
+    }
+
+    /**
+     * Closes a workspace: takes its view away and removes its data, its message-search index and its secrets.
+     *
+     * @param open - the workspace.
+     */
+    private async close(open: WorkspaceView): Promise<void> {
+        const index = this.views.indexOf(open);
+        if (index < 0) return;
+        this.views.splice(index, 1);
+        this.window.contentView.removeChildView(open.view);
+        unregisterView(open.context.webContents.id);
+        this.unread.remove(open.context.key);
+        open.view.webContents.close();
+        await this.deps.cleanUp(open.context, this.users.get(open.context.key));
+        this.users.delete(open.context.key);
+        if (this.views.length > 0) {
+            this.show(Math.min(index, this.views.length - 1));
+        } else {
+            this.window.contentView.removeChildView(this.deps.rail);
+            this.window.setTitle("Artise");
+            this.changed();
+        }
+        this.deps.closed(this.views.map((left) => left.info.serverName));
     }
 
     /**

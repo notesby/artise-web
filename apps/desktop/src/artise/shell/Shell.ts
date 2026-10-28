@@ -21,6 +21,8 @@ export interface ShellDeps {
     show(): void;
     /** Takes the shell's page away. */
     hide(): void;
+    /** The server names of the workspaces open now. */
+    openServerNames(): string[];
     /** Opens these workspaces in the window; fails when the first can't be reached. */
     openWorkspaces(serverNames: string[]): Promise<Result<unknown>>;
     /** The Artise icon, as PNG bytes. */
@@ -103,6 +105,40 @@ export class Shell {
         }
     }
 
+    /**
+     * "+" on the rail: the person's workspaces that aren't open yet, none ticked, over the open ones.
+     */
+    public async addWorkspaces(): Promise<void> {
+        this.set({ screen: "workspaces", workspaces: "loading", adding: true });
+        const result = await this.deps.artiseId.workspaces();
+        if (!result.ok) {
+            if (result.error === "expired") await this.welcome("expired");
+            else this.set({ screen: "workspaces", workspaces: [], error: result.error, adding: true });
+            return;
+        }
+        const open = new Set(this.deps.openServerNames());
+        const notOpen = result.value.filter((workspace) => !open.has(workspace.serverName));
+        this.set({
+            screen: "workspaces",
+            workspaces: notOpen.map(({ serverName, name }) => ({ serverName, name, selected: false })),
+            adding: true,
+        });
+    }
+
+    /**
+     * After the person signed out of a workspace: the ones left open are remembered, and when none is left,
+     * Artise ID is signed out too (in the browser as well, as on the phones) and the welcome shows.
+     *
+     * @param left - the server names still open.
+     */
+    public async closed(left: string[]): Promise<void> {
+        this.deps.updateSettings({ openWorkspaces: left });
+        if (left.length > 0) return;
+        await this.deps.artiseId.signOut(true);
+        this.deps.show();
+        await this.welcome();
+    }
+
     private async open(chosen: string[]): Promise<void> {
         const state = this.state;
         if (state.screen !== "workspaces" || state.workspaces === "loading") return;
@@ -114,13 +150,15 @@ export class Shell {
             ...workspace,
             selected: serverNames.includes(workspace.serverName),
         }));
-        this.set({ screen: "workspaces", workspaces: "loading" });
+        const adding = state.adding;
+        this.set({ screen: "workspaces", workspaces: "loading", adding });
         const opened = await this.deps.openWorkspaces(serverNames);
         if (opened.ok) {
-            this.deps.updateSettings({ openWorkspaces: serverNames });
+            const already = adding ? this.deps.openServerNames().filter((name) => !serverNames.includes(name)) : [];
+            this.deps.updateSettings({ openWorkspaces: [...already, ...serverNames] });
             this.deps.hide();
         } else {
-            this.set({ screen: "workspaces", workspaces: list, error: opened.error });
+            this.set({ screen: "workspaces", workspaces: list, error: opened.error, adding });
         }
     }
 
@@ -175,6 +213,10 @@ export class Shell {
             }
             case "/retry":
                 if (this.state.screen === "welcome") this.begin(() => this.welcome());
+                return back();
+            case "/close":
+                // "Volver" from "Agregar espacio de trabajo": back to the open workspaces.
+                if (this.state.screen === "workspaces" && this.state.adding) this.deps.hide();
                 return back();
             case "/cancel":
                 this.deps.artiseId.cancelSignIn();
