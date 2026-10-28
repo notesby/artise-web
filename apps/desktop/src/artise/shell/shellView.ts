@@ -4,7 +4,7 @@ Copyright 2026 Artise.
 SPDX-License-Identifier: AGPL-3.0-only
 */
 
-import { app, session, WebContentsView, type BrowserWindow, type CustomScheme } from "electron";
+import { app, net, session, WebContentsView, type BrowserWindow, type CustomScheme } from "electron";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -16,6 +16,7 @@ import { readArtiseSettings, updateArtiseSettings } from "../settings.js";
 import { isArtise } from "../variant.js";
 import { SHELL_ORIGIN } from "./render.js";
 import { Shell } from "./Shell.js";
+import { prepareWorkspaces } from "../workspace/openWorkspaces.js";
 
 const SCHEME = "artise-shell";
 
@@ -82,8 +83,12 @@ export function startArtiseShell(window: BrowserWindow): boolean {
             if (shown) window.contentView.removeChildView(view);
             shown = false;
         },
-        // D2-3 gives each workspace its own config; until then the window opens the packaged one.
-        openWorkspaces: () => void window.loadURL("vector://vector/webapp/"),
+        openWorkspaces: async (serverNames) => {
+            const prepared = await prepareWorkspaces(serverNames, (url, init) => net.fetch(url, init));
+            // The web app asks for its config (getConfig), which is now the first workspace's.
+            if (prepared.ok) void window.loadURL("vector://vector/webapp/");
+            return prepared;
+        },
         icon: async () => {
             // icon.png sits next to the platform's own icon in resources/build/.
             return fs.readFile(path.join(path.dirname(await getIconPath()), "icon.png"));
