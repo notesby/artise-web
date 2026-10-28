@@ -64,6 +64,10 @@ describe("artiseBuilderConfig", () => {
         expect(artise.mac?.target).toEqual(["dmg", "zip"]);
     });
 
+    it("records the tag or commit being built, for About's source link", () => {
+        expect(artiseBuilderConfig(element, "desktop-v0.1.0").extraMetadata?.artise_source_ref).toBe("desktop-v0.1.0");
+    });
+
     it("doesn't point electron-updater at Element's GitHub releases", () => {
         expect(artise.publish).toBeNull();
     });

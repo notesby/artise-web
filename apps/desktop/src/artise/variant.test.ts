@@ -47,4 +47,11 @@ describe("the Artise variant", () => {
         // The AGPL offer points at the release's tag, which is published before its binaries.
         expect(sourceCodeUrl("0.1.0")).toBe("https://github.com/notesby/artise-web/tree/desktop-v0.1.0");
     });
+
+    it("links the commit a test build was made from", () => {
+        // Test builds (0.0.1-dev.N) have no tag, so CI records the commit instead.
+        expect(sourceCodeUrl("0.0.1-dev.7", "f38c0d6e0b")).toBe(
+            "https://github.com/notesby/artise-web/tree/f38c0d6e0b",
+        );
+    });
 });
