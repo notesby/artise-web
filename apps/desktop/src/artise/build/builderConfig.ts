@@ -37,7 +37,7 @@ export function storeIdentity(env: NodeJS.ProcessEnv): {
  *
  * @param element - Element's configuration, built with the Artise variant.
  * @param sourceRef - the git tag or commit being built, for About's source link (the AGPL offer).
- * @param env - the environment, for the Store identity.
+ * @param env - the environment, for the Store identity and whether the Mac build is signed.
  */
 export function artiseBuilderConfig(
     element: Configuration,
@@ -71,6 +71,10 @@ export function artiseBuilderConfig(
         mac: {
             ...element.mac,
             icon: `${ARTISE_ICONS}/icon.icon`,
+            // Notarized (with Apple's API key from the environment, APPLE_API_KEY*) only when the build is also
+            // signed: CI sets CSC_LINK when the repository has the Developer ID certificate (ARTISE.md, "Signing
+            // the Mac build"). An unsigned build skips it instead of warning.
+            notarize: Boolean(env.CSC_LINK),
             // macOS asks before the camera and microphone are first used; the app's own words, in each language
             // (tools/artise/web_wording.py writes artise/mac/<lang>.lproj/InfoPlist.strings).
             extendInfo: {

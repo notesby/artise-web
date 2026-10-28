@@ -196,10 +196,54 @@ handlers:
   handler is called only for that view.
 
 Building: `.github/workflows/artise-desktop.yml` (Actions → Artise desktop → Run workflow, or a
-`desktop-v<major>.<minor>.<patch>` tag) builds an unsigned macOS universal `.dmg` and `.zip` and an unsigned Windows
-x64 `.zip`, starts each one on its OS (`apps/desktop/playwright/e2e/artise/`) and keeps them as the run's artifacts
-for 14 days. A tag `desktop-v1.2.3` builds version 1.2.3; any other run builds `0.0.1-dev.<run number>`
-(`artise/scripts/version.sh`). About links the source of the exact build: the tag, or the commit for test builds.
+`desktop-v<major>.<minor>.<patch>` tag) builds a macOS universal `.dmg` and `.zip` (signed and notarized when the
+repository has Apple's secrets, below; unsigned otherwise) and an unsigned Windows x64 `.zip`, starts each one on its
+OS (`apps/desktop/playwright/e2e/artise/`) and keeps them as the run's artifacts for 14 days. A tag `desktop-v1.2.3`
+builds version 1.2.3; any other run builds `0.0.1-dev.<run number>` (`artise/scripts/version.sh`). About links the
+source of the exact build: the tag, or the commit for test builds.
+
+### Signing the Mac build (macOS)
+
+Apple's one Developer Program covers iOS and macOS, so the account the iOS app uses also signs the Mac app: nothing
+else to buy. A Mac app given out outside the Mac App Store is signed with a **Developer ID Application**
+certificate (a different kind from the iOS distribution one) and **notarized**: Apple scans the build and the app
+carries Apple's ticket, so macOS opens it without the right-click → Open dance, and shows its notifications.
+Unsigned builds still build (for checking) and the hand checklist says how to open one.
+
+The certificate is made from this computer, with the App Store Connect API key the iOS app already has
+(`~/.artise-keys/AuthKey_<id>.p8`), by `tools/artise/mac_signing.py`:
+
+```sh
+python3 tools/artise/mac_signing.py request --issuer <App Store Connect issuer ID>   # once; the ID is kept locally
+python3 tools/artise/mac_signing.py secrets                                          # sets the five secrets with gh
+```
+
+`request` makes the private key and the request in `~/.artise-keys/mac-developer-id/` (the key never leaves this
+computer), asks Apple for the certificate and packs both as `developer-id.p12`, with Apple's intermediate, in the
+older cipher macOS's `security import` still needs. Apple only lets the account holder make Developer ID
+certificates: if `request` is refused, upload `developer-id.csr` at developer.apple.com → Certificates → Developer ID
+Application, download the `.cer`, and run `mac_signing.py p12 <the .cer>`. The issuer ID is in App Store Connect →
+Users and Access → Integrations → Team keys.
+
+The repository secrets (the same names as in artise-ios, so the values are the same):
+
+| Secret                   | Value                                                              |
+| ------------------------ | ------------------------------------------------------------------ |
+| `APPLE_CSC_LINK`         | `developer-id.p12`, base64-encoded (electron-builder's `CSC_LINK`) |
+| `APPLE_CSC_KEY_PASSWORD` | Its password (`~/.artise-keys/mac-developer-id/p12-password`)      |
+| `ASC_KEY_ID`             | The App Store Connect API key id                                   |
+| `ASC_ISSUER_ID`          | Its issuer ID                                                      |
+| `ASC_KEY_P8`             | The `.p8` file, base64-encoded                                     |
+
+With all five, the macOS job signs with the certificate (hardened runtime and Element's entitlements for the camera
+and the microphone, `build/entitlements.mac.plist`), notarizes with the API key (`notarytool`, through
+electron-builder and `@electron/notarize`), staples the ticket and checks it (`codesign --verify`, `spctl -a -t
+install`, `stapler validate`). With none, the build is unsigned; with some, the job fails and names the missing
+ones. The start-up check changes a fuse in its copy of the app, which breaks the signature, so it signs that copy
+again ad hoc. The `.dmg` itself isn't signed (electron-builder's default: notarization is of the app inside it).
+
+Certificates expire after five years and Apple allows five Developer ID certificates per team; `request` makes a
+new one with `csr --force` first. Never commit the key, the certificate or the `.p12`.
 
 ### Microsoft Store (Windows)
 

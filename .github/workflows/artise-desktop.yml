@@ -4,9 +4,11 @@
 # - On a desktop-v<major>.<minor>.<patch> tag for a release build with that version.
 # - On a pull request that changes this workflow or its scripts, so a change to the build is tried before merging.
 #
-# Nothing is signed or published yet: macOS is an unsigned universal .dmg and .zip (Developer ID signing and
-# notarization wait, D4-1), Windows an unsigned x64 .zip to try on a PC and the Microsoft Store package (.appx,
-# unsigned: the Store signs it). The builds are kept as this run's artifacts for 14 days.
+# macOS is a universal .dmg and .zip, signed with Artise's Developer ID and notarized when the repository has
+# Apple's secrets (APPLE_CSC_LINK, APPLE_CSC_KEY_PASSWORD, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8, set by
+# tools/artise/mac_signing.py; see ARTISE.md), else unsigned, to try with right-click → Open. Windows is an unsigned
+# x64 .zip to try on a PC and the Microsoft Store package (.appx, unsigned: the Store signs it). Nothing is
+# published yet; the builds are kept as this run's artifacts for 14 days.
 #
 # The Store package's identity comes from Partner Center ("Product identity"), set as the repository variables
 # STORE_IDENTITY_NAME, STORE_PUBLISHER and STORE_PUBLISHER_DISPLAY_NAME; without them it builds with placeholders,
@@ -73,7 +75,7 @@ jobs:
                   if-no-files-found: error
 
     macos:
-        name: Build macOS universal (unsigned)
+        name: Build macOS universal
         needs: webapp
         runs-on: macos-26
         steps:
@@ -109,15 +111,73 @@ jobs:
               working-directory: apps/desktop
               run: pnpm install --frozen-lockfile --filter element-desktop
 
-            - name: Build
+            # Signed and notarized when the repository has all five of Apple's secrets; unsigned when it has none.
+            # The API key goes to a file for notarytool; the certificate stays in the build step's own environment.
+            - name: Apple's signing secrets
+              id: apple
+              env:
+                  APPLE_CSC_LINK: ${{ secrets.APPLE_CSC_LINK }}
+                  APPLE_CSC_KEY_PASSWORD: ${{ secrets.APPLE_CSC_KEY_PASSWORD }}
+                  ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+                  ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+                  ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+              run: |
+                  missing=()
+                  for name in APPLE_CSC_LINK APPLE_CSC_KEY_PASSWORD ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+                      [ -n "${!name}" ] || missing+=("$name")
+                  done
+                  if [ "${#missing[@]}" -eq 5 ]; then
+                      echo "signed=false" >> "$GITHUB_OUTPUT"
+                      echo "::notice title=macOS::Unsigned build: the repository has no Apple signing secrets (ARTISE.md, Signing the Mac build)."
+                      exit 0
+                  elif [ "${#missing[@]}" -ne 0 ]; then
+                      echo "::error title=macOS::Some of Apple's signing secrets are missing: ${missing[*]} (ARTISE.md, Signing the Mac build)."
+                      exit 1
+                  fi
+                  key_path="$RUNNER_TEMP/AuthKey_$ASC_KEY_ID.p8"
+                  echo "$ASC_KEY_P8" | base64 --decode > "$key_path"
+                  if ! grep -q "BEGIN PRIVATE KEY" "$key_path"; then
+                      echo "::error title=macOS::ASC_KEY_P8 isn't a base64-encoded .p8 key."
+                      exit 1
+                  fi
+                  chmod 600 "$key_path"
+                  echo "signed=true" >> "$GITHUB_OUTPUT"
+                  echo "APPLE_API_KEY=$key_path" >> "$GITHUB_ENV"
+                  echo "APPLE_API_KEY_ID=$ASC_KEY_ID" >> "$GITHUB_ENV"
+                  echo "APPLE_API_ISSUER=$ASC_ISSUER_ID" >> "$GITHUB_ENV"
+
+            - name: Prepare
               working-directory: apps/desktop
               run: |
                   pnpm exec tsc
                   node scripts/copy-res.ts
-                  pnpm exec electron-builder --config artise/electron-builder.ts --universal --publish never --mac dmg zip
+
+            # Two steps, as Element's workflow: electron-builder takes even an empty CSC_LINK as a certificate.
+            - name: Build (signed and notarized)
+              if: steps.apple.outputs.signed == 'true'
+              working-directory: apps/desktop
+              run: pnpm exec electron-builder --config artise/electron-builder.ts --universal --publish never --mac dmg zip
+              env:
+                  CSC_LINK: ${{ secrets.APPLE_CSC_LINK }}
+                  CSC_KEY_PASSWORD: ${{ secrets.APPLE_CSC_KEY_PASSWORD }}
+                  VERSION: ${{ needs.webapp.outputs.version }}
+
+            - name: Build (unsigned)
+              if: steps.apple.outputs.signed != 'true'
+              working-directory: apps/desktop
+              run: pnpm exec electron-builder --config artise/electron-builder.ts --universal --publish never --mac dmg zip
               env:
                   CSC_IDENTITY_AUTO_DISCOVERY: false
                   VERSION: ${{ needs.webapp.outputs.version }}
+
+            - name: Check the app is signed, notarized and stapled
+              if: steps.apple.outputs.signed == 'true'
+              working-directory: apps/desktop
+              run: |
+                  codesign --verify --deep --strict --verbose=2 dist/mac-universal/Artise.app
+                  codesign -d --entitlements - dist/mac-universal/Artise.app | grep -q "com.apple.security.device.camera"
+                  spctl -a -vvv -t install dist/mac-universal/Artise.app
+                  xcrun stapler validate dist/mac-universal/Artise.app
 
             - name: Check the dmg and zip are there, and the app's permission texts
               working-directory: apps/desktop
@@ -252,8 +312,13 @@ jobs:
             # The build turns the EnableNodeCliInspectArguments fuse off; Playwright needs it to drive Electron.
             # This copy is only for the check and is thrown away with the runner.
             - name: Let Playwright drive the app
-              # From the desktop package's own bin folder, where @electron/fuses installs it.
-              run: '"$(pnpm bin)/electron-fuses" write --app "$EXECUTABLE" EnableNodeCliInspectArguments=on'
+              # From the desktop package's own bin folder, where @electron/fuses installs it. Changing the fuse
+              # breaks a signed build's signature, so on macOS the copy is signed again ad hoc for this check.
+              run: |
+                  "$(pnpm bin)/electron-fuses" write --app "$EXECUTABLE" EnableNodeCliInspectArguments=on
+                  if [ "$RUNNER_OS" = macOS ]; then
+                      codesign --force --deep --sign - "$(dirname "$(dirname "$(dirname "$EXECUTABLE")")")"
+                  fi
               env:
                   EXECUTABLE: ${{ matrix.executable }}
 

@@ -12,8 +12,9 @@ and one in Portuguese; the main run in Spanish.
 
 - [ ] Windows: install from the Microsoft Store (beta: the private listing). Artise opens; the Start menu, the
       taskbar and Task Manager say "Artise" with Artise's icon.
-- [ ] macOS: open the `.dmg`, drag Artise to Applications, open it. (Until Developer ID signing, D4-1: right-click →
-      Open the first time.) The Dock and the menu bar say "Artise".
+- [ ] macOS: open the `.dmg`, drag Artise to Applications, open it: a signed build opens at once (a test build
+      made without the signing secrets needs right-click → Open the first time). The Dock and the menu bar say
+      "Artise".
 - [ ] Help → "Acerca de Artise" shows the version, the AGPL licence and "Código fuente", which opens this
       release's tag on GitHub.
 

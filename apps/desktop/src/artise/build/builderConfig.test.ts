@@ -43,6 +43,15 @@ describe("artiseBuilderConfig", () => {
         ]);
     });
 
+    it("notarizes the Mac build only when it is signed", () => {
+        // CI sets CSC_LINK (the Developer ID certificate) when the repository has Apple's secrets; without it
+        // electron-builder would warn about missing notarization on every unsigned build.
+        expect(artiseBuilderConfig(element, "", {}).mac?.notarize).toBe(false);
+        expect(artiseBuilderConfig(element, "", { CSC_LINK: "base64..." }).mac?.notarize).toBe(true);
+        // Element's hardened runtime and entitlements (camera, microphone) stay for the signed build.
+        expect(artise.mac?.hardenedRuntime).toBe(true);
+    });
+
     it("names Artise as the publisher and AGPL-3.0-only as the licence", () => {
         expect(artise.copyright).toContain("Artise");
         expect(artise.copyright).not.toContain("Element Creations");
